@@ -12,6 +12,24 @@ type CityOption = {
   name: string;
 };
 
+const suggestionOrder = ["category", "placetype", "place", "business"];
+function sortSuggestions(items: Suggestion[]): Suggestion[] {
+  return [...items].sort((a, b) => {
+    const aIdx = suggestionOrder.indexOf(a.type.toLowerCase());
+    const bIdx = suggestionOrder.indexOf(b.type.toLowerCase());
+    const aRank = aIdx === -1 ? 999 : aIdx;
+    const bRank = bIdx === -1 ? 999 : bIdx;
+    if (aRank !== bRank) return aRank - bRank;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+function formatSuggestionType(value: string): string {
+  const normalized = value.toLowerCase();
+  if (normalized === "placetype") return "Place Type";
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 export default function GlobalSearch() {
   const router = useRouter();
   const listboxId = useId();
@@ -54,10 +72,24 @@ export default function GlobalSearch() {
   }, [router.asPath]);
 
   useEffect(() => {
+    const qParam = typeof router.query.q === "string" ? router.query.q.trim() : "";
+    if (qParam) {
+      setQuery(qParam);
+    }
+  }, [router.query.q]);
+
+  useEffect(() => {
     let ignore = false;
     const loadCities = async () => {
       try {
-        const response = await fetch("/api/public-search/cities");
+        const token =
+          typeof window === "undefined"
+            ? null
+            : window.localStorage.getItem("token") ??
+              window.localStorage.getItem("accessToken");
+        const response = await fetch("/api/public-search/cities", {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (!response.ok) {
           return;
         }
@@ -110,10 +142,16 @@ export default function GlobalSearch() {
       abortRef.current = controller;
       setLoading(true);
       try {
+        const token =
+          typeof window === "undefined"
+            ? null
+            : window.localStorage.getItem("token") ??
+              window.localStorage.getItem("accessToken");
         const response = await fetch(
           `/api/public-search/suggestions?q=${encodeURIComponent(query.trim())}&limit=10&citySlug=${encodeURIComponent(selectedCitySlug)}`,
           {
             signal: controller.signal,
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           },
         );
         if (!response.ok) {
@@ -123,9 +161,10 @@ export default function GlobalSearch() {
           return;
         }
         const payload = (await response.json()) as Suggestion[];
-        setItems(payload);
+        const ordered = sortSuggestions(payload);
+        setItems(ordered);
         setOpen(true);
-        setActiveIndex(payload.length > 0 ? 0 : -1);
+        setActiveIndex(-1);
       } catch {
         setItems([]);
         setOpen(true);
@@ -143,7 +182,7 @@ export default function GlobalSearch() {
   }, [query, canSearch, selectedCitySlug]);
 
   const firstTarget = useMemo(
-    () => items[activeIndex]?.href ?? items[0]?.href ?? null,
+    () => (activeIndex >= 0 ? items[activeIndex]?.href ?? null : null),
     [items, activeIndex],
   );
 
@@ -153,9 +192,11 @@ export default function GlobalSearch() {
       void router.push(firstTarget);
       return;
     }
-    if (selectedCitySlug) {
-      void router.push(`/c-${selectedCitySlug}`);
-    }
+    if (!canSearch) return;
+    const searchQuery = query.trim();
+    const params = new URLSearchParams({ q: searchQuery });
+    if (selectedCitySlug) params.set("citySlug", selectedCitySlug);
+    void router.push(`/search?${params.toString()}`);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -165,13 +206,15 @@ export default function GlobalSearch() {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % items.length);
+      setActiveIndex((prev) => (prev < 0 ? 0 : (prev + 1) % items.length));
       return;
     }
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev <= 0 ? items.length - 1 : prev - 1));
+      setActiveIndex((prev) =>
+        prev <= 0 ? items.length - 1 : prev - 1,
+      );
       return;
     }
 
@@ -209,36 +252,37 @@ export default function GlobalSearch() {
             </option>
           ))}
         </select>
-        <input
-          id="global-search"
-          className="pub-search-input"
-          type="search"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-          }}
-          onKeyDown={onKeyDown}
-          onFocus={() => {
-            if (canSearch) {
-              setOpen(true);
+        <div className="pub-search-input-wrap">
+          <input
+            id="global-search"
+            className="pub-search-input"
+            type="search"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+            onKeyDown={onKeyDown}
+            onFocus={() => {
+              if (canSearch) {
+                setOpen(true);
+              }
+            }}
+            onBlur={() => {
+              window.setTimeout(() => setOpen(false), 120);
+            }}
+            placeholder="Search business in Crossing Republic, Greater Noida West"
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            aria-activedescendant={
+              activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined
             }
-          }}
-          onBlur={() => {
-            window.setTimeout(() => setOpen(false), 120);
-          }}
-          placeholder="Search business in Crossing Republic, Greater Noida West"
-          autoComplete="off"
-          role="combobox"
-          aria-expanded={open}
-          aria-controls={listboxId}
-          aria-activedescendant={
-            activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined
-          }
-        />
-        <small></small>
-        <button className="pub-search-btn" type="submit" disabled={!canSearch}>
-          Search
-        </button>
+          />
+          <button className="pub-search-inset-btn" type="submit" disabled={!canSearch}>
+            Search
+          </button>
+        </div>
       </form>
 
       {canSearch && open ? (
@@ -267,7 +311,9 @@ export default function GlobalSearch() {
                   }}
                 >
                   <span>{item.label}</span>
-                  <span className="pub-search-type">{item.type}</span>
+                  <span className="pub-search-type">
+                    {formatSuggestionType(item.type)}
+                  </span>
                 </button>
               ))
             : null}

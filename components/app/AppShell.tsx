@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
+import TopProgress from "../shared/TopProgress";
 
 type RoleRequirement = "Admin" | "SuperAdmin";
 
@@ -69,7 +70,12 @@ export default function AppShell({ title, subtitle, requiredRole, children }: Ap
   }
 
   if (isChecking || !isAuthenticated) {
-    return <div className="app-loading">Loading workspace...</div>;
+    return (
+      <>
+        <TopProgress />
+        <div className="app-loading">Loading workspace...</div>
+      </>
+    );
   }
 
   if (roleDenied) {
@@ -90,6 +96,7 @@ export default function AppShell({ title, subtitle, requiredRole, children }: Ap
 
   return (
     <div className="app-shell">
+      <TopProgress />
       <aside className="app-sidebar">
         <Link href="/" className="app-logo">
           LocalOnline

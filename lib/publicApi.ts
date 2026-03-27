@@ -127,13 +127,58 @@ export function getApiBaseUrl() {
   return process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
 }
 
-async function fetchJson<T>(url: string): Promise<T | null> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    return null;
-  }
+function isRetriableStatus(status: number) {
+  return status === 500 || status === 502 || status === 503 || status === 504;
+}
 
-  return (await response.json()) as T;
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function notifyLoading(active: boolean) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("app:loading", { detail: { active } }));
+}
+
+async function fetchWithRetry(url: string, init?: RequestInit, retries = 2) {
+  let attempt = 0;
+  while (true) {
+    try {
+      const response = await fetch(url, init);
+      if (!isRetriableStatus(response.status) || attempt >= retries) {
+        return response;
+      }
+    } catch (err) {
+      if (attempt >= retries) throw err;
+    }
+    attempt += 1;
+    await sleep(350 * attempt);
+  }
+}
+
+async function fetchJson<T>(url: string): Promise<T | null> {
+  if (typeof window === "undefined") {
+    const { getServiceToken } = await import("./serviceAuth");
+    const apiBaseUrl = getApiBaseUrl();
+    const token = await getServiceToken(apiBaseUrl);
+    const response = await fetchWithRetry(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return (await response.json()) as T;
+  }
+  notifyLoading(true);
+  try {
+    const response = await fetchWithRetry(url);
+    if (!response.ok) {
+      return null;
+    }
+    return (await response.json()) as T;
+  } finally {
+    notifyLoading(false);
+  }
 }
 
 export async function fetchHomeData(apiBaseUrl: string) {

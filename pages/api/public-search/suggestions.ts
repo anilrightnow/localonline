@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getServiceToken } from "../../../lib/serviceAuth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const q = typeof req.query.q === "string" ? req.query.q : "";
@@ -13,8 +14,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const cityQuery = citySlug.trim() ? `&citySlug=${encodeURIComponent(citySlug.trim())}` : "";
+    const incomingAuth = req.headers.authorization;
+    const token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
+    if (!incomingAuth && !token) {
+      res.status(500).json([]);
+      return;
+    }
     const response = await fetch(
-      `${apiBaseUrl}/api/public-search/suggestions?q=${encodeURIComponent(q.trim())}&limit=${encodeURIComponent(limit)}${cityQuery}`
+      `${apiBaseUrl}/api/public-search/suggestions?q=${encodeURIComponent(q.trim())}&limit=${encodeURIComponent(limit)}${cityQuery}`,
+      {
+        headers: {
+          ...(incomingAuth ? { Authorization: incomingAuth } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      },
     );
 
     if (!response.ok) {

@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import GlobalSearch from "./GlobalSearch";
 import { getApiBaseUrl } from "../../lib/publicApi";
+import TopProgress from "../shared/TopProgress";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -44,6 +45,7 @@ export default function SiteShell({ children }: SiteShellProps) {
 
   return (
     <div className="pub-shell">
+      <TopProgress />
       <header className="pub-header">
         <div className="pub-container pub-header-inner">
           <Link href="/" className="pub-brand">

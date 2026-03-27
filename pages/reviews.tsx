@@ -74,9 +74,12 @@ export default function ReviewsPage() {
     }
     setBusinessLoading(true);
     try {
-      const apiUrl = getApiBaseUrl();
+      const authToken = localStorage.getItem("token");
       const response = await axios.get(
-        `${apiUrl}/api/public-search/business-token/${encodeURIComponent(token)}`,
+        `/api/public-search/business-token/${encodeURIComponent(token)}`,
+        {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+        },
       );
       setBusinessName(response.data?.detail?.name ?? "");
     } catch {

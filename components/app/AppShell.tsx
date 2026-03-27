@@ -29,6 +29,8 @@ const ADMIN_NAV: NavItem[] = [
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/subscriptions", label: "Subscriptions" },
   { href: "/admin/promotions", label: "Promotions" },
+  { href: "/admin/ad-requests", label: "Ad Requests" },
+  { href: "/admin/listing-updates", label: "Listing Updates" },
   { href: "/admin/moderation", label: "Moderation" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/roles", label: "Roles" },
@@ -54,8 +56,13 @@ export default function AppShell({ title, subtitle, requiredRole, children }: Ap
   ];
   const roleDenied = requiredRole ? !hasRole(session, requiredRole) : false;
 
-  function onLogout() {
+  async function onLogout() {
     if (typeof window === "undefined") return;
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore logout errors and continue client-side cleanup.
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("accessToken");
     window.location.href = "/auth/login";

@@ -203,7 +203,7 @@ export default function OwnerListingPage() {
     }
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
+      const response = await axios.put(
         `/api/owner-listings/businesses/${encodeURIComponent(selected.businessToken)}`,
         {
           name,
@@ -232,7 +232,7 @@ export default function OwnerListingPage() {
         },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
-      setMessage("Business updated successfully.");
+      setMessage(response.data?.message ?? "Update submitted.");
     } catch (error) {
       setMessage(getApiErrorMessage(error, "Save failed."));
     }
@@ -296,7 +296,7 @@ export default function OwnerListingPage() {
   }
 
   return (
-    <AppShell title="Business Add/Update" subtitle="Edits are saved directly to scraped_businesses and dependent mapping tables.">
+    <AppShell title="Business Add/Update" subtitle="Edits are reviewed by Admin/SuperAdmin before going live.">
       {message ? <div className="msg msg-success">{message}</div> : null}
 
       <div className="app-card">
@@ -460,7 +460,9 @@ export default function OwnerListingPage() {
           <JsonPathEditor label="full_json" value={fullJson} onChange={setFullJson} rootType="object" />
 
           <div className="app-actions">
-            <button className="btn btn-primary" type="submit" disabled={!selected?.businessToken}>Save in Scraped Tables</button>
+            <button className="btn btn-primary" type="submit" disabled={!selected?.businessToken}>
+              {isAdmin ? "Save in Scraped Tables" : "Submit for Review"}
+            </button>
           </div>
         </form>
       </div>

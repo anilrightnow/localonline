@@ -2,6 +2,7 @@ import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import BusinessCard from "../components/public/BusinessCard";
+import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
@@ -78,6 +79,14 @@ export default function HomePage({ data }: InferGetServerSidePropsType<typeof ge
               placeTypes: data.topPlaceTypes,
               places: [],
             }}
+          />
+        </SectionCard>
+
+        <SectionCard title="Advertise Here">
+          <AdRequestCard
+            title="Reach customers nearby"
+            subtitle="Promote your business in front of local customers exploring these listings."
+            ctaLabel="Send request"
           />
         </SectionCard>
 

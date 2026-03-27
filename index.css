@@ -118,6 +118,8 @@ a:hover {
 .pub-search-form {
   display: flex;
   gap: 8px;
+  align-items: stretch;
+  flex-wrap: wrap;
 }
 
 .pub-search-input {
@@ -126,6 +128,15 @@ a:hover {
   border-radius: 8px;
   padding: 11px 12px;
   font-size: 16px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.pub-search-input:focus,
+.pub-city-select:focus {
+  outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 
 .pub-city-select {
@@ -136,6 +147,7 @@ a:hover {
   background: var(--surface);
   color: var(--text);
   min-width: 170px;
+  flex: 0 0 auto;
 }
 
 .pub-search-btn {
@@ -238,6 +250,7 @@ a:hover {
   background: var(--surface);
   padding: 16px;
   margin-top: 14px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .pub-card-title {
@@ -264,6 +277,7 @@ a:hover {
   background: #fff;
   display: grid;
   gap: 10px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 /* Authenticated app shell */
@@ -483,6 +497,130 @@ a:hover {
   min-height: 130px;
 }
 
+.pub-ad {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  background: color-mix(in oklab, var(--surface) 92%, #f59e0b 8%);
+  display: grid;
+  gap: 12px;
+}
+
+.pub-ad-media {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(14, 165, 233, 0.12));
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.pub-ad-body {
+  display: grid;
+  gap: 6px;
+}
+
+.pub-ad-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pub-ad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pub-ad-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.pub-ad-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.pub-ad-inline {
+  background: color-mix(in oklab, var(--surface) 90%, #38bdf8 10%);
+}
+
+.pub-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 60;
+}
+
+.pub-modal {
+  width: min(720px, 100%);
+  max-height: min(85vh, 720px);
+  overflow: auto;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+}
+
+.pub-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pub-modal-title {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+}
+
+.pub-ad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #fff;
+  border: 1px solid #0f766e;
+  font-weight: 600;
+}
+
+.pub-ad-btn:hover {
+  text-decoration: none;
+  background: #0b5b55;
+  border-color: #0b5b55;
+}
+
+.pub-ad-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.pub-ad-link:hover {
+  text-decoration: none;
+  background: #f0fdfa;
+}
+
 .pub-biz-image {
   display: block;
   width: 100%;
@@ -618,6 +756,30 @@ a:hover {
   padding: 5px 10px;
   background: color-mix(in oklab, var(--surface) 90%, #22c55e 10%);
   font-size: 13px;
+}
+
+.pub-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.pub-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pub-table th,
+.pub-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.pub-table th {
+  background: color-mix(in oklab, var(--surface) 90%, #e0f2fe 10%);
+  font-weight: 600;
 }
 
 .pub-stars {
@@ -945,6 +1107,29 @@ body.theme-dark .pub-chip:hover {
   .pub-brand-logo {
     width: 142px;
     height: 29px;
+  }
+
+  .pub-search-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pub-city-select,
+  .pub-search-input,
+  .pub-search-btn {
+    width: 100%;
+  }
+
+  .pub-search-btn {
+    justify-content: center;
+  }
+
+  .pub-ad-media {
+    aspect-ratio: 16 / 7;
+  }
+
+  .pub-ad-grid {
+    grid-template-columns: 1fr;
   }
 
   .pub-showcase {

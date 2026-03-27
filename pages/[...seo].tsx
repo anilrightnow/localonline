@@ -3,6 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BusinessCard from "../components/public/BusinessCard";
+import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
@@ -1604,26 +1605,73 @@ export default function SeoPage({
                 </div>
               ) : (
                 <div className="pub-list-results">
-                  {apiData.items.map((item) => (
-                    <BusinessCard
-                      key={item.businessToken}
-                      variant="list"
-                      fallbackCategory={humanizeSlug(parsed.categorySlug)}
-                      fallbackArea={effectiveAreaName}
-                      fallbackCity={effectiveCityName}
-                      business={{
-                        ...item,
-                        thumbnailUrl:
-                          item.thumbnailUrl ??
-                          item.thumbUrl ??
-                          item.imageUrl ??
-                          item.photoUrl ??
-                          fallbackListThumb,
-                      }}
-                    />
-                  ))}
+                  {apiData.items.map((item, index) => {
+                    const card = (
+                      <BusinessCard
+                        key={item.businessToken}
+                        variant="list"
+                        fallbackCategory={humanizeSlug(parsed.categorySlug)}
+                        fallbackArea={effectiveAreaName}
+                        fallbackCity={effectiveCityName}
+                        business={{
+                          ...item,
+                          thumbnailUrl:
+                            item.thumbnailUrl ??
+                            item.thumbUrl ??
+                            item.imageUrl ??
+                            item.photoUrl ??
+                            fallbackListThumb,
+                        }}
+                      />
+                    );
+                    if (index !== 2) return card;
+                    return (
+                      <div key={`${item.businessToken}-with-ad`}>
+                        {card}
+                        <div className="pub-ad pub-ad-inline" style={{ marginTop: 12 }}>
+                          <div
+                            className="pub-ad-media"
+                            role="img"
+                            aria-label="Advertisement placeholder"
+                          >
+                            Ad space
+                          </div>
+                          <div className="pub-ad-body">
+                            <h3 className="pub-ad-title">Sponsored listing</h3>
+                            <p className="pub-muted">
+                              Promote your business in this result list.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {apiData.items.length > 0 && apiData.items.length < 3 ? (
+                    <div className="pub-ad pub-ad-inline">
+                      <div
+                        className="pub-ad-media"
+                        role="img"
+                        aria-label="Advertisement placeholder"
+                      >
+                        Ad space
+                      </div>
+                      <div className="pub-ad-body">
+                        <h3 className="pub-ad-title">Sponsored listing</h3>
+                        <p className="pub-muted">
+                          Promote your business in this result list.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               )}
+              {apiData.items.length > 0 ? (
+                <AdRequestCard
+                  title="Advertise in this area"
+                  subtitle="Reach customers searching in this neighborhood right now."
+                  ctaLabel="Request a slot"
+                />
+              ) : null}
               {totalPages > 1 ? (
                 <nav className="pub-pagination" aria-label="Pagination">
                   {currentPage > 1 ? (

@@ -33,7 +33,12 @@ type Props = {
 };
 
 type DetailTab = "overview" | "about" | "reviews" | "menu" | "gallery";
-type MenuRenderItem = { name: string; detail: string };
+type MenuRenderItem = {
+  name: string;
+  detail: string;
+  priceText: string;
+  description: string;
+};
 type MenuRenderSection = { title: string; items: MenuRenderItem[] };
 
 function titleFor(parsed: ParsedSeoRoute): string {
@@ -100,11 +105,17 @@ function dedupeKeywords(raw: Array<string | undefined | null>): string {
 function getMenuEntryTitle(entry: Record<string, unknown>): string {
   const candidates = [
     entry.name,
+    entry.Name,
     entry.title,
+    entry.Title,
     entry.itemName,
+    entry.ItemName,
     entry.menuItem,
+    entry.MenuItem,
     entry.category,
+    entry.Category,
     entry.type,
+    entry.Type,
   ];
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate.trim()) {
@@ -140,8 +151,40 @@ function getMenuEntryDetail(entry: Record<string, unknown>): string {
   return priceText || descriptionText;
 }
 
+function getMenuEntryPrice(entry: Record<string, unknown>): string {
+  const rawPrice = entry.price ?? entry.Price ?? entry.amount ?? entry.Amount;
+  if (typeof rawPrice === "number" && Number.isFinite(rawPrice)) {
+    return `Rs. ${rawPrice}`;
+  }
+  if (typeof rawPrice === "string" && rawPrice.trim()) {
+    return rawPrice.trim();
+  }
+  return "";
+}
+
+function getMenuEntryDescription(entry: Record<string, unknown>): string {
+  const rawDescription =
+    entry.description ??
+    entry.Description ??
+    entry.details ??
+    entry.Details ??
+    entry.value ??
+    entry.Value;
+  if (typeof rawDescription === "string" && rawDescription.trim()) {
+    return rawDescription.trim();
+  }
+  return "";
+}
+
 function getMenuSectionTitle(entry: Record<string, unknown>): string {
-  const candidates = [entry.Category, entry.category, entry.Name, entry.name];
+  const candidates = [
+    entry.Category,
+    entry.category,
+    entry.Name,
+    entry.name,
+    entry.Title,
+    entry.title,
+  ];
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate.trim()) {
       return candidate.trim();
@@ -174,25 +217,41 @@ type ReviewItem = {
   date?: string;
 };
 
-function parseJsonArray<T>(value?: string | null): T[] {
-  if (!value) return [];
+function parseJsonValue(value?: string | null): unknown {
+  if (!value) return null;
   try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? (parsed as T[]) : [];
+    let parsed: unknown = JSON.parse(value);
+    if (typeof parsed === "string") {
+      const trimmed = parsed.trim();
+      if (trimmed && (trimmed.startsWith("{") || trimmed.startsWith("["))) {
+        try {
+          parsed = JSON.parse(trimmed);
+        } catch {
+          // Fall through with the first parse result.
+        }
+      }
+    }
+    return parsed;
   } catch {
-    return [];
+    return null;
   }
 }
 
+function parseJsonArray<T>(value?: string | null): T[] {
+  const parsed = parseJsonValue(value);
+  return Array.isArray(parsed) ? (parsed as T[]) : [];
+}
+
 function parseReviewJson(value?: string | null): ReviewItem[] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    const reviews = parsed?.Reviews ?? parsed?.reviews;
+  const parsed = parseJsonValue(value);
+  if (!parsed) return [];
+  if (Array.isArray(parsed)) return parsed as ReviewItem[];
+  if (typeof parsed === "object") {
+    const obj = parsed as { Reviews?: unknown; reviews?: unknown };
+    const reviews = obj.Reviews ?? obj.reviews;
     return Array.isArray(reviews) ? (reviews as ReviewItem[]) : [];
-  } catch {
-    return [];
   }
+  return [];
 }
 
 function stripHtml(input?: string | null): string {
@@ -317,24 +376,6 @@ function pickFirstHindiName(value: unknown): string | null {
   return null;
 }
 
-function extractHindiBusinessName(
-  detail?: BusinessApiResponse["detail"],
-): string | null {
-  if (!detail) return null;
-  const fromAbout = pickFirstHindiName(
-    parseJsonArray<unknown>(detail.aboutJson),
-  );
-  if (fromAbout) return fromAbout;
-  try {
-    if (detail.fullJson) {
-      const full = JSON.parse(detail.fullJson) as unknown;
-      const fromFull = pickFirstHindiName(full);
-      if (fromFull) return fromFull;
-    }
-  } catch {}
-  return null;
-}
-
 function shouldHideBusinessInfoHeading(items: AboutItem[]): boolean {
   if (items.length === 0) return false;
   const normalized = items.map((item) =>
@@ -356,38 +397,13 @@ function splitLabelAndValue(raw: string): { label: string; value: string } {
 }
 
 function shouldDisplayAboutKey(rawKey: string): boolean {
-  const normalized = rawKey.trim().toLowerCase();
-  const compact = normalized.replace(/[\s_-]+/g, "");
-  if (!normalized) return false;
-  const hidden = new Set([
-    "oloc",
-    "authority",
-    "action",
-    "plus code",
-    "phone",
-    "tel",
-  ]);
-  const hiddenCompact = new Set(["pluscode", "phone", "tel"]);
-  hiddenCompact.forEach((element) => {
-    if (normalized.indexOf(element) !== -1) {
-      return false;
-    }
-  });
-  if (hidden.has(normalized) || hiddenCompact.has(compact)) return false;
-  if (/^[a-z0-9_-]{1,12}$/.test(normalized) && !normalized.includes(" "))
-    return false;
-  return true;
+  return rawKey.trim().length > 0;
 }
 
 function shouldHideAboutEntry(rawKey: string, rawValue: string): boolean {
-  const combined = `${rawKey} ${rawValue}`.toLowerCase();
-  if (combined.indexOf("plus code") !== -1) return true;
-  if (combined.indexOf("tel:") !== -1) return true;
-  const part = splitLabelAndValue(rawValue);
-  const label = part.label.toLowerCase().replace(/[\s_-]+/g, "");
-  if (label === "phone" || label === "tel" || label === "telephone")
-    return true;
-  return false;
+  const key = rawKey.trim();
+  const value = String(rawValue ?? "").trim();
+  return !key || !value;
 }
 
 function normalizeMediaUrl(input?: string): string | null {
@@ -563,7 +579,7 @@ export default function SeoPage({
     (effectiveAreaSlug ? humanizeSlug(effectiveAreaSlug) : undefined);
   const effectiveBusinessName =
     businessData?.detail.name ?? businessData?.canonical.businessName;
-  const hindiBusinessName = extractHindiBusinessName(businessData?.detail);
+  const hindiBusinessName = businessData?.detail?.name_hindi;
   const hideBusinessInfoHeading = shouldHideBusinessInfoHeading(aboutItems);
   const fallbackListThumb = fallbackThumbnail({
     category: humanizeSlug(parsed.categorySlug),
@@ -585,6 +601,7 @@ export default function SeoPage({
           effectiveCityName,
           effectiveAreaName,
         ));
+  //console.log("page desc " + pageDescription);
   const dynamicKeywords = dedupeKeywords([
     effectiveCityName,
     effectiveAreaName,
@@ -632,10 +649,13 @@ export default function SeoPage({
               : null,
           )
           .filter((item): item is Record<string, unknown> => Boolean(item))
-          .map((item) => ({
-            name: getMenuEntryTitle(item),
-            detail: getMenuEntryDetail(item),
-          }))
+          .map((item) => {
+            const name = getMenuEntryTitle(item);
+            const priceText = getMenuEntryPrice(item);
+            const description = getMenuEntryDescription(item);
+            const detail = getMenuEntryDetail(item);
+            return { name, priceText, description, detail };
+          })
           .filter(
             (item) => item.name && item.name.toLowerCase() !== "menu item",
           )
@@ -651,11 +671,20 @@ export default function SeoPage({
       }
 
       const fallbackName = getMenuEntryTitle(row);
+      const fallbackPrice = getMenuEntryPrice(row);
+      const fallbackDescription = getMenuEntryDescription(row);
       const fallbackDetail = getMenuEntryDetail(row);
       if (fallbackName && fallbackName.toLowerCase() !== "menu item") {
         sections.push({
           title: "Menu",
-          items: [{ name: fallbackName, detail: fallbackDetail }],
+          items: [
+            {
+              name: fallbackName,
+              priceText: fallbackPrice,
+              description: fallbackDescription,
+              detail: fallbackDetail,
+            },
+          ],
         });
       }
     }
@@ -1052,7 +1081,6 @@ export default function SeoPage({
           !hindiBusinessName.includes(pageTitle) ? (
             <p className="pub-subtitle">{hindiBusinessName}</p>
           ) : null}
-          <p className="pub-subtitle">{pageDescription}</p>
         </section>
 
         <SectionCard
@@ -1144,23 +1172,21 @@ export default function SeoPage({
                       )}
                     </div>
                   ) : null}
-                  {toExternalUrl(businessData.detail.website) ? (
+                  {toExternalUrl(businessData.detail.websiteLink) ? (
                     <p>
                       Website:{" "}
                       <a
-                        href={toExternalUrl(businessData.detail.website) ?? "#"}
+                        href={
+                          toExternalUrl(businessData.detail.websiteLink) ?? "#"
+                        }
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        {businessData.detail.website}
+                        {businessData.detail.websiteLink}
                       </a>
                     </p>
                   ) : null}
-                  {businessData.detail.description ? (
-                    <p className="pub-muted">
-                      {businessData.detail.description}
-                    </p>
-                  ) : null}
+
                   {generatedNarrative ? (
                     <div className="pub-hours-block">
                       <h3>Business Overview</h3>
@@ -1423,20 +1449,55 @@ export default function SeoPage({
                         key={`menu-section-${section.title}-${sectionIndex}`}
                         className="pub-menu-item"
                       >
-                        <h3>{section.title}</h3>
-                        <ul>
-                          {section.items.map((item, itemIndex) => (
-                            <li key={`menu-item-${sectionIndex}-${itemIndex}`}>
-                              <strong>{item.name}</strong>
-                              {item.detail ? (
-                                <span className="pub-muted">
-                                  {" "}
-                                  - {item.detail}
-                                </span>
-                              ) : null}
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="pub-menu-header">
+                          <h3>{section.title}</h3>
+                          <span className="pub-menu-count">
+                            {section.items.length} items
+                          </span>
+                        </div>
+                        {section.items.every(
+                          (item) => !item.priceText && !item.description,
+                        ) ? (
+                          <div className="pub-menu-chips">
+                            {section.items.map((item, itemIndex) => (
+                              <span
+                                key={`menu-chip-${sectionIndex}-${itemIndex}`}
+                                className="pub-menu-chip"
+                              >
+                                {item.name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <ul className="pub-menu-items">
+                            {section.items.map((item, itemIndex) => (
+                              <li
+                                key={`menu-item-${sectionIndex}-${itemIndex}`}
+                                className="pub-menu-row"
+                              >
+                                <div className="pub-menu-row-top">
+                                  <span className="pub-menu-name">
+                                    {item.name}
+                                  </span>
+                                  {item.priceText ? (
+                                    <span className="pub-menu-price">
+                                      {item.priceText}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                {item.description ? (
+                                  <div className="pub-menu-desc pub-muted">
+                                    {item.description}
+                                  </div>
+                                ) : item.detail ? (
+                                  <div className="pub-menu-desc pub-muted">
+                                    {item.detail}
+                                  </div>
+                                ) : null}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </article>
                     ))}
                   </div>
@@ -1793,7 +1854,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   context,
 ) => {
   const raw = context.params?.seo;
-  const segments = Array.isArray(raw) ? raw : [];
+  const segments = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? [raw]
+      : [];
   const parsed = parseSeoSegments(segments);
   if (!parsed) {
     return { notFound: true };
@@ -1915,26 +1980,27 @@ function buildApiPath(
 }
 
 function tryExtractBusinessToken(businessComposite: string): string | null {
-  const normalized = businessComposite.trim().toLowerCase();
+  const normalized = businessComposite.trim();
   if (!normalized) {
     return null;
   }
 
-  const match = normalized.match(/-b([a-f0-9]{20,})$/);
-  return match?.[1] ?? null;
+  const match = normalized.match(/-b([a-f0-9]{20,})$/i);
+  return match?.[1]?.toLowerCase() ?? null;
 }
 
 function tryExtractLegacyCid(businessComposite: string): string | null {
-  const normalized = businessComposite.trim().toLowerCase();
+  const normalized = businessComposite.trim();
   if (!normalized) return null;
+  const lowered = normalized.toLowerCase();
 
   const googleCidMarker = "-google-cid:";
-  const googleCidIndex = normalized.lastIndexOf(googleCidMarker);
+  const googleCidIndex = lowered.lastIndexOf(googleCidMarker);
   if (googleCidIndex >= 0) {
-    return normalized.slice(googleCidIndex + 1);
+    return lowered.slice(googleCidIndex + 1);
   }
 
-  const pieces = normalized.split("-").filter(Boolean);
+  const pieces = lowered.split("-").filter(Boolean);
   if (pieces.length === 0) return null;
 
   const last = pieces[pieces.length - 1] ?? null;

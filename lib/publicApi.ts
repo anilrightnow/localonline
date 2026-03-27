@@ -84,6 +84,7 @@ export type BusinessApiResponse = {
     businessToken: string;
     cid?: string | null;
     name: string;
+    name_hindi?: string | null;
     address?: string | null;
     phone?: string | null;
     website?: string | null;

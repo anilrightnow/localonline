@@ -22,7 +22,6 @@ function readPrefixedSegment(segment: string, prefix: string): string | null {
   if (!segment.startsWith(prefix)) {
     return null;
   }
- console.log(segment);
   const slug = segment.slice(prefix.length).trim().toLowerCase();
   if (!slug) {
     return null;
@@ -238,14 +237,14 @@ export function parseSeoSegments(segments: string[]): ParsedSeoRoute | null {
       kind: "business",
       citySlug: businessCitySlug,
       areaSlug,
-      businessComposite: segments[2].toLowerCase(),
+      businessComposite: segments[2].trim(),
       legacy: true,
     };
   }
 
   if (segments.length === 1 && looksLikeBusinessComposite(segments[0])) {
-    const composite = segments[0].toLowerCase();
-    const extracted = extractBusinessAreaCity(composite);
+    const composite = segments[0].trim();
+    const extracted = extractBusinessAreaCity(composite.toLowerCase());
     return {
       kind: "business",
       citySlug: extracted?.citySlug ?? "unknown",

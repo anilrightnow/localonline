@@ -50,9 +50,9 @@ export default function HomePage({ data }: InferGetServerSidePropsType<typeof ge
         <meta property="og:description" content={data.seo.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={data.seo.canonicalPath} />
-        <meta property="og:image" content="/logo-localonline.svg" />
+        <meta property="og:image" content="/local-online-logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/logo-localonline.svg" />
+        <meta name="twitter:image" content="/local-online-logo.png" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </Head>
       <SiteShell>

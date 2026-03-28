@@ -50,7 +50,7 @@ export default function SiteShell({ children }: SiteShellProps) {
         <div className="pub-container pub-header-inner">
           <Link href="/" className="pub-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-localonline.svg" alt={siteName} className="pub-brand-logo" />
+            <img src="/local-online-logo.png" alt={siteName} className="pub-brand-logo" />
             <span className="pub-sr-only">{siteName}</span>
           </Link>
           <nav id="pub-main-nav" className="pub-nav" aria-label="Primary">

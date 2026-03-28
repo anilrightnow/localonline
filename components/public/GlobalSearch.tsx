@@ -72,7 +72,8 @@ export default function GlobalSearch() {
   }, [router.asPath]);
 
   useEffect(() => {
-    const qParam = typeof router.query.q === "string" ? router.query.q.trim() : "";
+    const qParam =
+      typeof router.query.q === "string" ? router.query.q.trim() : "";
     if (qParam) {
       setQuery(qParam);
     }
@@ -85,8 +86,8 @@ export default function GlobalSearch() {
         const token =
           typeof window === "undefined"
             ? null
-            : window.localStorage.getItem("token") ??
-              window.localStorage.getItem("accessToken");
+            : (window.localStorage.getItem("token") ??
+              window.localStorage.getItem("accessToken"));
         const response = await fetch("/api/public-search/cities", {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
@@ -145,8 +146,8 @@ export default function GlobalSearch() {
         const token =
           typeof window === "undefined"
             ? null
-            : window.localStorage.getItem("token") ??
-              window.localStorage.getItem("accessToken");
+            : (window.localStorage.getItem("token") ??
+              window.localStorage.getItem("accessToken"));
         const response = await fetch(
           `/api/public-search/suggestions?q=${encodeURIComponent(query.trim())}&limit=10&citySlug=${encodeURIComponent(selectedCitySlug)}`,
           {
@@ -182,12 +183,14 @@ export default function GlobalSearch() {
   }, [query, canSearch, selectedCitySlug]);
 
   const firstTarget = useMemo(
-    () => (activeIndex >= 0 ? items[activeIndex]?.href ?? null : null),
+    () => (activeIndex >= 0 ? (items[activeIndex]?.href ?? null) : null),
     [items, activeIndex],
   );
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setOpen(false);
+    setActiveIndex(-1);
     if (firstTarget) {
       void router.push(firstTarget);
       return;
@@ -212,9 +215,7 @@ export default function GlobalSearch() {
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) =>
-        prev <= 0 ? items.length - 1 : prev - 1,
-      );
+      setActiveIndex((prev) => (prev <= 0 ? items.length - 1 : prev - 1));
       return;
     }
 
@@ -279,7 +280,11 @@ export default function GlobalSearch() {
               activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined
             }
           />
-          <button className="pub-search-inset-btn" type="submit" disabled={!canSearch}>
+          <button
+            className="pub-search-inset-btn"
+            type="submit"
+            disabled={!canSearch}
+          >
             Search
           </button>
         </div>
@@ -307,6 +312,8 @@ export default function GlobalSearch() {
                   className={`pub-search-item pub-search-item-btn ${activeIndex === index ? "is-active" : ""}`}
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => {
+                    setOpen(false);
+                    setActiveIndex(-1);
                     void router.push(item.href);
                   }}
                 >

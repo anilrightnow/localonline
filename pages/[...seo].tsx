@@ -1628,7 +1628,10 @@ export default function SeoPage({
                     return (
                       <div key={`${item.businessToken}-with-ad`}>
                         {card}
-                        <div className="pub-ad pub-ad-inline" style={{ marginTop: 12 }}>
+                        <div
+                          className="pub-ad pub-ad-inline"
+                          style={{ marginTop: 12 }}
+                        >
                           <div
                             className="pub-ad-media"
                             role="img"
@@ -1739,17 +1742,7 @@ export default function SeoPage({
 
         {links ? (
           <>
-            <SectionCard title="Resolved Route">
-              <div className="pub-compact">
-                <p>
-                  <strong>Type:</strong> {parsed.kind}
-                </p>
-                <p>
-                  <strong>Canonical:</strong>{" "}
-                  <code className="pub-code">{canonicalPath}</code>
-                </p>
-              </div>
-            </SectionCard>
+            {" "}
             <SectionCard title="You might interested in">
               <SeoLinkSections links={links} />
             </SectionCard>

@@ -36,8 +36,10 @@ export default function BusinessCard({
   return (
     <article className={`pub-biz-card ${variant === "list" ? "pub-biz-card-list" : ""}`}>
       <div className="pub-biz-image-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={thumb} alt={`${business.name} thumbnail`} className="pub-biz-image" loading="lazy" />
+        <Link href={business.canonicalPath} className="pub-biz-image-link" aria-label={`Open ${business.name}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={thumb} alt={`${business.name} thumbnail`} className="pub-biz-image" loading="lazy" />
+        </Link>
       </div>
       <div className="pub-biz-body">
         <h3 className="pub-biz-title">

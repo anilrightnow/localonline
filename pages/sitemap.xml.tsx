@@ -31,11 +31,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   const paths = [
     "/sitemaps/cities.xml",
     "/sitemaps/city-areas.xml",
-    "/sitemaps/city-categories/:shard.xml",
-    "/sitemaps/city-area-categories/:shard.xml",
-    "/sitemaps/businesses/:shard.xml",
-    "/sitemaps/city-area-place-types/:shard.xml",
-    "/sitemaps/city-area-place-type-places/:shard.xml",
+    "/sitemaps/city-categories/1.xml",
+    "/sitemaps/city-area-categories/1.xml",
+    "/sitemaps/businesses/1.xml",
+    "/sitemaps/city-area-place-types/1.xml",
+    "/sitemaps/city-area-place-type-places/1.xml",
   ];
   const urls = paths
     .map((path) => `<sitemap><loc>${siteBase}${path}</loc></sitemap>`)

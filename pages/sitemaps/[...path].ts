@@ -1,4 +1,5 @@
 ﻿import type { GetServerSideProps } from "next";
+import { fetchSitemapData, type SitemapResponse } from "../../lib/publicApi";
 type Props = Record<string, never>;
 
 type ReqWithHeaders = Parameters<GetServerSideProps>[0]["req"];
@@ -58,9 +59,10 @@ export const getServerSideProps: GetServerSideProps<Props, SitemapParams> = asyn
   const siteBase = getSiteBase(req);
   const path = params?.path?.join("/") || "";
   const apiUrl = `${apiBaseUrl.replace(/\/+$/, "")}/sitemaps/${path}`;
-
+console.log("Fetching sitemap data from API:", apiUrl);
   try {
-    const response = await fetch(apiUrl, { headers: { Accept: "application/xml" } });
+    const { fetchSitemapWithServiceAuth } = await import("../../lib/serviceAuth");
+    const response = await fetchSitemapWithServiceAuth(apiBaseUrl, apiUrl);
     if (!response.ok) {
       if (response.status === 404) {
         const emptySet =

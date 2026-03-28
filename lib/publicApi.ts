@@ -123,6 +123,10 @@ export type BusinessApiResponse = {
   relatedLinks: RelatedLinks;
 };
 
+export type SitemapResponse = {
+body: string;
+}
+
 export function getApiBaseUrl() {
   return process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
 }
@@ -199,4 +203,8 @@ export async function fetchBusinessData(apiBaseUrl: string, businessToken: strin
 
 export async function fetchSearchData(apiBaseUrl: string, apiPath: string) {
   return fetchJson<SearchApiResponse>(`${apiBaseUrl}${apiPath}`);
+}
+
+export async function fetchSitemapData(apiBaseUrl: string, siteMapPath: string) {
+  return fetchJson<SitemapResponse>(`${apiBaseUrl}/${siteMapPath}`);
 }

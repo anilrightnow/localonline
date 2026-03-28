@@ -50,7 +50,7 @@ export async function getServiceToken(apiBaseUrl: string): Promise<string | null
   }
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`Service login failed: ${res.status} ${text} ${JSON.stringify({ email, password })}`);
+    throw new Error(`Service login failed: ${res.status} ${text}`);
   }
   const data = (await res.json()) as { access_token?: string; expires_in?: number };
   if (!data.access_token) {

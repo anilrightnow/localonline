@@ -2,6 +2,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Script from "next/script";
 import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
 
@@ -18,7 +19,11 @@ export default function App({ Component, pageProps }: AppProps) {
     }
 
     const track = (path: string) => {
-      trackAnalyticsEvent({ eventType: "page_view", source: "site", payload: { path } });
+      trackAnalyticsEvent({
+        eventType: "page_view",
+        source: "site",
+        payload: { path },
+      });
     };
 
     track(router.asPath || "/");
@@ -37,6 +42,19 @@ export default function App({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/favicon.svg" />
       </Head>
+      <Script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-Y671521B04"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-Y671521B04');
+        `}
+      </Script>
       <Component {...pageProps} />
     </>
   );

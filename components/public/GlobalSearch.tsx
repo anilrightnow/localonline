@@ -48,16 +48,14 @@ export default function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  // Load saved city from localStorage
+  // Load saved city
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem(storageKey)?.trim().toLowerCase();
-    if (saved) {
-      setSelectedCitySlug(saved);
-    }
+    if (saved) setSelectedCitySlug(saved);
   }, []);
 
-  // Save selected city to localStorage
+  // Save city
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(storageKey, selectedCitySlug);
@@ -67,12 +65,10 @@ export default function GlobalSearch() {
   useEffect(() => {
     const routeMatch = router.asPath.match(/\/c-([^/?#]+)/i);
     const routeCity = routeMatch?.[1]?.trim().toLowerCase();
-    if (routeCity) {
-      setSelectedCitySlug(routeCity);
-    }
+    if (routeCity) setSelectedCitySlug(routeCity);
   }, [router.asPath]);
 
-  // Update query from URL param
+  // Update query from URL
   useEffect(() => {
     const qParam =
       typeof router.query.q === "string" ? router.query.q.trim() : "";
@@ -116,7 +112,6 @@ export default function GlobalSearch() {
           : [{ slug: "ghaziabad", name: "Ghaziabad" }, ...normalized];
 
         setCities(list);
-
         if (!list.some((item) => item.slug === selectedCitySlug)) {
           setSelectedCitySlug("ghaziabad");
         }
@@ -131,7 +126,7 @@ export default function GlobalSearch() {
 
   const canSearch = query.trim().length >= 2;
 
-  // Debounced API call for suggestions
+  // Debounced suggestions fetch
   useEffect(() => {
     if (debounceRef.current) {
       window.clearTimeout(debounceRef.current);
@@ -159,9 +154,7 @@ export default function GlobalSearch() {
               window.localStorage.getItem("accessToken"));
 
         const response = await fetch(
-          `/api/public-search/suggestions?q=${encodeURIComponent(
-            query.trim(),
-          )}&limit=10&citySlug=${encodeURIComponent(selectedCitySlug)}`,
+          `/api/public-search/suggestions?q=${encodeURIComponent(query.trim())}&limit=10&citySlug=${encodeURIComponent(selectedCitySlug)}`,
           {
             signal: controller.signal,
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -177,7 +170,7 @@ export default function GlobalSearch() {
         const ordered = sortSuggestions(payload);
 
         setItems(ordered);
-        setOpen(true);
+        setOpen(true); // Only open when we actually have results
         setActiveIndex(-1);
       } catch (err: any) {
         if (err.name !== "AbortError") {
@@ -186,12 +179,10 @@ export default function GlobalSearch() {
       } finally {
         setLoading(false);
       }
-    }, 300); // Increased to 300ms for better UX (was 160ms)
+    }, 300);
 
     return () => {
-      if (debounceRef.current) {
-        window.clearTimeout(debounceRef.current);
-      }
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
   }, [query, canSearch, selectedCitySlug]);
 
@@ -216,25 +207,20 @@ export default function GlobalSearch() {
 
     if (!canSearch) return;
 
-    const searchQuery = query.trim();
-    const params = new URLSearchParams({ q: searchQuery });
+    const params = new URLSearchParams({ q: query.trim() });
     if (selectedCitySlug) params.set("citySlug", selectedCitySlug);
-
     void router.push(`/search?${params.toString()}`);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      // Always close dropdown on Enter
-      closeDropdown();
-
+      closeDropdown(); // ← This ensures it closes immediately
       if (activeIndex >= 0 && items[activeIndex]) {
         e.preventDefault();
         void router.push(items[activeIndex].href);
         return;
       }
-
-      // If no active suggestion, let form submit handle it
+      // Otherwise let form submit handle it
       return;
     }
 
@@ -291,15 +277,14 @@ export default function GlobalSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             onFocus={() => {
+              // Only open if we already have suggestions AND can search
+              // This prevents reopening after navigation/Enter
               if (canSearch && items.length > 0) {
                 setOpen(true);
               }
             }}
             onBlur={() => {
-              // Small delay to allow clicks on suggestions
-              window.setTimeout(() => {
-                closeDropdown();
-              }, 150);
+              window.setTimeout(closeDropdown, 150);
             }}
             placeholder="Search business in Crossing Republic, Greater Noida West"
             autoComplete="off"
@@ -328,7 +313,7 @@ export default function GlobalSearch() {
           role="listbox"
           aria-label="Search suggestions"
         >
-          {loading ? <div className="pub-search-item">Loading...</div> : null}
+          {loading && <div className="pub-search-item">Loading...</div>}
 
           {!loading && items.length === 0 && (
             <div className="pub-search-item">No suggestions found</div>

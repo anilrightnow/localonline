@@ -1,6 +1,7 @@
 :root {
   --bg: #fafbffff;
   --surface: #fff;
+  --box-surface: #9ebff4;
   --border: #d3e3fdff;
   --text: #000;
   --muted: #000000ff;
@@ -323,7 +324,7 @@ a:hover {
 .pub-card {
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--box-surface);
   padding: 16px;
   margin-top: 14px;
   box-shadow: var(--shadow-subtle);
@@ -588,7 +589,7 @@ a:hover {
   border: 1px dashed var(--border);
   border-radius: 12px;
   padding: 14px;
-  background: color-mix(in oklab, var(--surface) 92%, #f59e0b 8%);
+  background: color-mix(in oklab, var(--surface) 92%, #9ebff4 8%);
   display: grid;
   gap: 12px;
 }
@@ -602,7 +603,8 @@ a:hover {
   display: grid;
   place-items: center;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
@@ -897,12 +899,12 @@ a:hover {
   border-radius: 999px;
   padding: 5px 10px;
   color: var(--text);
-  background: #fff1e3;
+  background: #e2ecfc;
 }
 
 .pub-chip:hover {
   text-decoration: none;
-  background: #f7e0cb;
+  background: #9ebff4;
 }
 
 body.theme-dark .pub-chip {

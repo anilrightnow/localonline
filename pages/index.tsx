@@ -6,7 +6,11 @@ import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
-import { fetchHomeData, getApiBaseUrl, type HomeApiResponse } from "../lib/publicApi";
+import {
+  fetchHomeData,
+  getApiBaseUrl,
+  type HomeApiResponse,
+} from "../lib/publicApi";
 
 type Props = {
   data: HomeApiResponse;
@@ -16,7 +20,8 @@ const fallbackData: HomeApiResponse = {
   seo: {
     title: "LocalOnline - Online Market for Local Businesses",
     h1: "Discover Local Businesses on LocalOnline",
-    description: "LocalOnline helps you find and compare businesses by city, area, category, and place.",
+    description:
+      "LocalOnline helps you find and compare businesses by city, area, category, and place.",
     canonicalPath: "/",
   },
   topCities: [],
@@ -26,7 +31,9 @@ const fallbackData: HomeApiResponse = {
   featuredBusinesses: [],
 };
 
-export default function HomePage({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function HomePage({
+  data,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -53,7 +60,10 @@ export default function HomePage({ data }: InferGetServerSidePropsType<typeof ge
         <meta property="og:image" content="/local-online-logo.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="/local-online-logo.png" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </Head>
       <SiteShell>
         <section className="pub-hero">
@@ -63,10 +73,19 @@ export default function HomePage({ data }: InferGetServerSidePropsType<typeof ge
 
         <SectionCard title="How This Works">
           <div className="pub-grid-2">
-            <p className="pub-muted">1. Search by city, area, category, place type, or business name.</p>
-            <p className="pub-muted">2. Open SEO-friendly location pages and compare relevant listings.</p>
-            <p className="pub-muted">3. Navigate to verified business details with canonical URLs.</p>
-            <p className="pub-muted">4. Explore connected pages through related internal links.</p>
+            <p className="pub-muted">
+              1. Search by city, area, category, place type, or business name.
+            </p>
+            <p className="pub-muted">
+              2. Open location pages and compare relevant listings.
+            </p>
+            <p className="pub-muted">
+              3. Navigate to verified business details with all details.
+            </p>
+            <p className="pub-muted">
+              4. Business owner can manage their listings and engage with
+              customers for free.
+            </p>
           </div>
         </SectionCard>
 
@@ -104,20 +123,26 @@ export default function HomePage({ data }: InferGetServerSidePropsType<typeof ge
 
         <SectionCard title="For Business Owners">
           <div className="pub-grid-2">
-            <p className="pub-muted">Claim listing, enrich profile, and unlock management features with plans.</p>
-            <p className="pub-muted">Track category/area visibility and improve discovery via structured listing data.</p>
+            <p className="pub-muted">
+              Claim listing, enrich profile, and unlock management features with
+              plans.
+            </p>
+            <p className="pub-muted">
+              Track category/area visibility and improve discovery via
+              structured listing data.
+            </p>
           </div>
           <div className="pub-chip-list" style={{ marginTop: 10 }}>
-            <Link className="pub-chip" href="/claims">
+            <Link className="pub-ad-btn" href="/claims">
               Claim Listing
             </Link>
-            <Link className="pub-chip" href="/owner/listing">
+            <Link className="pub-ad-btn" href="/owner/listing">
               Manage Listing
             </Link>
-            <Link className="pub-chip" href="/reviews">
+            <Link className="pub-ad-btn" href="/reviews">
               Write Review
             </Link>
-            <Link className="pub-chip" href="/community/events">
+            <Link className="pub-ad-btn" href="/community/events">
               Local Events
             </Link>
           </div>

@@ -875,7 +875,7 @@ export default function SeoPage({
       for (const row of hours) {
         const dayRaw = ((row as any).Day ?? row.day ?? "").toString();
         const timeRaw = ((row as any).Time ?? row.time ?? "").toString();
-        const dayOfWeek = toSchemaDayName(dayRaw);
+        const dayOfWeek = getDayNameOnly(toSchemaDayName(dayRaw));
         if (!dayOfWeek) continue;
         const parsedRange = parseHoursRange(timeRaw);
         list.push({
@@ -888,6 +888,33 @@ export default function SeoPage({
     }
     return list.length > 0 ? list : undefined;
   }, [hoursGroups]);
+
+  // Add this helper function inside your component
+  const getDayNameOnly = (value: any): string => {
+    if (!value) return "Day";
+
+    const str = String(value).trim();
+
+    // Array of valid day names
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    // First, try to find if any day name exists in the string
+    for (const day of dayNames) {
+      if (str.includes(day)) {
+        return day; // Return clean day name only
+      }
+    }
+    // Final fallback
+    return str;
+  };
 
   const schemaReviews = useMemo(() => {
     const list = scrapedReviews
@@ -1177,6 +1204,7 @@ export default function SeoPage({
                     <p>
                       Website:{" "}
                       <a
+                        style={{ overflowWrap: "anywhere" }}
                         href={
                           toExternalUrl(businessData.detail.websiteLink) ?? "#"
                         }
@@ -1210,13 +1238,13 @@ export default function SeoPage({
                   ) : null}
                   <div className="pub-contact-actions">
                     <a
-                      className="pub-chip"
+                      className="pub-ad-btn"
                       href={`/claims?businessToken=${encodeURIComponent(businessData.detail.businessToken)}`}
                     >
                       Own this listing
                     </a>
                     <a
-                      className="pub-chip"
+                      className="pub-ad-btn"
                       href={`/owner/listing?businessToken=${encodeURIComponent(businessData.detail.businessToken)}`}
                     >
                       Manage as owner
@@ -1733,7 +1761,7 @@ export default function SeoPage({
                 onClick={() => setShowMoreGeneratedSearches((v) => !v)}
               >
                 {showMoreGeneratedSearches
-                  ? "Show 10 links"
+                  ? "Show less links"
                   : `Show more links (${generatedSearchLinks.length - 10} more)`}
               </button>
             ) : null}

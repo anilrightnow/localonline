@@ -917,7 +917,8 @@ export default function SeoPage({
       for (const row of hours) {
         const dayRaw = ((row as any).Day ?? row.day ?? "").toString();
         const timeRaw = ((row as any).Time ?? row.time ?? "").toString();
-        const dayOfWeek = getDayNameOnly(toSchemaDayName(dayRaw));
+        let dayOfWeekOnly = toSchemaDayName(dayRaw) ?? "";
+        const dayOfWeek = getDayNameOnly(dayOfWeekOnly);
         if (!dayOfWeek) continue;
         const parsedRange = parseHoursRange(timeRaw);
         list.push({
@@ -1345,7 +1346,7 @@ export default function SeoPage({
                                   <td>
                                     {
                                       ((row as any).Day ??
-                                        getDayNameOnly(row.day) ??
+                                        getDayNameOnly(row.day ?? "") ??
                                         "Day") as string
                                     }
                                     :{" "}

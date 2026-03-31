@@ -398,13 +398,27 @@ function splitLabelAndValue(raw: string): { label: string; value: string } {
 }
 
 function shouldDisplayAboutKey(rawKey: string): boolean {
-  return rawKey.trim().length > 0;
+  const hiddenKeys = ["address", "authority", "oloc", "locatedin", "phone"];
+  let isShow = true;
+  hiddenKeys.forEach((element) => {
+    if (rawKey.trim().toLowerCase().indexOf(element) >= 0) {
+      isShow = false;
+    }
+  });
+  return rawKey.trim().length > 0 && isShow;
 }
 
 function shouldHideAboutEntry(rawKey: string, rawValue: string): boolean {
+  const hiddenKeys = ["action"];
+  let isShow = true;
+  hiddenKeys.forEach((element) => {
+    if (rawKey.trim().toLowerCase().indexOf(element) >= 0) {
+      isShow = false;
+    }
+  });
   const key = rawKey.trim();
   const value = String(rawValue ?? "").trim();
-  return !key || !value;
+  return (!key || !value) && isShow;
 }
 
 function normalizeMediaUrl(input?: string): string | null {
@@ -863,6 +877,34 @@ export default function SeoPage({
     }
   }, [activeTab, hasMenuItems]);
 
+  // Add this helper function inside your component
+  function getDayNameOnly(dayValue: string) {
+    if (!dayValue) return "Day";
+
+    // Array of valid day names
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    // First, try to find if any day name exists in the string
+    for (const day of dayNames) {
+      if (
+        dayValue.trim().toLowerCase().indexOf(day.trim().toLowerCase()) >= 0
+      ) {
+        dayValue = day; // Return clean day name only
+        break;
+      }
+    }
+    // Final fallback
+    return dayValue;
+  }
+
   const openingHoursSpecification = useMemo(() => {
     const list: Array<{
       "@type": "OpeningHoursSpecification";
@@ -888,33 +930,6 @@ export default function SeoPage({
     }
     return list.length > 0 ? list : undefined;
   }, [hoursGroups]);
-
-  // Add this helper function inside your component
-  const getDayNameOnly = (value: any): string => {
-    if (!value) return "Day";
-
-    const str = String(value).trim();
-
-    // Array of valid day names
-    const dayNames = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-
-    // First, try to find if any day name exists in the string
-    for (const day of dayNames) {
-      if (str.includes(day)) {
-        return day; // Return clean day name only
-      }
-    }
-    // Final fallback
-    return str;
-  };
 
   const schemaReviews = useMemo(() => {
     const list = scrapedReviews
@@ -1269,7 +1284,6 @@ export default function SeoPage({
                           ).filter(
                             (entry) => !shouldHideAboutEntry(key, entry),
                           );
-                          if (!showKey || values.length === 0) return null;
                           return (
                             <div key={`${key}-${index}`} className="pub-fact">
                               {showKey ? <strong>{key}</strong> : null}
@@ -1331,7 +1345,7 @@ export default function SeoPage({
                                   <td>
                                     {
                                       ((row as any).Day ??
-                                        row.day ??
+                                        getDayNameOnly(row.day) ??
                                         "Day") as string
                                     }
                                     :{" "}
@@ -1339,7 +1353,7 @@ export default function SeoPage({
                                   <td>
                                     {
                                       ((row as any).Time ??
-                                        row.time ??
+                                        parseHoursRange(row.time) ??
                                         "N/A") as string
                                     }
                                   </td>

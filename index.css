@@ -1,8 +1,8 @@
 :root {
   --bg: #fafbffff;
   --surface: #fff;
-  --box-surface: #9ebff4;
-  --border: #d3e3fdff;
+  --box-surface: #fff;
+  --border: #9AA6B2;
   --text: #000;
   --muted: #000000ff;
   --accent: #000;
@@ -753,7 +753,7 @@ a:hover {
   padding: 8px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--surface) 86%, #f1e2cf 14%);
+  background: color-mix(in oklab, var(--surface) 86%, #D9EAFD 14%);
 }
 
 .pub-tab-btn {
@@ -1170,7 +1170,7 @@ body.theme-dark .pub-chip:hover {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
-  background: color-mix(in oklab, var(--surface) 92%, #f4ddc2 8%);
+  background: color-mix(in oklab, var(--surface) 92%, #fff 8%);
   box-shadow: var(--shadow-subtle);
 }
 

@@ -10,6 +10,8 @@ type AnalyticsEvent = {
 export function trackAnalyticsEvent(event: AnalyticsEvent): void {
   if (typeof window === "undefined") return;
   if (!event?.eventType) return;
+  const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
+  if (!token) return;
   try {
     const apiBaseUrl = getApiBaseUrl();
     const endpoint = `${apiBaseUrl}/api/analytics/track`;
@@ -26,7 +28,7 @@ export function trackAnalyticsEvent(event: AnalyticsEvent): void {
     }
     void fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body,
       keepalive: true,
     });

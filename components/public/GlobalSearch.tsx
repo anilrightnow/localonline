@@ -36,6 +36,8 @@ export default function GlobalSearch() {
   const listboxId = useId();
   const debounceRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const suppressOpenRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const storageKey = "pub.selectedCitySlug";
   const [cities, setCities] = useState<CityOption[]>([
@@ -125,6 +127,9 @@ export default function GlobalSearch() {
   }, [selectedCitySlug]);
 
   const canSearch = query.trim().length >= 2;
+  const isInputFocused = () =>
+    typeof document !== "undefined" &&
+    inputRef.current === document.activeElement;
 
   // Debounced suggestions fetch
   useEffect(() => {
@@ -136,6 +141,7 @@ export default function GlobalSearch() {
       setItems([]);
       setOpen(false);
       setActiveIndex(-1);
+      suppressOpenRef.current = false;
       return;
     }
 
@@ -170,7 +176,9 @@ export default function GlobalSearch() {
         const ordered = sortSuggestions(payload);
 
         setItems(ordered);
-        setOpen(true); // Only open when we actually have results
+        setOpen(
+          !suppressOpenRef.current && ordered.length > 0 && isInputFocused(),
+        );
         setActiveIndex(-1);
       } catch (err: any) {
         if (err.name !== "AbortError") {
@@ -198,6 +206,7 @@ export default function GlobalSearch() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    suppressOpenRef.current = true;
     closeDropdown();
 
     if (firstTarget) {
@@ -274,12 +283,16 @@ export default function GlobalSearch() {
             className="pub-search-input"
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            ref={inputRef}
+            onChange={(e) => {
+              suppressOpenRef.current = false;
+              setQuery(e.target.value);
+            }}
             onKeyDown={onKeyDown}
             onFocus={() => {
               // Only open if we already have suggestions AND can search
               // This prevents reopening after navigation/Enter
-              if (canSearch && items.length > 0) {
+              if (canSearch && items.length > 0 && !suppressOpenRef.current) {
                 setOpen(true);
               }
             }}

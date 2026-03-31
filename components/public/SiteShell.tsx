@@ -3,6 +3,7 @@ import Link from "next/link";
 import GlobalSearch from "./GlobalSearch";
 import { getApiBaseUrl } from "../../lib/publicApi";
 import TopProgress from "../shared/TopProgress";
+import { getAuthToken } from "../../lib/auth";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -22,7 +23,15 @@ export default function SiteShell({ children }: SiteShellProps) {
   useEffect(() => {
     let mounted = true;
     const apiBaseUrl = getApiBaseUrl();
-    fetch(`${apiBaseUrl}/api/analytics/site/summary`)
+    const token = getAuthToken();
+    if (!token) {
+      return () => {
+        mounted = false;
+      };
+    }
+    const authHeaders = { Authorization: `Bearer ${token}` };
+
+    fetch(`${apiBaseUrl}/api/analytics/site/summary`, { headers: authHeaders })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!mounted || !data) return;
@@ -30,7 +39,7 @@ export default function SiteShell({ children }: SiteShellProps) {
         if (!Number.isNaN(total)) setSiteVisitors(total);
       })
       .catch(() => null);
-    fetch(`${apiBaseUrl}/api/public/settings`)
+    fetch(`${apiBaseUrl}/api/public/settings`, { headers: authHeaders })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!mounted || !data) return;

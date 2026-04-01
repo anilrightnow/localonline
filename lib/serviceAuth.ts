@@ -1,5 +1,14 @@
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
+function isServiceLoginDisabled() {
+  const raw = String(
+    process.env.API_SERVICE_LOGIN_DISABLED || process.env.SERVICE_LOGIN_DISABLED || "",
+  )
+    .trim()
+    .toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes";
+}
+
 function isRetriableStatus(status: number) {
   return status === 500 || status === 502 || status === 503 || status === 504;
 }
@@ -15,6 +24,9 @@ function getServiceCredentials() {
 }
 
 export async function getServiceToken(apiBaseUrl: string): Promise<string | null> {
+  if (isServiceLoginDisabled()) {
+    return null;
+  }
   const { email, password } = getServiceCredentials();
   if (!email || !password) {
     throw new Error("Service credentials missing (API_SERVICE_EMAIL/API_SERVICE_PASSWORD).");

@@ -39,8 +39,8 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="LocalOnline" />
         <meta name="apple-mobile-web-app-title" content="LocalOnline" />
         <meta name="theme-color" content="#0f766e" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.png" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/favicon.png" />
       </Head>
       <Script
         async

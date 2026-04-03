@@ -1,8 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Link from "next/link";
 import { getApiErrorMessage } from "../../lib/apiError";
 import SiteShell from "../../components/public/SiteShell";
+import { apiUrl } from "../../lib/apiClient";
 
 export default function ConfirmEmailPage() {
   const router = useRouter();
@@ -23,7 +25,7 @@ export default function ConfirmEmailPage() {
     setMessage(null);
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/confirm-email", { email, token });
+      const response = await axios.post(apiUrl("/api/auth/confirm-email"), { email, token });
       setMessage(response.data?.message ?? "Email confirmed.");
     } catch (error) {
       setMessage(getApiErrorMessage(error, "Email confirmation failed."));
@@ -50,6 +52,11 @@ export default function ConfirmEmailPage() {
             {loading ? "Confirming..." : "Confirm Email"}
           </button>
         </form>
+        <div className="auth-links">
+          <Link className="btn btn-ghost" href="/auth/login">
+            Back to login
+          </Link>
+        </div>
       </div>
     </SiteShell>
   );

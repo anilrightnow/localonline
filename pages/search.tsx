@@ -5,6 +5,7 @@ import SectionCard from "../components/public/SectionCard";
 import SiteShell from "../components/public/SiteShell";
 import { getApiBaseUrl } from "../lib/publicApi";
 import { fetchWithServiceAuth } from "../lib/serviceAuth";
+import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
 
 type SearchResponse = {
   query: { q: string; citySlug?: string | null };
@@ -61,6 +62,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const citySlug = typeof context.query.citySlug === "string" ? context.query.citySlug.trim() : "";
   const page = typeof context.query.page === "string" ? Number.parseInt(context.query.page, 10) : 1;
   const apiBaseUrl = getApiBaseUrl();
+  const authToken = getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
   const params = new URLSearchParams();
   params.set("q", q);
   if (citySlug) params.set("citySlug", citySlug);
@@ -68,6 +70,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const res = await fetchWithServiceAuth(
     apiBaseUrl,
     `${apiBaseUrl}/api/public-search/query?${params.toString()}`,
+    undefined,
+    authToken,
   );
   const data = res.ok ? ((await res.json()) as SearchResponse) : null;
   if (!data) {

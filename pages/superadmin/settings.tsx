@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
@@ -8,6 +9,7 @@ type SettingsResponse = {
 };
 
 export default function SuperAdminSettingsPage() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -18,7 +20,8 @@ export default function SuperAdminSettingsPage() {
     setError(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const response = await fetch(`${apiBaseUrl}/api/superadmin/settings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -33,8 +36,9 @@ export default function SuperAdminSettingsPage() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     void loadSettings();
-  }, []);
+  }, [isAuthenticated]);
 
   async function onSave(event: FormEvent) {
     event.preventDefault();
@@ -42,7 +46,8 @@ export default function SuperAdminSettingsPage() {
     setError(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const response = await fetch(`${apiBaseUrl}/api/superadmin/settings`, {
         method: "PUT",
         headers: {
@@ -59,6 +64,9 @@ export default function SuperAdminSettingsPage() {
     }
   }
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading settings...</div>;
 
   return (
@@ -82,6 +90,15 @@ export default function SuperAdminSettingsPage() {
             type="email"
             value={String(settings.support_email ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, support_email: e.target.value }))}
+          />
+        </div>
+        <div className="form-row">
+          <label>Admin Alert Emails</label>
+          <input
+            className="form-input"
+            placeholder="admin1@example.com, admin2@example.com"
+            value={String(settings.admin_emails ?? "")}
+            onChange={(e) => setSettings((prev) => ({ ...prev, admin_emails: e.target.value }))}
           />
         </div>
         <div className="form-row">

@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { apiUrl } from "../../lib/apiClient";
 
 type SearchBusinessItem = {
   businessToken: string;
@@ -29,9 +31,9 @@ export default function PromotionsPage() {
     event.preventDefault();
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       await axios.post(
-        "/api/promotions",
+        apiUrl("/api/promotions"),
         {
           businessToken,
           type,
@@ -56,9 +58,9 @@ export default function PromotionsPage() {
       setBusinessOptions([]);
       return;
     }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/owner-listings/search", {
+      .get(apiUrl("/api/owner-listings/search"), {
         params: { q: term, limit: 15 },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })

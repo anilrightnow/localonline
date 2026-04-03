@@ -11,6 +11,7 @@ import {
   getApiBaseUrl,
   type HomeApiResponse,
 } from "../lib/publicApi";
+import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
 
 type Props = {
   data: HomeApiResponse;
@@ -152,8 +153,9 @@ export default function HomePage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   const apiBaseUrl = getApiBaseUrl();
-  const data = (await fetchHomeData(apiBaseUrl)) ?? fallbackData;
+  const authToken = getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
+  const data = (await fetchHomeData(apiBaseUrl, authToken)) ?? fallbackData;
   return { props: { data } };
 };

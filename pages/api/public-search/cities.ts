@@ -1,10 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServiceToken } from "../../../lib/serviceAuth";
+import { getAuthTokenFromCookieHeader } from "../../../lib/authCookie";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const apiBaseUrl = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
   try {
-    const incomingAuth = req.headers.authorization;
+    const cookieToken = getAuthTokenFromCookieHeader(req.headers.cookie);
+    const incomingAuth =
+      req.headers.authorization ?? (cookieToken ? `Bearer ${cookieToken}` : undefined);
     const token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
     if (!incomingAuth && !token) {
       res.status(500).json([]);

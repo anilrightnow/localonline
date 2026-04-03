@@ -1,11 +1,13 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
 type RoleRow = { id: string; name: string };
 
 export default function SuperAdminRolesPage() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -14,7 +16,8 @@ export default function SuperAdminRolesPage() {
   async function loadRoles() {
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const res = await fetch(`${apiBaseUrl}/api/admin/roles`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -26,8 +29,9 @@ export default function SuperAdminRolesPage() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     void loadRoles();
-  }, []);
+  }, [isAuthenticated]);
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
@@ -35,7 +39,8 @@ export default function SuperAdminRolesPage() {
     setError(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const res = await fetch(`${apiBaseUrl}/api/superadmin/roles`, {
         method: "POST",
         headers: {
@@ -51,6 +56,10 @@ export default function SuperAdminRolesPage() {
     } catch (err) {
       setError(getApiErrorMessage(err, "Failed to create role."));
     }
+  }
+
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
   }
 
   return (

@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { apiFetch } from "../../lib/apiClient";
 
 type AdRequestPayload = {
   businessName: string;
@@ -45,7 +46,7 @@ export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCa
     setError(null);
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/ad-requests", {
+      const response = await apiFetch("/api/ad-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

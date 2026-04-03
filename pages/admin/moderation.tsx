@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { apiUrl } from "../../lib/apiClient";
 
 type PendingClaim = { id: string; businessToken?: string | null; claimedByUserId: string; contactEmail: string; createdAt: string };
 type PendingReview = { id: string; businessToken?: string | null; rating: number; title: string; comment: string; createdAt: string };
@@ -13,12 +15,12 @@ export default function ModerationPage() {
 
   async function loadPending() {
     setMessage("");
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     try {
       const [claimsRes, reviewsRes] = await Promise.all([
-        axios.get("/api/listing-claims/pending", { headers }),
-        axios.get("/api/reviews/pending", { headers }),
+        axios.get(apiUrl("/api/listing-claims/pending"), { headers }),
+        axios.get(apiUrl("/api/reviews/pending"), { headers }),
       ]);
       setClaims(claimsRes.data ?? []);
       setReviews(reviewsRes.data ?? []);
@@ -28,16 +30,24 @@ export default function ModerationPage() {
   }
 
   async function moderateClaim(id: string, action: "approve" | "reject") {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    await axios.post(`/api/listing-claims/${id}/${action}`, action === "reject" ? { reason: "Rejected by admin." } : {}, { headers });
+    await axios.post(
+      apiUrl(`/api/listing-claims/${id}/${action}`),
+      action === "reject" ? { reason: "Rejected by admin." } : {},
+      { headers },
+    );
     await loadPending();
   }
 
   async function moderateReview(id: string, action: "approve" | "reject") {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    await axios.post(`/api/reviews/${id}/${action}`, action === "reject" ? { reason: "Rejected by admin." } : {}, { headers });
+    await axios.post(
+      apiUrl(`/api/reviews/${id}/${action}`),
+      action === "reject" ? { reason: "Rejected by admin." } : {},
+      { headers },
+    );
     await loadPending();
   }
 

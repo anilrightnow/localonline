@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
@@ -16,17 +17,21 @@ interface DashboardData {
 }
 
 export default function Dashboard() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     const fetchDashboard = async () => {
       try {
         const apiBaseUrl = getApiBaseUrl();
+        const token = getAuthToken();
+        if (!token) throw new Error("Not authenticated.");
         const response = await fetch(`${apiBaseUrl}/api/admin/dashboard`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         if (!response.ok) throw new Error("Failed to load dashboard");
@@ -39,8 +44,11 @@ export default function Dashboard() {
       }
     };
     fetchDashboard();
-  }, []);
+  }, [isAuthenticated]);
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading dashboard...</div>;
   if (error) return <AppShell requiredRole="Admin" title="Admin Dashboard"><div className="msg msg-error">{error}</div></AppShell>;
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
@@ -22,6 +23,7 @@ interface Plan {
 }
 
 export default function Subscriptions() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,16 +31,19 @@ export default function Subscriptions() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     fetchSubscription();
     fetchPlans();
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchSubscription = async () => {
     try {
       const apiBaseUrl = getApiBaseUrl();
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const response = await fetch(`${apiBaseUrl}/api/subscriptions`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error("Failed to load subscription");
@@ -54,9 +59,11 @@ export default function Subscriptions() {
   const fetchPlans = async () => {
     try {
       const apiBaseUrl = getApiBaseUrl();
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const response = await fetch(`${apiBaseUrl}/api/plans`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
@@ -72,10 +79,12 @@ export default function Subscriptions() {
     setMessage(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const response = await fetch(`${apiBaseUrl}/api/subscriptions/change-plan`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ planId }),
@@ -88,6 +97,9 @@ export default function Subscriptions() {
     }
   };
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading subscriptions...</div>;
   if (error) return <AppShell requiredRole="Admin" title="Subscriptions"><div className="msg msg-error">{error}</div></AppShell>;
 

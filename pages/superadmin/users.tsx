@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
@@ -15,6 +16,7 @@ type UserRow = {
 type RoleRow = { id: string; name: string };
 
 export default function SuperAdminUsersPage() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,8 @@ export default function SuperAdminUsersPage() {
     setError(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const [usersRes, rolesRes] = await Promise.all([
         fetch(`${apiBaseUrl}/api/superadmin/users`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${apiBaseUrl}/api/admin/roles`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -43,15 +46,17 @@ export default function SuperAdminUsersPage() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     void loadAll();
-  }, []);
+  }, [isAuthenticated]);
 
   async function saveRoles(userId: string, nextRoles: string[]) {
     setMessage(null);
     setError(null);
     try {
       const apiBaseUrl = getApiBaseUrl();
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) throw new Error("Not authenticated.");
       const res = await fetch(`${apiBaseUrl}/api/superadmin/users/${encodeURIComponent(userId)}/roles`, {
         method: "POST",
         headers: {
@@ -68,6 +73,9 @@ export default function SuperAdminUsersPage() {
     }
   }
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading users...</div>;
 
   return (

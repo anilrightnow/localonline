@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { apiFetch } from "../../lib/apiClient";
 
 type ListingUpdate = {
   Id: string;
@@ -57,14 +59,14 @@ export default function ListingUpdatesPage() {
     setLoading(true);
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const params = new URLSearchParams();
       params.set("page", String(page));
       params.set("pageSize", String(pagination.pageSize));
       if (status && status !== "All") params.set("status", status);
       if (query.trim()) params.set("q", query.trim());
       params.set("order", order);
-      const res = await fetch(`/api/admin/listing-updates?${params.toString()}`, {
+      const res = await apiFetch(`/api/admin/listing-updates?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error("Failed to load listing updates.");
@@ -80,10 +82,10 @@ export default function ListingUpdatesPage() {
   async function loadLogs(requestId?: string) {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const params = new URLSearchParams();
       if (requestId) params.set("requestId", requestId);
-      const res = await fetch(`/api/admin/listing-updates/logs?${params.toString()}`, {
+      const res = await apiFetch(`/api/admin/listing-updates/logs?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error("Failed to load logs.");
@@ -97,8 +99,8 @@ export default function ListingUpdatesPage() {
   async function approveRequest(id: string) {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/listing-updates/${id}/approve`, {
+      const token = getAuthToken();
+      const res = await apiFetch(`/api/admin/listing-updates/${id}/approve`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -114,8 +116,8 @@ export default function ListingUpdatesPage() {
     const reason = prompt("Enter rejection reason (optional):") || "";
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/listing-updates/${id}/reject`, {
+      const token = getAuthToken();
+      const res = await apiFetch(`/api/admin/listing-updates/${id}/reject`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

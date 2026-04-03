@@ -1,5 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import { getAuthToken } from "../../lib/auth";
+import { apiFetch } from "../../lib/apiClient";
 
 type Suggestion = {
   type: string;
@@ -84,13 +86,9 @@ export default function GlobalSearch() {
     let ignore = false;
     const loadCities = async () => {
       try {
-        const token =
-          typeof window === "undefined"
-            ? null
-            : (window.localStorage.getItem("token") ??
-              window.localStorage.getItem("accessToken"));
+        const token = getAuthToken();
 
-        const response = await fetch("/api/public-search/cities", {
+        const response = await apiFetch("/api/public-search/cities", {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
 
@@ -153,13 +151,9 @@ export default function GlobalSearch() {
       setLoading(true);
 
       try {
-        const token =
-          typeof window === "undefined"
-            ? null
-            : (window.localStorage.getItem("token") ??
-              window.localStorage.getItem("accessToken"));
+        const token = getAuthToken();
 
-        const response = await fetch(
+        const response = await apiFetch(
           `/api/public-search/suggestions?q=${encodeURIComponent(query.trim())}&limit=10&citySlug=${encodeURIComponent(selectedCitySlug)}`,
           {
             signal: controller.signal,

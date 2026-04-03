@@ -3,7 +3,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { useRequireAuth } from "../lib/auth";
 import { getApiErrorMessage } from "../lib/apiError";
-import { getApiBaseUrl } from "../lib/publicApi";
+import { getAuthToken } from "../lib/auth";
+import { apiUrl } from "../lib/apiClient";
 import AppShell from "../components/app/AppShell";
 
 type PublicReview = {
@@ -74,9 +75,9 @@ export default function ReviewsPage() {
     }
     setBusinessLoading(true);
     try {
-      const authToken = localStorage.getItem("token");
+      const authToken = getAuthToken();
       const response = await axios.get(
-        `/api/public-search/business-token/${encodeURIComponent(token)}`,
+        apiUrl(`/api/public-search/business-token/${encodeURIComponent(token)}`),
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         },
@@ -91,10 +92,9 @@ export default function ReviewsPage() {
 
   async function searchBusinesses() {
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const response = await axios.get<BusinessOption[]>(
-        `${apiUrl}/api/owner-listings/search`,
+        apiUrl("/api/owner-listings/search"),
         {
           params: { q: businessQuery, limit: 20 },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -108,10 +108,9 @@ export default function ReviewsPage() {
 
   async function loadMyReviews(nextPage = page) {
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const response = await axios.get<MyReviewResponse>(
-        `${apiUrl}/api/reviews/mine`,
+        apiUrl("/api/reviews/mine"),
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           params: {
@@ -134,9 +133,8 @@ export default function ReviewsPage() {
   async function loadReviews(targetBusinessToken: string) {
     if (!targetBusinessToken) return;
     try {
-      const apiUrl = getApiBaseUrl();
       const response = await axios.get(
-        `${apiUrl}/api/reviews/business-token/${encodeURIComponent(targetBusinessToken)}`,
+        apiUrl(`/api/reviews/business-token/${encodeURIComponent(targetBusinessToken)}`),
       );
       setReviews(response.data ?? []);
     } catch {
@@ -154,10 +152,9 @@ export default function ReviewsPage() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const response = await axios.post(
-        `${apiUrl}/api/reviews/business-token/${encodeURIComponent(businessToken)}`,
+        apiUrl(`/api/reviews/business-token/${encodeURIComponent(businessToken)}`),
         { rating, title, comment },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );

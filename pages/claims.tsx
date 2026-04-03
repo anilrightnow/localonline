@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { useRequireAuth } from "../lib/auth";
+import { getAuthToken, useRequireAuth } from "../lib/auth";
 import { getApiErrorMessage } from "../lib/apiError";
-import { getApiBaseUrl } from "../lib/publicApi";
+import { apiUrl } from "../lib/apiClient";
 import AppShell from "../components/app/AppShell";
 
 type ClaimItem = {
@@ -58,9 +58,9 @@ export default function ClaimsPage() {
     }
     setBusinessLoading(true);
     try {
-      const authToken = localStorage.getItem("token");
+      const authToken = getAuthToken();
       const response = await axios.get(
-        `/api/public-search/business-token/${encodeURIComponent(token)}`,
+        apiUrl(`/api/public-search/business-token/${encodeURIComponent(token)}`),
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         },
@@ -75,10 +75,9 @@ export default function ClaimsPage() {
 
   async function searchBusinesses() {
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const response = await axios.get<BusinessOption[]>(
-        `${apiUrl}/api/owner-listings/search`,
+        apiUrl("/api/owner-listings/search"),
         {
           params: { q: businessQuery, limit: 20 },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -103,9 +102,8 @@ export default function ClaimsPage() {
 
   async function loadMine() {
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
-      const response = await axios.get(`${apiUrl}/api/listing-claims/mine`, {
+      const token = getAuthToken();
+      const response = await axios.get(apiUrl("/api/listing-claims/mine"), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       setClaims(response.data ?? []);
@@ -122,10 +120,9 @@ export default function ClaimsPage() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
-      const apiUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const response = await axios.post(
-        `${apiUrl}/api/listing-claims/request`,
+        apiUrl("/api/listing-claims/request"),
         { businessToken, contactEmail, documents },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
@@ -149,9 +146,8 @@ export default function ClaimsPage() {
     event.preventDefault();
     setMessage("");
     try {
-      const apiUrl = getApiBaseUrl();
       const response = await axios.post(
-        `${apiUrl}/api/listing-claims/verify-email`,
+        apiUrl("/api/listing-claims/verify-email"),
         { token: verificationToken },
       );
       setMessage(response.data?.message ?? "Verification successful.");

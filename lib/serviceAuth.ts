@@ -77,8 +77,9 @@ export async function fetchWithServiceAuth(
   apiBaseUrl: string,
   url: string,
   init?: RequestInit,
+  authToken?: string | null,
 ): Promise<Response> {
-  const token = await getServiceToken(apiBaseUrl);
+  const token = authToken ?? (await getServiceToken(apiBaseUrl));
   const headers = new Headers(init?.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
   return fetch(url, { ...init, headers });
@@ -88,8 +89,9 @@ export async function fetchSitemapWithServiceAuth(
   apiBaseUrl: string,
   url: string,
   init?: RequestInit,
+  authToken?: string | null,
 ): Promise<Response> {
-  const token = await getServiceToken(apiBaseUrl);
+  const token = authToken ?? (await getServiceToken(apiBaseUrl));
   const headers = new Headers(init?.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
   headers.set("Accept", "application/xml");

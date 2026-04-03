@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import Link from "next/link";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
+import { apiUrl } from "../../lib/apiClient";
 
 const TwoFactorSetupPage = () => {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [step, setStep] = useState<"choose" | "totp" | "verify">("choose");
   const [totpKey, setTotpKey] = useState("");
   const [totpUri, setTotpUri] = useState("");
@@ -13,9 +17,13 @@ const TwoFactorSetupPage = () => {
 
   const handleSetupTotp = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) {
+        setMessage("Please sign in to setup 2FA.");
+        return;
+      }
       const response = await axios.post(
-        "/api/auth/setup-totp",
+        apiUrl("/api/auth/setup-totp"),
         {},
         {
           headers: {
@@ -33,9 +41,13 @@ const TwoFactorSetupPage = () => {
 
   const handleVerifyTotp = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) {
+        setMessage("Please sign in to verify 2FA.");
+        return;
+      }
       await axios.post(
-        "/api/auth/verify-totp",
+        apiUrl("/api/auth/verify-totp"),
         { token: verifyToken },
         {
           headers: {
@@ -50,8 +62,12 @@ const TwoFactorSetupPage = () => {
     }
   };
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
+
   return (
-    <div style={{ maxWidth: "600px", margin: "50px auto", padding: "20px" }}>
+    <div className="app-card" style={{ maxWidth: "600px", margin: "50px auto" }}>
       <h2>Two-Factor Authentication Setup</h2>
 
       {step === "choose" && (
@@ -114,6 +130,11 @@ const TwoFactorSetupPage = () => {
           )}
         </div>
       )}
+      <div className="auth-links">
+        <Link className="btn btn-ghost" href="/profile">
+          Back to profile
+        </Link>
+      </div>
     </div>
   );
 };

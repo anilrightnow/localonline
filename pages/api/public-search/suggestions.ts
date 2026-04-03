@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServiceToken } from "../../../lib/serviceAuth";
+import { getAuthTokenFromCookieHeader } from "../../../lib/authCookie";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const q = typeof req.query.q === "string" ? req.query.q : "";
@@ -14,7 +15,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const cityQuery = citySlug.trim() ? `&citySlug=${encodeURIComponent(citySlug.trim())}` : "";
-    const incomingAuth = req.headers.authorization;
+    const cookieToken = getAuthTokenFromCookieHeader(req.headers.cookie);
+    const incomingAuth =
+      req.headers.authorization ?? (cookieToken ? `Bearer ${cookieToken}` : undefined);
     const token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
     if (!incomingAuth && !token) {
       res.status(500).json([]);

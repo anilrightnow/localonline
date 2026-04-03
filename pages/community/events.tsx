@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import { useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { getAuthToken } from "../../lib/auth";
+import { apiUrl } from "../../lib/apiClient";
 import AppShell from "../../components/app/AppShell";
 
 type EventRow = {
@@ -47,7 +49,7 @@ export default function CommunityEventsPage() {
 
   async function loadEvents() {
     try {
-      const response = await axios.get("/api/community/events");
+      const response = await axios.get(apiUrl("/api/community/events"));
       setEvents(response.data ?? []);
     } catch {
       setEvents([]);
@@ -65,9 +67,9 @@ export default function CommunityEventsPage() {
       setCityOptions([]);
       return;
     }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/master/cities", {
+      .get(apiUrl("/api/master/cities"), {
         params: { q: term, limit: 15 },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
@@ -86,9 +88,9 @@ export default function CommunityEventsPage() {
       setAreaOptions([]);
       return;
     }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/master/areas", {
+      .get(apiUrl("/api/master/areas"), {
         params: { q: term, limit: 15, cityId: selectedCity.id },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
@@ -98,9 +100,11 @@ export default function CommunityEventsPage() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/subscriptions", { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .get(apiUrl("/api/subscriptions"), {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       .then((res) => setCurrentPlan(res.data?.planName ?? "Free"))
       .catch(() => setCurrentPlan("Free"));
   }, [isAuthenticated]);
@@ -109,9 +113,9 @@ export default function CommunityEventsPage() {
     event.preventDefault();
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const response = await axios.post(
-        "/api/community/events",
+        apiUrl("/api/community/events"),
         {
           title,
           description,
@@ -131,8 +135,8 @@ export default function CommunityEventsPage() {
 
   async function loadMine() {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/api/community/mine", {
+    const token = getAuthToken();
+      const response = await axios.get(apiUrl("/api/community/mine"), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       setMyEvents(response.data?.events ?? []);

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServiceToken } from "../../../lib/serviceAuth";
+import { getAuthTokenFromCookieHeader } from "../../../lib/authCookie";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const path = req.query.path ? (Array.isArray(req.query.path) ? req.query.path : [req.query.path]) : [];
@@ -8,7 +9,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const qsIndex = req.url?.indexOf("?") ?? -1;
   const queryString = qsIndex >= 0 ? req.url?.slice(qsIndex) ?? "" : "";
   const targetUrl = `${apiBaseUrl}/api/public-search/${path.join("/")}${queryString}`;
-  const incomingAuth = req.headers.authorization;
+  const cookieToken = getAuthTokenFromCookieHeader(req.headers.cookie);
+  const incomingAuth = req.headers.authorization ?? (cookieToken ? `Bearer ${cookieToken}` : undefined);
   let token: string | null = null;
   try {
     token = incomingAuth ? null : await getServiceToken(apiBaseUrl);

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import AppShell from "../components/app/AppShell";
 import { getApiErrorMessage } from "../lib/apiError";
-import { getApiBaseUrl } from "../lib/publicApi";
+import { getAuthToken, useRequireAuth } from "../lib/auth";
+import { apiFetch } from "../lib/apiClient";
 
 type ProfileSection = "overview" | "edit-profile" | "change-password";
 
@@ -24,6 +25,7 @@ interface SubscriptionState {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const initialSection = useMemo<ProfileSection>(() => {
     const tab = typeof router.query.section === "string" ? router.query.section : "";
     if (tab === "edit-profile" || tab === "change-password") return tab;
@@ -50,16 +52,21 @@ export default function ProfilePage() {
   }, [initialSection]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     void fetchProfile();
     void fetchSubscription();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   async function fetchProfile() {
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/user/profile`, {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Not authenticated.");
+      }
+      const response = await apiFetch("/api/user/profile", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) {
@@ -82,10 +89,13 @@ export default function ProfilePage() {
 
   async function fetchSubscription() {
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/subscriptions`, {
+      const token = getAuthToken();
+      if (!token) {
+        return;
+      }
+      const response = await apiFetch("/api/subscriptions", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) {
@@ -103,11 +113,14 @@ export default function ProfilePage() {
     setError(null);
     setSuccess(null);
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/user/profile`, {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Not authenticated.");
+      }
+      const response = await apiFetch("/api/user/profile", {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -139,11 +152,14 @@ export default function ProfilePage() {
       return;
     }
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/user/change-password`, {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Not authenticated.");
+      }
+      const response = await apiFetch("/api/user/change-password", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -160,6 +176,9 @@ export default function ProfilePage() {
     }
   }
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading profile...</div>;
 
   return (

@@ -1,9 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { useRequireAuth, getAuthToken } from "../../lib/auth";
+import { getAuthToken, setAuthTokenCookie, useRequireAuth } from "../../lib/auth";
 import AppShell from "../../components/app/AppShell";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { apiUrl } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 
 type SearchBusinessItem = {
@@ -56,6 +57,7 @@ export default function OwnerListingPage() {
   const router = useRouter();
   const session = useMemo(() => getUserSessionFromToken(getAuthToken()), []);
   const isAdmin = hasRole(session, "Admin");
+  const isOwner = session.roles.includes("Owner");
 
   const [query, setQuery] = useState("");
   const [searchItems, setSearchItems] = useState<SearchBusinessItem[]>([]);
@@ -96,11 +98,14 @@ export default function OwnerListingPage() {
   async function searchBusinesses() {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get<SearchBusinessItem[]>("/api/owner-listings/search", {
-        params: { q: query, limit: 20 },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const token = getAuthToken();
+      const response = await axios.get<SearchBusinessItem[]>(
+        apiUrl("/api/owner-listings/search"),
+        {
+          params: { q: query, limit: 20 },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       setSearchItems(response.data ?? []);
       if ((response.data ?? []).length === 0) {
         setMessage("No matching business found.");
@@ -114,10 +119,13 @@ export default function OwnerListingPage() {
   async function loadBusiness(businessToken: string) {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get<BusinessDetail>(`/api/owner-listings/businesses/${encodeURIComponent(businessToken)}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const token = getAuthToken();
+      const response = await axios.get<BusinessDetail>(
+        apiUrl(`/api/owner-listings/businesses/${encodeURIComponent(businessToken)}`),
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       const b = response.data;
       setPlanName(b.planName ?? "Free");
       setName(b.name ?? "");
@@ -155,8 +163,8 @@ export default function OwnerListingPage() {
       setSelectedAreas([]);
       return;
     }
-    const token = localStorage.getItem("token");
-    const response = await axios.get<MasterOption[]>("/api/master/areas", {
+    const token = getAuthToken();
+    const response = await axios.get<MasterOption[]>(apiUrl("/api/master/areas"), {
       params: { ids: ids.join(",") },
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -168,8 +176,8 @@ export default function OwnerListingPage() {
       setSelectedCategories([]);
       return;
     }
-    const token = localStorage.getItem("token");
-    const response = await axios.get<MasterOption[]>("/api/master/categories", {
+    const token = getAuthToken();
+    const response = await axios.get<MasterOption[]>(apiUrl("/api/master/categories"), {
       params: { ids: ids.join(",") },
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -177,8 +185,8 @@ export default function OwnerListingPage() {
   }
 
   async function searchAreas() {
-    const token = localStorage.getItem("token");
-    const response = await axios.get<MasterOption[]>("/api/master/areas", {
+    const token = getAuthToken();
+    const response = await axios.get<MasterOption[]>(apiUrl("/api/master/areas"), {
       params: { q: areaQuery, limit: 20 },
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -186,8 +194,8 @@ export default function OwnerListingPage() {
   }
 
   async function searchCategories() {
-    const token = localStorage.getItem("token");
-    const response = await axios.get<MasterOption[]>("/api/master/categories", {
+    const token = getAuthToken();
+    const response = await axios.get<MasterOption[]>(apiUrl("/api/master/categories"), {
       params: { q: categoryQuery, limit: 20 },
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -202,9 +210,9 @@ export default function OwnerListingPage() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const response = await axios.put(
-        `/api/owner-listings/businesses/${encodeURIComponent(selected.businessToken)}`,
+        apiUrl(`/api/owner-listings/businesses/${encodeURIComponent(selected.businessToken)}`),
         {
           name,
           nameHindi,
@@ -241,9 +249,9 @@ export default function OwnerListingPage() {
   async function createBusiness() {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const response = await axios.post(
-        "/api/owner-listings/businesses",
+        apiUrl("/api/owner-listings/businesses"),
         {
           name: "New Business",
           aboutJson: [],
@@ -271,13 +279,42 @@ export default function OwnerListingPage() {
 
   const canEditGallery = isAdmin || planName.toLowerCase() === "popular";
 
-  async function loadAnalytics(businessToken: string, targetDays: number) {
+  async function registerAsOwner() {
+    setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get<AnalyticsResponse>(`/api/owner-listings/businesses/${encodeURIComponent(businessToken)}/analytics`, {
-        params: { days: targetDays },
+      const token = getAuthToken();
+      const response = await fetch(apiUrl("/api/owner/register"), {
+        method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || "Owner registration failed.");
+      }
+      const refreshRes = await fetch(apiUrl("/api/auth/refresh"), { method: "POST" });
+      if (refreshRes.ok) {
+        const data = (await refreshRes.json()) as { access_token?: string };
+        if (data.access_token) {
+          setAuthTokenCookie(data.access_token);
+        }
+      }
+      setMessage("Owner access enabled. Reloading...");
+      window.location.reload();
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, "Owner registration failed."));
+    }
+  }
+
+  async function loadAnalytics(businessToken: string, targetDays: number) {
+    try {
+    const token = getAuthToken();
+      const response = await axios.get<AnalyticsResponse>(
+        apiUrl(`/api/owner-listings/businesses/${encodeURIComponent(businessToken)}/analytics`),
+        {
+          params: { days: targetDays },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       setAnalytics(response.data);
     } catch {
       setAnalytics(null);
@@ -298,6 +335,18 @@ export default function OwnerListingPage() {
   return (
     <AppShell title="Business Add/Update" subtitle="Edits are reviewed by Admin/SuperAdmin before going live.">
       {message ? <div className="msg msg-success">{message}</div> : null}
+
+      {!isAdmin && !isOwner ? (
+        <div className="app-card">
+          <h2>Register as Owner</h2>
+          <p>Register as an owner to add new business listings.</p>
+          <div className="app-actions">
+            <button className="btn btn-primary" type="button" onClick={() => void registerAsOwner()}>
+              Register as Owner
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="app-card">
         <h2>Select Business</h2>
@@ -339,7 +388,7 @@ export default function OwnerListingPage() {
         ) : null}
       </div>
 
-      {isAdmin ? (
+      {isAdmin || isOwner ? (
         <div className="app-card">
           <h2>Add New Business</h2>
           <p>Creates a new row in `scraped_businesses`.</p>

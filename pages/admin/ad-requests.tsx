@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../../components/app/AppShell";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { getAuthToken } from "../../lib/auth";
+import { apiFetch } from "../../lib/apiClient";
 
 type AdRequest = {
   Id: string;
@@ -49,7 +51,7 @@ export default function AdRequestsPage() {
     setLoading(true);
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const params = new URLSearchParams();
       params.set("page", String(page));
       params.set("pageSize", String(pagination.pageSize));
@@ -59,7 +61,7 @@ export default function AdRequestsPage() {
       if (area.trim()) params.set("area", area.trim());
       params.set("sort", sort);
       params.set("order", order);
-      const res = await fetch(`/api/admin/ad-requests?${params.toString()}`, {
+      const res = await apiFetch(`/api/admin/ad-requests?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error("Failed to load ad requests.");
@@ -75,8 +77,8 @@ export default function AdRequestsPage() {
   async function updateStatus(id: string, nextStatus: string) {
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/admin/ad-requests/${id}`, {
+      const token = getAuthToken();
+      const res = await apiFetch(`/api/admin/ad-requests/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

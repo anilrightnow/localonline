@@ -1,12 +1,35 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { apiFetch } from "./apiClient";
+import { getAuthTokenFromCookieHeader } from "./authCookie";
 
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") {
     return null;
   }
+  return getAuthTokenFromCookieHeader(document.cookie);
+}
 
-  return localStorage.getItem("token") ?? localStorage.getItem("accessToken");
+export function getAuthHeader(): { Authorization?: string } {
+  const token = getAuthToken();
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
+}
+
+export function setAuthTokenCookie(token: string) {
+  if (typeof document === "undefined") return;
+  const value = encodeURIComponent(token);
+  const base = "path=/; SameSite=Lax";
+  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `access_token=${value}; Max-Age=1800; ${base}${secure}`;
+  document.cookie = `token=${value}; Max-Age=1800; ${base}${secure}`;
+}
+
+export function clearAuthTokenCookie() {
+  if (typeof document === "undefined") return;
+  const base = "path=/; SameSite=Lax";
+  document.cookie = `access_token=; Max-Age=0; ${base}`;
+  document.cookie = `token=; Max-Age=0; ${base}`;
 }
 
 export function useRequireAuth() {
@@ -25,30 +48,8 @@ export function useRequireAuth() {
       void router.replace(`/auth/login?returnUrl=${returnUrl}`);
       return;
     }
-
-    const controller = new AbortController();
-    const verify = async () => {
-      try {
-        const res = await fetch("/api/user/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error("unauthorized");
-        setIsAuthenticated(true);
-      } catch {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          localStorage.removeItem("accessToken");
-        }
-        const returnUrl = encodeURIComponent(router.asPath || "/");
-        void router.replace(`/auth/login?returnUrl=${returnUrl}`);
-        return;
-      } finally {
-        setIsChecking(false);
-      }
-    };
-    void verify();
-    return () => controller.abort();
+    setIsAuthenticated(true);
+    setIsChecking(false);
   }, [router]);
 
   return { isChecking, isAuthenticated, token: getAuthToken() };

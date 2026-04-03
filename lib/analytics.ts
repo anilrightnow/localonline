@@ -1,3 +1,6 @@
+import { getAuthToken } from "./auth";
+import { getApiBaseUrl } from "./publicApi";
+
 type AnalyticsEventPayload = Record<string, unknown>;
 
 type AnalyticsEvent = {
@@ -10,7 +13,7 @@ type AnalyticsEvent = {
 export function trackAnalyticsEvent(event: AnalyticsEvent): void {
   if (typeof window === "undefined") return;
   if (!event?.eventType) return;
-  const token = localStorage.getItem("token") ?? localStorage.getItem("accessToken");
+  const token = getAuthToken();
   if (!token) return;
   try {
     const apiBaseUrl = getApiBaseUrl();
@@ -36,4 +39,3 @@ export function trackAnalyticsEvent(event: AnalyticsEvent): void {
     // best-effort tracking only
   }
 }
-import { getApiBaseUrl } from "./publicApi";

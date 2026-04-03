@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
 
 type RoleRow = { id: string; name: string };
 
 export default function AdminRolesPage() {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,8 @@ export default function AdminRolesPage() {
       setError(null);
       try {
         const apiBaseUrl = getApiBaseUrl();
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
+        if (!token) throw new Error("Not authenticated.");
         const res = await fetch(`${apiBaseUrl}/api/admin/roles`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -29,9 +32,13 @@ export default function AdminRolesPage() {
         setLoading(false);
       }
     };
+    if (!isAuthenticated) return;
     void load();
-  }, []);
+  }, [isAuthenticated]);
 
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
   if (loading) return <div className="app-loading">Loading roles...</div>;
 
   return (

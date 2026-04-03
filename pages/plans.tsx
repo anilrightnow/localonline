@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getApiErrorMessage } from "../lib/apiError";
+import { getAuthToken, useRequireAuth } from "../lib/auth";
 import AppShell from "../components/app/AppShell";
+import { apiUrl } from "../lib/apiClient";
 
 interface Plan {
   name: string;
@@ -10,20 +12,23 @@ interface Plan {
 }
 
 const PlansPage = () => {
+  const { isChecking, isAuthenticated } = useRequireAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentPlan, setCurrentPlan] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     fetchPlans();
     fetchCurrentSubscription();
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchPlans = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/api/plans", {
+      const token = getAuthToken();
+      if (!token) return;
+      const response = await axios.get(apiUrl("/api/plans"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPlans(response.data);
@@ -32,8 +37,9 @@ const PlansPage = () => {
 
   const fetchCurrentSubscription = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/api/subscriptions", {
+      const token = getAuthToken();
+      if (!token) return;
+      const response = await axios.get(apiUrl("/api/subscriptions"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data?.planName) {
@@ -46,9 +52,13 @@ const PlansPage = () => {
     setLoading(true);
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
+      if (!token) {
+        setMessage("Please sign in to upgrade your plan.");
+        return;
+      }
       await axios.post(
-        "/api/plans/upgrade",
+        apiUrl("/api/plans/upgrade"),
         { planName },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -61,6 +71,10 @@ const PlansPage = () => {
     }
     setLoading(false);
   };
+
+  if (isChecking || !isAuthenticated) {
+    return <div className="app-loading">Redirecting to login...</div>;
+  }
 
   return (
     <AppShell title="Plans & Billing" subtitle="Choose the plan that fits your monthly usage.">

@@ -24,6 +24,8 @@ import {
   type ParsedSeoRoute,
 } from "../lib/seoRoutes";
 import { trackAnalyticsEvent } from "../lib/analytics";
+import { getAuthToken, setAuthTokenCookie } from "../lib/auth";
+import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
 
 type Props = {
   parsed: ParsedSeoRoute;
@@ -863,9 +865,7 @@ export default function SeoPage({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const token =
-      window.localStorage.getItem("token") ??
-      window.localStorage.getItem("accessToken");
+    const token = getAuthToken();
     if (token) {
       setContactUnlocked(true);
     }
@@ -1059,8 +1059,7 @@ export default function SeoPage({
         throw new Error("Login token not received.");
       }
       if (typeof window !== "undefined") {
-        window.localStorage.setItem("token", payload.access_token);
-        window.localStorage.setItem("accessToken", payload.access_token);
+        setAuthTokenCookie(payload.access_token);
       }
       setContactUnlocked(true);
       setShowContactGate(false);
@@ -1950,6 +1949,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const canonicalPath = buildCanonicalPath(parsed);
   const apiBaseUrl = getApiBaseUrl();
+  const authToken = getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
   const currentPageRaw =
     typeof context.query.page === "string"
       ? Number.parseInt(context.query.page, 10)
@@ -1976,9 +1976,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       ? null
       : tryExtractLegacyCid(parsed.businessComposite ?? "");
     const canonicalData = businessToken
-      ? await fetchBusinessCanonical(apiBaseUrl, businessToken)
+      ? await fetchBusinessCanonical(apiBaseUrl, businessToken, authToken)
       : legacyCid
-        ? await fetchBusinessCanonicalByCid(apiBaseUrl, legacyCid)
+        ? await fetchBusinessCanonicalByCid(apiBaseUrl, legacyCid, authToken)
         : null;
     if (!canonicalData) {
       return { notFound: true };
@@ -1995,7 +1995,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   }
 
   const apiPath = buildApiPath(parsed, currentPage);
-  const apiData = apiPath ? await fetchSearchData(apiBaseUrl, apiPath) : null;
+  const apiData = apiPath
+    ? await fetchSearchData(apiBaseUrl, apiPath, authToken)
+    : null;
   let businessData: BusinessApiResponse | null = null;
   if (parsed.kind === "business") {
     const businessToken = tryExtractBusinessToken(
@@ -2005,16 +2007,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       ? null
       : tryExtractLegacyCid(parsed.businessComposite ?? "");
     if (businessToken) {
-      businessData = await fetchBusinessData(apiBaseUrl, businessToken);
+      businessData = await fetchBusinessData(apiBaseUrl, businessToken, authToken);
     } else if (legacyCid) {
       const canonicalData = await fetchBusinessCanonicalByCid(
         apiBaseUrl,
         legacyCid,
+        authToken,
       );
       if (canonicalData?.businessToken) {
         businessData = await fetchBusinessData(
           apiBaseUrl,
           canonicalData.businessToken,
+          authToken,
         );
       }
     }

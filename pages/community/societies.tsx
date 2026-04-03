@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import axios from "axios";
-import { useRequireAuth } from "../../lib/auth";
+import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
+import { apiUrl } from "../../lib/apiClient";
 import AppShell from "../../components/app/AppShell";
-import { getAuthToken } from "../../lib/auth";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 
 type SocietyRow = {
@@ -48,7 +48,7 @@ export default function SocietiesPage() {
 
   async function loadSocieties() {
     try {
-      const response = await axios.get("/api/community/societies");
+      const response = await axios.get(apiUrl("/api/community/societies"));
       setSocieties(response.data ?? []);
     } catch {
       setSocieties([]);
@@ -66,9 +66,9 @@ export default function SocietiesPage() {
       setCityOptions([]);
       return;
     }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/master/cities", {
+      .get(apiUrl("/api/master/cities"), {
         params: { q: term, limit: 15 },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
@@ -87,9 +87,9 @@ export default function SocietiesPage() {
       setAreaOptions([]);
       return;
     }
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     axios
-      .get("/api/master/areas", {
+      .get(apiUrl("/api/master/areas"), {
         params: { q: term, limit: 15, cityId: selectedCity.id },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
@@ -105,9 +105,9 @@ export default function SocietiesPage() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       const response = await axios.post(
-        "/api/community/societies",
+        apiUrl("/api/community/societies"),
         {
           name,
           description,
@@ -126,8 +126,8 @@ export default function SocietiesPage() {
 
   async function loadMine() {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("/api/community/mine", {
+    const token = getAuthToken();
+      const response = await axios.get(apiUrl("/api/community/mine"), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       setMySocieties(response.data?.societies ?? []);

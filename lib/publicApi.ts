@@ -160,11 +160,17 @@ async function fetchWithRetry(url: string, init?: RequestInit, retries = 2) {
   }
 }
 
-async function fetchJson<T>(url: string): Promise<T | null> {
+async function fetchJson<T>(
+  url: string,
+  options?: { authToken?: string },
+): Promise<T | null> {
+  const { getAuthToken } = await import("./auth");
+  const clientToken = typeof window !== "undefined" ? getAuthToken() : null;
+  const authToken = options?.authToken ?? clientToken;
   if (typeof window === "undefined") {
     const { getServiceToken } = await import("./serviceAuth");
     const apiBaseUrl = getApiBaseUrl();
-    const token = await getServiceToken(apiBaseUrl);
+    const token = authToken ?? (await getServiceToken(apiBaseUrl));
     const response = await fetchWithRetry(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
@@ -175,7 +181,9 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
   notifyLoading(true);
   try {
-    const response = await fetchWithRetry(url);
+    const response = await fetchWithRetry(url, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+    });
     if (!response.ok) {
       return null;
     }
@@ -185,26 +193,59 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-export async function fetchHomeData(apiBaseUrl: string) {
-  return fetchJson<HomeApiResponse>(`${apiBaseUrl}/api/public-search/home`);
+export async function fetchHomeData(apiBaseUrl: string, authToken?: string) {
+  return fetchJson<HomeApiResponse>(`${apiBaseUrl}/api/public-search/home`, {
+    authToken,
+  });
 }
 
-export async function fetchBusinessCanonical(apiBaseUrl: string, businessToken: string) {
-  return fetchJson<CanonicalBusinessResponse>(`${apiBaseUrl}/api/public-search/business-token/${encodeURIComponent(businessToken)}/canonical`);
+export async function fetchBusinessCanonical(
+  apiBaseUrl: string,
+  businessToken: string,
+  authToken?: string,
+) {
+  return fetchJson<CanonicalBusinessResponse>(
+    `${apiBaseUrl}/api/public-search/business-token/${encodeURIComponent(businessToken)}/canonical`,
+    { authToken },
+  );
 }
 
-export async function fetchBusinessCanonicalByCid(apiBaseUrl: string, cid: string) {
-  return fetchJson<CanonicalBusinessResponse>(`${apiBaseUrl}/api/public-search/business/${encodeURIComponent(cid)}/canonical`);
+export async function fetchBusinessCanonicalByCid(
+  apiBaseUrl: string,
+  cid: string,
+  authToken?: string,
+) {
+  return fetchJson<CanonicalBusinessResponse>(
+    `${apiBaseUrl}/api/public-search/business/${encodeURIComponent(cid)}/canonical`,
+    { authToken },
+  );
 }
 
-export async function fetchBusinessData(apiBaseUrl: string, businessToken: string) {
-  return fetchJson<BusinessApiResponse>(`${apiBaseUrl}/api/public-search/business-token/${encodeURIComponent(businessToken)}`);
+export async function fetchBusinessData(
+  apiBaseUrl: string,
+  businessToken: string,
+  authToken?: string,
+) {
+  return fetchJson<BusinessApiResponse>(
+    `${apiBaseUrl}/api/public-search/business-token/${encodeURIComponent(businessToken)}`,
+    { authToken },
+  );
 }
 
-export async function fetchSearchData(apiBaseUrl: string, apiPath: string) {
-  return fetchJson<SearchApiResponse>(`${apiBaseUrl}${apiPath}`);
+export async function fetchSearchData(
+  apiBaseUrl: string,
+  apiPath: string,
+  authToken?: string,
+) {
+  return fetchJson<SearchApiResponse>(`${apiBaseUrl}${apiPath}`, { authToken });
 }
 
-export async function fetchSitemapData(apiBaseUrl: string, siteMapPath: string) {
-  return fetchJson<SitemapResponse>(`${apiBaseUrl}/${siteMapPath}`);
+export async function fetchSitemapData(
+  apiBaseUrl: string,
+  siteMapPath: string,
+  authToken?: string,
+) {
+  return fetchJson<SitemapResponse>(`${apiBaseUrl}/${siteMapPath}`, {
+    authToken,
+  });
 }

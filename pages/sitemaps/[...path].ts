@@ -26,31 +26,6 @@ function getSiteBase(req: ReqWithHeaders): string {
   return `${proto}://${host}`.replace(/\/+$/, "");
 }
 
-function rewriteSitemap(xml: string, apiBase: string, siteBase: string): string {
-  let apiOrigin = "";
-  let siteOrigin = "";
-  try {
-    apiOrigin = new URL(apiBase).origin;
-    siteOrigin = new URL(siteBase).origin;
-  } catch {
-    //console.log("Invalid API or Site base URL, skipping sitemap rewrite:",xml, apiBase, siteBase);
-    return xml;
-  }
-
-  return xml.replace(/<loc>([^<]+)<\/loc>/g, (_match, loc) => {
-    try {
-      const url = new URL(loc, apiOrigin);
-      //if (url.origin === apiOrigin) {
-        url.protocol = new URL(siteOrigin).protocol;
-        url.host = new URL(siteOrigin).host;
-        return `<loc>${url.toString()}</loc>`;
-      //}
-    } catch {
-      return `<loc>${loc}</loc>`;
-    }
-    return `<loc>${loc}</loc>`;
-  });
-}
 
 export const getServerSideProps: GetServerSideProps<Props, SitemapParams> = async ({ req, res, params }) => {
   const apiBaseUrl =

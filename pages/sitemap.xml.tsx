@@ -3,10 +3,10 @@ type Props = Record<string, never>;
 
 function getSiteBase(req: Parameters<GetServerSideProps>[0]["req"]): string {
   const configured =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.SITE_URL ??
-    process.env.PUBLIC_BASE_URL ??
-    process.env.NEXT_PUBLIC_PUBLIC_BASE_URL;
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in";
+  process.env.SITE_URL ?? "https://localonline.in";
+  process.env.PUBLIC_BASE_URL ?? "https://localonline.in";
+  process.env.NEXT_PUBLIC_PUBLIC_BASE_URL ?? "https://localonline.in";
   if (configured) {
     return String(configured).replace(/\/+$/, "");
   }

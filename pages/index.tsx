@@ -58,9 +58,9 @@ export default function HomePage({
         <meta property="og:description" content={data.seo.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={data.seo.canonicalPath} />
-        <meta property="og:image" content="/local-online-logo.png" />
+        <meta property="og:image" content="/local-online-logo.svg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="/local-online-logo.png" />
+        <meta name="twitter:image" content="/local-online-logo.svg" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -153,9 +153,12 @@ export default function HomePage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context,
+) => {
   const apiBaseUrl = getApiBaseUrl();
-  const authToken = getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
+  const authToken =
+    getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
   const data = (await fetchHomeData(apiBaseUrl, authToken)) ?? fallbackData;
   return { props: { data } };
 };

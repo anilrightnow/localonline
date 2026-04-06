@@ -39,9 +39,24 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="LocalOnline" />
         <meta name="apple-mobile-web-app-title" content="LocalOnline" />
         <meta name="theme-color" content="#0f766e" />
-        <link rel="icon" href="/favicon.png" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="shortcut icon" href="/favicon.svg" />
       </Head>
+      <Script id="trusted-types" strategy="beforeInteractive">
+        {`
+          if (window.trustedTypes && window.trustedTypes.createPolicy) {
+            try {
+              window.trustedTypes.createPolicy('default', {
+                createHTML: (input) => input,
+                createScript: (input) => input,
+                createScriptURL: (input) => input,
+              });
+            } catch (err) {
+              // ignore if policy already exists
+            }
+          }
+        `}
+      </Script>
       <Script
         async
         src="https://www.googletagmanager.com/gtag/js?id=G-Y671521B04"

@@ -79,8 +79,8 @@ export default function SiteShell({ children }: SiteShellProps) {
           <Link href="/" className="pub-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/local-online-logo.png"
-              alt={siteName}
+              src="/local-online-logo.svg"
+              alt="Local Online"
               className="pub-brand-logo"
             />
             <span className="pub-sr-only">{siteName}</span>

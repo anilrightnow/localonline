@@ -33,17 +33,18 @@ function rewriteSitemap(xml: string, apiBase: string, siteBase: string): string 
     apiOrigin = new URL(apiBase).origin;
     siteOrigin = new URL(siteBase).origin;
   } catch {
+    //console.log("Invalid API or Site base URL, skipping sitemap rewrite:",xml, apiBase, siteBase);
     return xml;
   }
 
   return xml.replace(/<loc>([^<]+)<\/loc>/g, (_match, loc) => {
     try {
       const url = new URL(loc, apiOrigin);
-      if (url.origin === apiOrigin) {
+      //if (url.origin === apiOrigin) {
         url.protocol = new URL(siteOrigin).protocol;
         url.host = new URL(siteOrigin).host;
         return `<loc>${url.toString()}</loc>`;
-      }
+      //}
     } catch {
       return `<loc>${loc}</loc>`;
     }
@@ -59,7 +60,7 @@ export const getServerSideProps: GetServerSideProps<Props, SitemapParams> = asyn
   const siteBase = getSiteBase(req);
   const path = params?.path?.join("/") || "";
   const apiUrl = `${apiBaseUrl.replace(/\/+$/, "")}/sitemaps/${path}`;
-console.log("Fetching sitemap data from API:", apiUrl);
+//console.log("Fetching sitemap data from API:", apiUrl,siteBase);
   try {
     const { fetchSitemapWithServiceAuth } = await import("../../lib/serviceAuth");
     const response = await fetchSitemapWithServiceAuth(apiBaseUrl, apiUrl);
@@ -68,7 +69,7 @@ console.log("Fetching sitemap data from API:", apiUrl);
         const emptySet =
           '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>';
         res.setHeader("Content-Type", "application/xml; charset=utf-8");
-        res.setHeader("Cache-Control", "public, max-age=300, s-maxage=900");
+        //res.setHeader("Cache-Control", "public, max-age=300, s-maxage=900");
         res.write(emptySet);
         res.end();
         return { props: {} };
@@ -77,10 +78,12 @@ console.log("Fetching sitemap data from API:", apiUrl);
       res.end();
       return { props: {} };
     }
-    const xml = await response.text();
-    const rewritten = rewriteSitemap(xml, apiBaseUrl, siteBase);
+    let xml = await response.text();
+   
+    const rewritten =xml.replaceAll(apiBaseUrl,siteBase); //rewriteSitemap(xml, apiBaseUrl, siteBase);
+    //console.log("Fetched sitemap XML:", xml,apiBaseUrl,siteBase);
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=900");
+    //res.setHeader("Cache-Control", "public, max-age=300, s-maxage=900");
     res.write(rewritten);
     res.end();
   } catch {

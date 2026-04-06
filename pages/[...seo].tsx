@@ -1789,19 +1789,7 @@ export default function SeoPage({
               <SeoLinkSections links={links} />
             </SectionCard>
           </>
-        ) : (
-          <SectionCard title="Resolved Route">
-            <div className="pub-compact">
-              <p>
-                <strong>Type:</strong> {parsed.kind}
-              </p>
-              <p>
-                <strong>Canonical:</strong>{" "}
-                <code className="pub-code">{canonicalPath}</code>
-              </p>
-            </div>
-          </SectionCard>
-        )}
+        ) : null}
       </SiteShell>
       {lightboxOpen && visibleMediaUrls.length > 0 ? (
         <div
@@ -1949,7 +1937,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const canonicalPath = buildCanonicalPath(parsed);
   const apiBaseUrl = getApiBaseUrl();
-  const authToken = getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
+  const authToken =
+    getAuthTokenFromCookieHeader(context.req.headers.cookie) ?? undefined;
   const currentPageRaw =
     typeof context.query.page === "string"
       ? Number.parseInt(context.query.page, 10)
@@ -2007,7 +1996,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       ? null
       : tryExtractLegacyCid(parsed.businessComposite ?? "");
     if (businessToken) {
-      businessData = await fetchBusinessData(apiBaseUrl, businessToken, authToken);
+      businessData = await fetchBusinessData(
+        apiBaseUrl,
+        businessToken,
+        authToken,
+      );
     } else if (legacyCid) {
       const canonicalData = await fetchBusinessCanonicalByCid(
         apiBaseUrl,

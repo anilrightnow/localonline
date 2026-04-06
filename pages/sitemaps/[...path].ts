@@ -10,10 +10,10 @@ type SitemapParams = {
 
 function getSiteBase(req: ReqWithHeaders): string {
   const configured =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.SITE_URL ??"https://localonline.in"
-    process.env.PUBLIC_BASE_URL ??
-    process.env.NEXT_PUBLIC_PUBLIC_BASE_URL;
+    process.env.NEXT_PUBLIC_SITE_URL??"https://localonline.in";
+    process.env.SITE_URL ??"https://localonline.in";
+    process.env.PUBLIC_BASE_URL??"https://localonline.in";
+    process.env.NEXT_PUBLIC_PUBLIC_BASE_URL??"https://localonline.in";
   if (configured) {
     return String(configured).replace(/\/+$/, "");
   }

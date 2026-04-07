@@ -5,6 +5,9 @@ import AppShell from "../components/app/AppShell";
 import { getApiErrorMessage } from "../lib/apiError";
 import { getAuthToken, useRequireAuth } from "../lib/auth";
 import { apiFetch } from "../lib/apiClient";
+import PasswordField from "../components/shared/PasswordField";
+import FormField from "../components/shared/FormField";
+import FormMessage from "../components/shared/FormMessage";
 
 type ProfileSection = "overview" | "edit-profile" | "change-password";
 
@@ -183,8 +186,8 @@ export default function ProfilePage() {
 
   return (
     <AppShell title="My Profile" subtitle="Manage account information, security, and plan upgrades.">
-      {error ? <div className="msg msg-error">{error}</div> : null}
-      {success ? <div className="msg msg-success">{success}</div> : null}
+      <FormMessage message={error} tone="error" />
+      <FormMessage message={success} tone="success" />
 
       <div className="app-grid">
         <div className="app-card">
@@ -218,28 +221,22 @@ export default function ProfilePage() {
         <div className="app-card">
           <h2>Update Profile</h2>
           <form onSubmit={handleUpdateProfile}>
-            <div className="form-row">
-              <label>Full Name</label>
+            <FormField label="Full Name">
               <input className="form-input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>Username</label>
+            </FormField>
+            <FormField label="Username">
               <input className="form-input" value={userName} onChange={(e) => setUserName(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>Email</label>
+            </FormField>
+            <FormField label="Email">
               <input className="form-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>Mobile</label>
+            </FormField>
+            <FormField label="Mobile">
               <input className="form-input" value={mobile} onChange={(e) => setMobile(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>DOB (optional)</label>
+            </FormField>
+            <FormField label="DOB (optional)">
               <input className="form-input" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>Gender (optional)</label>
+            </FormField>
+            <FormField label="Gender (optional)">
               <select className="form-select" value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="">Select</option>
                 <option value="Male">Male</option>
@@ -247,7 +244,7 @@ export default function ProfilePage() {
                 <option value="Other">Other</option>
                 <option value="PreferNotToSay">Prefer not to say</option>
               </select>
-            </div>
+            </FormField>
             <div className="app-actions">
               <button className="btn btn-primary" type="submit">Save Profile</button>
               <button className="btn btn-ghost" type="button" onClick={() => setSection("overview")}>Cancel</button>
@@ -260,14 +257,26 @@ export default function ProfilePage() {
         <div className="app-card">
           <h2>Change Password</h2>
           <form onSubmit={handleChangePassword}>
-            <div className="form-row">
-              <label>Current Password</label>
-              <input className="form-input" type="password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-            </div>
-            <div className="form-row">
-              <label>New Password</label>
-              <input className="form-input" type="password" required minLength={6} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-            </div>
+            <PasswordField
+              id="profile-current-password"
+              label="Current Password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              required
+              autoComplete="current-password"
+              hasError={Boolean(error)}
+            />
+            <PasswordField
+              id="profile-new-password"
+              label="New Password"
+              value={newPassword}
+              onChange={setNewPassword}
+              required
+              minLength={6}
+              autoComplete="new-password"
+              showStrength
+              hasError={Boolean(error)}
+            />
             <div className="app-actions">
               <button className="btn btn-primary" type="submit">Update Password</button>
               <button className="btn btn-ghost" type="button" onClick={() => setSection("overview")}>Cancel</button>

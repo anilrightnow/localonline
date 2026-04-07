@@ -4,6 +4,7 @@ import { getApiErrorMessage } from "../lib/apiError";
 import { getAuthToken, useRequireAuth } from "../lib/auth";
 import AppShell from "../components/app/AppShell";
 import { apiUrl } from "../lib/apiClient";
+import FormMessage from "../components/shared/FormMessage";
 
 interface Plan {
   name: string;
@@ -78,7 +79,7 @@ const PlansPage = () => {
 
   return (
     <AppShell title="Plans & Billing" subtitle="Choose the plan that fits your monthly usage.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
       <div className="app-card">
         <h2>Upgrade Steps</h2>
         <ol>

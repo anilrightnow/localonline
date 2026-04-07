@@ -5,6 +5,9 @@ import axios from "axios";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
 import SiteShell from "../../components/public/SiteShell";
+import PasswordField from "../../components/shared/PasswordField";
+import FormField from "../../components/shared/FormField";
+import FormMessage from "../../components/shared/FormMessage";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
@@ -30,43 +33,49 @@ const RegisterPage = () => {
 
   return (
     <SiteShell>
-      <div className="app-card" style={{ maxWidth: "420px", margin: "50px auto" }}>
-        <h2>Register</h2>
-        <form onSubmit={handleRegister}>
-          <div className="form-row">
-            <label>Email</label>
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2 className="auth-title">Create your account</h2>
+          <p className="auth-subtitle">Join LocalOnline to claim listings and manage your presence.</p>
+        </div>
+        <FormMessage message={error} tone="error" />
+        <form onSubmit={handleRegister} className="auth-form">
+          <FormField id="register-email" label="Email">
             <input
               className="form-input"
               type="email"
+              id="register-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </FormField>
+          <PasswordField
+            id="register-password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            required
+            minLength={8}
+            autoComplete="new-password"
+            helpText="Use at least 8 characters for stronger security."
+            showStrength
+            hasError={Boolean(error)}
+          />
+          <PasswordField
+            id="register-confirm"
+            label="Confirm Password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            required
+            autoComplete="new-password"
+            hasError={Boolean(error)}
+          />
+          <div className="auth-actions">
+            <button className="btn btn-primary" type="submit">
+              Register
+            </button>
           </div>
-          <div className="form-row">
-            <label>Password</label>
-            <input
-              className="form-input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-row">
-            <label>Confirm Password</label>
-            <input
-              className="form-input"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && <div className="msg msg-error">{error}</div>}
-          <button className="btn btn-primary" type="submit">
-            Register
-          </button>
         </form>
         <div className="auth-links">
           <Link className="btn btn-ghost" href="/auth/login">

@@ -6,6 +6,7 @@ import { getApiErrorMessage } from "../lib/apiError";
 import { getAuthToken } from "../lib/auth";
 import { apiUrl } from "../lib/apiClient";
 import AppShell from "../components/app/AppShell";
+import FormMessage from "../components/shared/FormMessage";
 
 type PublicReview = {
   id: string;
@@ -190,7 +191,7 @@ export default function ReviewsPage() {
       title="Reviews"
       subtitle="Submit reviews and manage your moderation status with filters and paging."
     >
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
 
       <div className="app-card">
         <h2>Submit Review</h2>

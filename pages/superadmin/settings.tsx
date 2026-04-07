@@ -1,5 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import AppShell from "../../components/app/AppShell";
+import PasswordField from "../../components/shared/PasswordField";
+import FormField from "../../components/shared/FormField";
+import FormMessage from "../../components/shared/FormMessage";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
@@ -71,83 +74,73 @@ export default function SuperAdminSettingsPage() {
 
   return (
     <AppShell requiredRole="SuperAdmin" title="SuperAdmin Settings" subtitle="Central configuration for email and app defaults.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
-      {error ? <div className="msg msg-error">{error}</div> : null}
+      <FormMessage message={error} tone="error" />
+      <FormMessage message={message} tone="success" />
       <form className="app-card" onSubmit={onSave}>
         <h2>App Settings</h2>
-        <div className="form-row">
-          <label>Site Name</label>
+        <FormField label="Site Name">
           <input
             className="form-input"
             value={String(settings.site_name ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, site_name: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>Support Email</label>
+        </FormField>
+        <FormField label="Support Email">
           <input
             className="form-input"
             type="email"
             value={String(settings.support_email ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, support_email: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>Admin Alert Emails</label>
+        </FormField>
+        <FormField label="Admin Alert Emails">
           <input
             className="form-input"
             placeholder="admin1@example.com, admin2@example.com"
             value={String(settings.admin_emails ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, admin_emails: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>Public Base URL</label>
+        </FormField>
+        <FormField label="Public Base URL">
           <input
             className="form-input"
             placeholder="https://example.com"
             value={String(settings.public_base_url ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, public_base_url: e.target.value }))}
           />
-        </div>
+        </FormField>
 
         <h2 style={{ marginTop: 24 }}>SMTP (Email)</h2>
-        <div className="form-row">
-          <label>SMTP Host</label>
+        <FormField label="SMTP Host">
           <input
             className="form-input"
             value={String(settings.smtp_host ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, smtp_host: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>SMTP Port</label>
+        </FormField>
+        <FormField label="SMTP Port">
           <input
             className="form-input"
             type="number"
             value={String(settings.smtp_port ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, smtp_port: Number(e.target.value) }))}
           />
-        </div>
-        <div className="form-row">
-          <label>SMTP User</label>
+        </FormField>
+        <FormField label="SMTP User">
           <input
             className="form-input"
             value={String(settings.smtp_user ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, smtp_user: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>SMTP Password</label>
-          <input
-            className="form-input"
-            type="password"
-            value={String(settings.smtp_pass ?? "")}
-            onChange={(e) => setSettings((prev) => ({ ...prev, smtp_pass: e.target.value }))}
-          />
-        </div>
-        <div className="form-row">
-          <label>SMTP Secure (TLS)</label>
+        </FormField>
+        <PasswordField
+          id="smtp-password"
+          label="SMTP Password"
+          value={String(settings.smtp_pass ?? "")}
+          onChange={(value) => setSettings((prev) => ({ ...prev, smtp_pass: value }))}
+          autoComplete="off"
+        />
+        <FormField label="SMTP Secure (TLS)">
           <select
             className="form-select"
             value={String(settings.smtp_secure ?? false)}
@@ -156,24 +149,22 @@ export default function SuperAdminSettingsPage() {
             <option value="false">false</option>
             <option value="true">true</option>
           </select>
-        </div>
-        <div className="form-row">
-          <label>From Email</label>
+        </FormField>
+        <FormField label="From Email">
           <input
             className="form-input"
             type="email"
             value={String(settings.smtp_from ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, smtp_from: e.target.value }))}
           />
-        </div>
-        <div className="form-row">
-          <label>From Name</label>
+        </FormField>
+        <FormField label="From Name">
           <input
             className="form-input"
             value={String(settings.smtp_from_name ?? "")}
             onChange={(e) => setSettings((prev) => ({ ...prev, smtp_from_name: e.target.value }))}
           />
-        </div>
+        </FormField>
 
         <div className="app-actions">
           <button className="btn btn-primary" type="submit">Save Settings</button>

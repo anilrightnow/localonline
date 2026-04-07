@@ -5,6 +5,7 @@ import { getAuthToken, useRequireAuth } from "../lib/auth";
 import { getApiErrorMessage } from "../lib/apiError";
 import { apiUrl } from "../lib/apiClient";
 import AppShell from "../components/app/AppShell";
+import FormMessage from "../components/shared/FormMessage";
 
 type ClaimItem = {
   id: string;
@@ -180,7 +181,7 @@ export default function ClaimsPage() {
       title="Listing Claims"
       subtitle="Request ownership of business listings and verify by email token."
     >
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
       <div className="app-grid">
         <div className="app-card">
           <h2>Request Claim</h2>

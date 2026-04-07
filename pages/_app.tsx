@@ -12,6 +12,12 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const savedTheme = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("theme="))
+      ?.split("=")[1];
+    document.body.classList.toggle("theme-dark", savedTheme === "dark");
+
     const todayKey = `site_visit_${new Date().toISOString().slice(0, 10)}`;
     if (!localStorage.getItem(todayKey)) {
       localStorage.setItem(todayKey, "1");

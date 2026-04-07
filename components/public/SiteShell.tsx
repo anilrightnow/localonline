@@ -27,7 +27,18 @@ export default function SiteShell({ children }: SiteShellProps) {
 
   useEffect(() => {
     setIsClient(true);
+    const savedTheme = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("theme="))
+      ?.split("=")[1];
+    setDarkMode(savedTheme === "dark");
+  }, []);
+
+  useEffect(() => {
     document.body.classList.toggle("theme-dark", darkMode);
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = `theme=${darkMode ? "dark" : "light"}; Path=/; Expires=${expires.toUTCString()}`;
     return () => document.body.classList.remove("theme-dark");
   }, [darkMode]);
 

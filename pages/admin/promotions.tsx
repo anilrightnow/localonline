@@ -4,6 +4,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
+import FormMessage from "../../components/shared/FormMessage";
 
 type SearchBusinessItem = {
   businessToken: string;
@@ -167,7 +168,7 @@ export default function PromotionsPage() {
           <button className="btn btn-primary" type="submit">Save Promotion</button>
         </form>
       </div>
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
     </AppShell>
   );
 }

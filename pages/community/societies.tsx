@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
 import AppShell from "../../components/app/AppShell";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
+import FormMessage from "../../components/shared/FormMessage";
 
 type SocietyRow = {
   id: string;
@@ -148,7 +149,7 @@ export default function SocietiesPage() {
 
   return (
     <AppShell title="Community Societies" subtitle="Submit local society listings and monitor publication.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
       <div className="app-card">
         {!canCreateSociety ? <p>Only Admin and SuperAdmin can create societies.</p> : null}
         <form onSubmit={onSubmit}>

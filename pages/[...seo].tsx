@@ -555,6 +555,7 @@ export default function SeoPage({
   const [showContactGate, setShowContactGate] = useState(false);
   const [contactEmail, setContactEmail] = useState("");
   const [contactPassword, setContactPassword] = useState("");
+  const [contactPasswordVisible, setContactPasswordVisible] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
 
   useEffect(() => {
@@ -1878,17 +1879,26 @@ export default function SeoPage({
               <label className="pub-sr-only" htmlFor="contact-password">
                 Password
               </label>
-              <input
-                id="contact-password"
-                className="pub-search-input"
-                type="password"
-                value={contactPassword}
-                onChange={(e) => setContactPassword(e.target.value)}
-                placeholder="Password"
-                required
-                minLength={6}
-                style={{ marginTop: 8 }}
-              />
+              <div className="form-field" style={{ marginTop: 8 }}>
+                <input
+                  id="contact-password"
+                  className="pub-search-input form-input-password"
+                  type={contactPasswordVisible ? "text" : "password"}
+                  value={contactPassword}
+                  onChange={(e) => setContactPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setContactPasswordVisible((v) => !v)}
+                  aria-label={contactPasswordVisible ? "Hide password" : "Show password"}
+                >
+                  {contactPasswordVisible ? "Hide" : "Show"}
+                </button>
+              </div>
               {contactError ? (
                 <p
                   className="pub-muted"

@@ -6,6 +6,9 @@ import { getApiErrorMessage } from "../../lib/apiError";
 import { setAuthTokenCookie } from "../../lib/auth";
 import { apiUrl } from "../../lib/apiClient";
 import SiteShell from "../../components/public/SiteShell";
+import PasswordField from "../../components/shared/PasswordField";
+import FormField from "../../components/shared/FormField";
+import FormMessage from "../../components/shared/FormMessage";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -27,33 +30,38 @@ const LoginPage = () => {
 
   return (
     <SiteShell>
-      <div className="app-card" style={{ maxWidth: "420px", margin: "50px auto" }}>
-        <h2>Login</h2>
-        <form onSubmit={handleLogin}>
-          <div className="form-row">
-            <label>Email</label>
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2 className="auth-title">Welcome back</h2>
+          <p className="auth-subtitle">Sign in to manage your account and listings.</p>
+        </div>
+        <FormMessage message={error} tone="error" />
+        <form onSubmit={handleLogin} className="auth-form">
+          <FormField id="login-email" label="Email">
             <input
               className="form-input"
               type="email"
+              id="login-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </FormField>
+          <PasswordField
+            id="login-password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            required
+            autoComplete="current-password"
+            helpText="Use the password you created during registration."
+            hasError={Boolean(error)}
+          />
+          <div className="auth-actions">
+            <button className="btn btn-primary" type="submit">
+              Login
+            </button>
           </div>
-          <div className="form-row">
-            <label>Password</label>
-            <input
-              className="form-input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && <div className="msg msg-error">{error}</div>}
-          <button className="btn btn-primary" type="submit">
-            Login
-          </button>
         </form>
         <div className="auth-links">
           <Link className="btn btn-ghost" href="/auth/forgot-password">

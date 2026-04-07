@@ -3,6 +3,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
+import FormMessage from "../../components/shared/FormMessage";
 
 type UserRow = {
   id: string;
@@ -50,7 +51,7 @@ export default function AdminUsersPage() {
 
   return (
     <AppShell requiredRole="Admin" title="Users" subtitle="Read-only view of users and roles.">
-      {error ? <div className="msg msg-error">{error}</div> : null}
+      {error ? <FormMessage message={error} tone="error" /> : null}
       <div className="app-card">
         <table className="app-table">
           <thead>

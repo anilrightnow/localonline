@@ -3,6 +3,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
+import FormMessage from "../../components/shared/FormMessage";
 
 interface Subscription {
   id: string;
@@ -101,7 +102,13 @@ export default function Subscriptions() {
     return <div className="app-loading">Redirecting to login...</div>;
   }
   if (loading) return <div className="app-loading">Loading subscriptions...</div>;
-  if (error) return <AppShell requiredRole="Admin" title="Subscriptions"><div className="msg msg-error">{error}</div></AppShell>;
+  if (error) {
+    return (
+      <AppShell requiredRole="Admin" title="Subscriptions">
+        <FormMessage message={error} tone="error" />
+      </AppShell>
+    );
+  }
 
   const usagePercent = subscription
     ? Math.round(
@@ -111,7 +118,7 @@ export default function Subscriptions() {
 
   return (
     <AppShell requiredRole="Admin" title="Subscription Management" subtitle="Monitor usage and switch plans for the current account.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
 
       {subscription && (
         <div className="app-card">

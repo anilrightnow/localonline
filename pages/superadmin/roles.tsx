@@ -3,6 +3,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
+import FormMessage from "../../components/shared/FormMessage";
 
 type RoleRow = { id: string; name: string };
 
@@ -64,8 +65,8 @@ export default function SuperAdminRolesPage() {
 
   return (
     <AppShell requiredRole="SuperAdmin" title="Role Management" subtitle="Create roles for assignment.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
-      {error ? <div className="msg msg-error">{error}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
+      {error ? <FormMessage message={error} tone="error" /> : null}
       <div className="app-card">
         <form onSubmit={onCreate}>
           <div className="form-row">

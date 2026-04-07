@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "../../lib/apiError";
 import { getAuthToken } from "../../lib/auth";
 import { apiUrl } from "../../lib/apiClient";
 import AppShell from "../../components/app/AppShell";
+import FormMessage from "../../components/shared/FormMessage";
 
 type EventRow = {
   id: string;
@@ -157,7 +158,7 @@ export default function CommunityEventsPage() {
 
   return (
     <AppShell title="Community Events" subtitle="Submit local events and track your publishing status.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
       <div className="app-card">
         <p><strong>Current Plan:</strong> {currentPlan}</p>
         {currentPlan.toLowerCase() === "free" ? (

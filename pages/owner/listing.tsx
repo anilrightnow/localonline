@@ -6,6 +6,7 @@ import AppShell from "../../components/app/AppShell";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
+import FormMessage from "../../components/shared/FormMessage";
 
 type SearchBusinessItem = {
   businessToken: string;
@@ -334,7 +335,7 @@ export default function OwnerListingPage() {
 
   return (
     <AppShell title="Business Add/Update" subtitle="Edits are reviewed by Admin/SuperAdmin before going live.">
-      {message ? <div className="msg msg-success">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="success" /> : null}
 
       {!isAdmin && !isOwner ? (
         <div className="app-card">
@@ -661,7 +662,7 @@ function JsonPathEditor({
             Add Field
           </button>
         </div>
-        {error ? <div className="msg msg-error">{error}</div> : null}
+        {error ? <FormMessage message={error} tone="error" /> : null}
         <textarea className="form-textarea" value={value} rows={5} readOnly style={{ marginTop: 8 }} />
       </div>
     </div>

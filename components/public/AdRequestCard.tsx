@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { apiFetch } from "../../lib/apiClient";
+import FormMessage from "../shared/FormMessage";
 
 type AdRequestPayload = {
   businessName: string;
@@ -157,8 +158,8 @@ export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCa
                 onChange={(e) => updateField("message", e.target.value)}
                 required
               />
-              {message ? <div className="msg msg-success">{message}</div> : null}
-              {error ? <div className="msg msg-error">{error}</div> : null}
+              {message ? <FormMessage message={message} tone="success" /> : null}
+              {error ? <FormMessage message={error} tone="error" /> : null}
               <div className="pub-ad-actions">
                 <button className="pub-ad-btn" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : ctaLabel}

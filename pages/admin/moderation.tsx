@@ -4,6 +4,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
+import FormMessage from "../../components/shared/FormMessage";
 
 type PendingClaim = { id: string; businessToken?: string | null; claimedByUserId: string; contactEmail: string; createdAt: string };
 type PendingReview = { id: string; businessToken?: string | null; rating: number; title: string; comment: string; createdAt: string };
@@ -56,7 +57,7 @@ export default function ModerationPage() {
       <div className="app-actions">
         <button className="btn btn-primary" onClick={loadPending}>Load Pending</button>
       </div>
-      {message ? <div className="msg msg-error">{message}</div> : null}
+      {message ? <FormMessage message={message} tone="error" /> : null}
 
       <div className="app-card">
         <h2>Pending Claims</h2>

@@ -3,6 +3,7 @@ import AppShell from "../../components/app/AppShell";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getApiBaseUrl } from "../../lib/publicApi";
+import FormMessage from "../../components/shared/FormMessage";
 
 type OverviewResponse = {
   from: string;
@@ -59,7 +60,7 @@ export default function AdminAnalyticsPage() {
 
   return (
     <AppShell requiredRole="Admin" title="Usage Analytics" subtitle="Cross-user claims, reviews, and event signals.">
-      {error ? <div className="msg msg-error">{error}</div> : null}
+      {error ? <FormMessage message={error} tone="error" /> : null}
       <div className="app-actions">
         <select className="form-select" style={{ maxWidth: 180 }} value={days} onChange={(e) => setDays(Number(e.target.value))}>
           <option value={7}>Last 7 days</option>

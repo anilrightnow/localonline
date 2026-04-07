@@ -3,6 +3,7 @@ import AppShell from "../../components/app/AppShell";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
+import FormMessage from "../../components/shared/FormMessage";
 
 type AdRequest = {
   Id: string;
@@ -146,7 +147,7 @@ export default function AdRequestsPage() {
             {loading ? "Loading..." : "Apply filters"}
           </button>
         </div>
-        {message ? <div className="msg msg-error" style={{ marginTop: 10 }}>{message}</div> : null}
+        {message ? <FormMessage message={message} tone="error" /> : null}
       </div>
 
       <div className="app-card">

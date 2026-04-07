@@ -5,6 +5,8 @@ import Link from "next/link";
 import { getApiErrorMessage } from "../../lib/apiError";
 import SiteShell from "../../components/public/SiteShell";
 import { apiUrl } from "../../lib/apiClient";
+import FormField from "../../components/shared/FormField";
+import FormMessage from "../../components/shared/FormMessage";
 
 export default function ConfirmEmailPage() {
   const router = useRouter();
@@ -13,6 +15,7 @@ export default function ConfirmEmailPage() {
   const [email, setEmail] = useState(emailFromQuery);
   const [token, setToken] = useState(tokenFromQuery);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,12 +26,15 @@ export default function ConfirmEmailPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setMessage(null);
+    setMessageType("");
     setLoading(true);
     try {
       const response = await axios.post(apiUrl("/api/auth/confirm-email"), { email, token });
       setMessage(response.data?.message ?? "Email confirmed.");
+      setMessageType("success");
     } catch (error) {
       setMessage(getApiErrorMessage(error, "Email confirmation failed."));
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -36,21 +42,37 @@ export default function ConfirmEmailPage() {
 
   return (
     <SiteShell>
-      <div className="app-card" style={{ maxWidth: 520, margin: "24px auto" }}>
-        <h2>Confirm Email</h2>
-        {message ? <div className="msg msg-success">{message}</div> : null}
-        <form onSubmit={onSubmit}>
-          <div className="form-row">
-            <label>Email</label>
-            <input className="form-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <div className="auth-card">
+        <div className="auth-header">
+          <h2 className="auth-title">Confirm your email</h2>
+          <p className="auth-subtitle">Enter the verification token sent to your inbox.</p>
+        </div>
+        <FormMessage message={message} tone={messageType === "error" ? "error" : "success"} />
+        <form onSubmit={onSubmit} className="auth-form">
+          <FormField id="confirm-email" label="Email">
+            <input
+              className="form-input"
+              id="confirm-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </FormField>
+          <FormField id="confirm-token" label="Confirmation Token" helpText="Paste the exact code from your confirmation email.">
+            <input
+              className="form-input"
+              id="confirm-token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              required
+            />
+          </FormField>
+          <div className="auth-actions">
+            <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? "Confirming..." : "Confirm Email"}
+            </button>
           </div>
-          <div className="form-row">
-            <label>Confirmation Token</label>
-            <input className="form-input" value={token} onChange={(e) => setToken(e.target.value)} required />
-          </div>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            {loading ? "Confirming..." : "Confirm Email"}
-          </button>
         </form>
         <div className="auth-links">
           <Link className="btn btn-ghost" href="/auth/login">

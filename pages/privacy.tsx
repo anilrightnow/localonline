@@ -7,23 +7,55 @@ export default function PrivacyPage() {
     <SiteShell>
       <SectionCard title="Privacy Policy">
         <p>
-          LocalOnline respects your privacy. We collect only the information needed to
-          provide our services, such as account details and activity data related to
-          listings, reviews, and community features.
+          <b>Goal:</b> To inform users how you handle their data, especially for
+          "Click-to-Call" features.
         </p>
         <p>
-          We use cookies for authentication and session management. We do not sell
-          your personal data. Data may be shared with trusted service providers only
-          when required to operate the platform.
+          <b>I. Data Collection</b>
+          <br />
+          <b>For Users:</b> We collect basic info (IP address, location) and any
+          data provided during registration (Name, Email, Mobile).
+          <br />
+          <b>For Businesses:</b> We collect GST details (if applicable), shop
+          address, contact numbers, and images.
         </p>
         <p>
-          If you have questions or want to request data removal, contact us at{" "}
-          <a href="mailto:support@localonline.in">support@localonline.in</a>.
+          <b>II. Usage of Data</b>
+          <br />
+          <b>Lead Tracking: </b>When a user clicks "View Phone Number," we may
+          log this action to provide analytics to the business owner (e.g., "You
+          received 10 inquiries from Gaur City 1 this week").
+          <b>Communication: </b>
+          <br /> We may use your email to send updates about local deals or
+          service alerts in Greater Noida West, Crossing Republik, and Gaur
+          City. You can opt out of these communications at any time.
         </p>
-        <div className="auth-links">
-          <Link className="btn btn-ghost" href="/terms">Terms</Link>
-          <Link className="btn btn-ghost" href="/about">About</Link>
-        </div>
+        <p>
+          <b>III. Cookies & Location</b>
+          <br />
+          We use cookies to remember your preferred location (e.g., Crossing
+          Republik) so you don't have to select it every time you visit. <br />
+          We use Google Analytics to track site performance.
+        </p>
+        <p>
+          <b>IV. Data Sharing</b>
+          <br />
+          We do not sell user personal data to third-party telemarketers.
+          <br />
+          Data is only shared with listed businesses when a user explicitly
+          submits a "Request a Quote" or "Contact" form.
+        </p>
+      </SectionCard>
+      <SectionCard title="Claim This Business / Edit Policy">
+        <p>
+          Since your site allows the community to "Suggest an Edit," you need a
+          small clause for this:
+          <br />
+          "To maintain data integrity, all community-suggested edits (phone
+          number changes, address updates) undergo a manual or automated
+          verification process before going live. The verified business owner
+          has the final authority over their listing details."
+        </p>
       </SectionCard>
     </SiteShell>
   );

@@ -38,7 +38,7 @@ export default function HomePage({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "LocalOnline",
+    name: "Local Online",
     url: data.seo.canonicalPath,
     description: data.seo.description,
     potentialAction: {
@@ -72,6 +72,25 @@ export default function HomePage({
           <p className="pub-subtitle">{data.seo.description}</p>
         </section>
 
+        <SectionCard title="Advertise Here">
+          <AdRequestCard
+            title="Reach customers nearby"
+            subtitle="Promote your business in front of local customers exploring these listings."
+            ctaLabel="Send request"
+          />
+        </SectionCard>
+        <SectionCard title="Explore Local Search Paths">
+          <SeoLinkSections
+            links={{
+              cities: data.topCities,
+              categories: data.topCategories,
+              areas: data.topAreas,
+              placeTypes: data.topPlaceTypes,
+              places: [],
+            }}
+          />
+        </SectionCard>
+
         <SectionCard title="How This Works">
           <div className="pub-grid-2">
             <p className="pub-muted">
@@ -88,26 +107,6 @@ export default function HomePage({
               customers for free.
             </p>
           </div>
-        </SectionCard>
-
-        <SectionCard title="Explore Local Search Paths">
-          <SeoLinkSections
-            links={{
-              cities: data.topCities,
-              categories: data.topCategories,
-              areas: data.topAreas,
-              placeTypes: data.topPlaceTypes,
-              places: [],
-            }}
-          />
-        </SectionCard>
-
-        <SectionCard title="Advertise Here">
-          <AdRequestCard
-            title="Reach customers nearby"
-            subtitle="Promote your business in front of local customers exploring these listings."
-            ctaLabel="Send request"
-          />
         </SectionCard>
 
         <SectionCard title="Featured Businesses">

@@ -133,7 +133,6 @@ export default function SiteShell({ children }: SiteShellProps) {
               <p className="pub-footer-title">{siteName}</p>
               <p className="pub-footer-text">
                 Your online market for local businesses.
-                {` Site visits: ${siteVisitors ?? "—"}.`}
               </p>
               {supportEmail ? (
                 <a className="pub-footer-link" href={`mailto:${supportEmail}`}>

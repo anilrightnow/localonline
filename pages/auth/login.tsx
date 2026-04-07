@@ -18,7 +18,7 @@ const LoginPage = () => {
     try {
       const response = await axios.post(apiUrl("/api/auth/login"), { email, password });
       setAuthTokenCookie(response.data.access_token);
-      const returnUrl = typeof router.query.returnUrl === "string" ? router.query.returnUrl : "/profile";
+      const returnUrl = typeof router.query.returnUrl === "string" ? router.query.returnUrl : "/dashboard";
       router.push(returnUrl);
     } catch (err) {
       setError(getApiErrorMessage(err, "Invalid email or password"));

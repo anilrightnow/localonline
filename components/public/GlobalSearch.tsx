@@ -293,7 +293,7 @@ export default function GlobalSearch() {
             onBlur={() => {
               window.setTimeout(closeDropdown, 150);
             }}
-            placeholder="Search business in Crossing Republic, Greater Noida West"
+            placeholder="Search in Crossing Republic, Greater Noida West"
             autoComplete="off"
             role="combobox"
             aria-expanded={open}

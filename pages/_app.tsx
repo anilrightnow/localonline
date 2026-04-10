@@ -42,11 +42,23 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <meta name="application-name" content="LocalOnline" />
-        <meta name="apple-mobile-web-app-title" content="LocalOnline" />
+        <meta name="application-name" content="Local Online" />
+        <meta name="apple-mobile-web-app-title" content="Local Online" />
         <meta name="theme-color" content="#0f766e" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link
+          rel="icon"
+          type="image/png"
+          href="favicon-96x96.png"
+          sizes="96x96"
+        />
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="apple-touch-icon.png"
+        />
+        <link rel="manifest" href="site.webmanifest" />
       </Head>
       <Script id="trusted-types" strategy="beforeInteractive">
         {`

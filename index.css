@@ -365,13 +365,12 @@ a:hover {
 
 .pub-title {
   margin: 0 0 8px;
-  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+  font-size: clamp(1.4rem, 2.2vw, 2.2rem);
 }
 
 .pub-subtitle {
   margin: 0;
   color: var(--muted);
-  max-width: 760px;
 }
 
 .pub-card {
@@ -2635,4 +2634,7 @@ body.theme-dark .admin-shell select:focus,
 body.theme-dark .admin-shell textarea:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.25);
+}
+.jer-editor-container{
+  height: 100%;
 }

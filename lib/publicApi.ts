@@ -14,6 +14,7 @@ export type RelatedLinks = {
 export type SearchBusinessItem = {
   businessToken: string;
   name: string;
+  description?: string | null;
   address?: string | null;
   rating?: number | null;
   totalReviews?: number | null;

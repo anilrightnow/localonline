@@ -457,13 +457,23 @@ export default function OwnerListingPage() {
     editingBusiness,
   ]);
 
-  const tabs = [
+  type TabDefinition = {
+    key: string;
+    label: string;
+    value: unknown;
+    onChange: (value: string) => void;
+    rootType: "array" | "object";
+    disabled?: boolean;
+    helperText?: string;
+  };
+
+  const tabs: TabDefinition[] = [
     {
       key: "about",
       label: "About",
       value: aboutJson,
       onChange: setAboutJson,
-      rootType: "array" as const,
+      rootType: "array",
     },
     {
       key: "businessHours",

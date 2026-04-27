@@ -16,7 +16,10 @@ import {
   type BusinessApiResponse,
   type SearchApiResponse,
 } from "../lib/publicApi";
-import { getApiErrorMessageFromResponse } from "../lib/apiError";
+import {
+  getApiErrorMessage,
+  getApiErrorMessageFromResponse,
+} from "../lib/apiError";
 import { fallbackThumbnail } from "../lib/thumbnail";
 import {
   buildCanonicalPath,
@@ -26,6 +29,7 @@ import {
 import { trackAnalyticsEvent } from "../lib/analytics";
 import { getAuthToken, setAuthTokenCookie } from "../lib/auth";
 import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
+import type { UserSession } from "../lib/session";
 import { getUserSessionFromToken, hasRole } from "../lib/session";
 import {
   Phone,
@@ -585,8 +589,9 @@ export default function SeoPage({
     "contact",
   );
 
-  const session = useMemo(() => {
-    if (typeof window === "undefined") return { roles: [] };
+  const session = useMemo<UserSession>(() => {
+    if (typeof window === "undefined")
+      return { userId: null, email: null, roles: [] };
     return getUserSessionFromToken(getAuthToken());
   }, [contactUnlocked]);
 
@@ -1079,9 +1084,7 @@ export default function SeoPage({
         setReviewRating(5);
       }, 2000);
     } catch (err: any) {
-      setReviewError(
-        getApiErrorMessageFromResponse(err, "Failed to submit review."),
-      );
+      setReviewError(getApiErrorMessage(err, "Failed to submit review."));
     } finally {
       setReviewSubmitting(false);
     }

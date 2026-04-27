@@ -10,6 +10,7 @@ import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import FormMessage from "../../components/shared/FormMessage";
+import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { JsonEditor } from "json-edit-react";
 
 type ClaimedBusiness = {
@@ -111,6 +112,7 @@ export default function OwnerListingPage() {
   const [reviewJson, setReviewJson] = useState("{}");
   const [mediaJson, setMediaJson] = useState("[]");
   const [menuJson, setMenuJson] = useState("[]");
+  const [canonicalPath, setCanonicalPath] = useState("");
   const [fullJson, setFullJson] = useState("{}");
   const [isVerified, setIsVerified] = useState(false);
   const [activeTab, setActiveTab] = useState("about");
@@ -208,6 +210,20 @@ export default function OwnerListingPage() {
       setAvgRating(b.avgRating == null ? "" : String(b.avgRating));
       setTotalReviews(b.totalReviews == null ? "" : String(b.totalReviews));
 
+      // Fetch canonical path for preview link
+      try {
+        const canonRes = await axios.get(
+          apiUrl(
+            `/api/public-search/business-token/${encodeURIComponent(businessToken)}/canonical`,
+          ),
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+        setCanonicalPath(canonRes.data?.canonicalPath || "");
+      } catch (err) {
+        console.error("Failed to fetch canonical path:", err);
+        setCanonicalPath("");
+      }
+
       // Pre-populate area/category IDs and load actual object values by id
       const selectedAreaIds = b.areaIds ?? [];
       const selectedCategoryIds = b.categoryIds ?? [];
@@ -248,13 +264,19 @@ export default function OwnerListingPage() {
         setSelectedCategories([]);
       }
 
-      setActionsJson(b.actionsJson ?? "{}");
-      setAboutJson(b.aboutJson ?? "[]");
-      setBusinessHoursJson(b.businessHoursJson ?? "[]");
-      setReviewJson(b.reviewJson ?? "{}");
-      setMediaJson(b.mediaJson ?? "[]");
-      setMenuJson(b.menuJson ?? "[]");
-      setFullJson(b.fullJson ?? "{}");
+      // Ensure we treat these as valid JSON strings for the editor
+      const stringifySafe = (val: any, fallback: string) => {
+        if (typeof val === "string") return val || fallback;
+        return val ? JSON.stringify(val, null, 2) : fallback;
+      };
+
+      setActionsJson(stringifySafe(b.actionsJson, "{}"));
+      setAboutJson(stringifySafe(b.aboutJson, "[]"));
+      setBusinessHoursJson(stringifySafe(b.businessHoursJson, "[]"));
+      setReviewJson(stringifySafe(b.reviewJson, "{}"));
+      setMediaJson(stringifySafe(b.mediaJson, "[]"));
+      setMenuJson(stringifySafe(b.menuJson, "[]"));
+      setFullJson(stringifySafe(b.fullJson, "{}"));
       setIsVerified(Boolean(b.isVerified));
       setActiveTab("about");
       setMessage("Business loaded successfully.");
@@ -533,7 +555,18 @@ export default function OwnerListingPage() {
       title="My Business Listings"
       subtitle="Manage your claimed businesses"
     >
-      {message ? <FormMessage message={message} tone="success" /> : null}
+      {message && (
+        <div
+          className={`form-alert ${message.toLowerCase().includes("failed") || message.toLowerCase().includes("error") ? "is-error" : "is-success"}`}
+        >
+          {message.toLowerCase().includes("failed") ? (
+            <AlertCircle size={18} />
+          ) : (
+            <CheckCircle2 size={18} />
+          )}
+          <span>{message}</span>
+        </div>
+      )}
 
       {!isAdmin && !isOwner ? (
         <div className="app-card">
@@ -748,6 +781,16 @@ export default function OwnerListingPage() {
           <p style={{ color: "#666", marginBottom: "16px" }}>
             <strong>Plan:</strong> {planName}
           </p>
+
+          {!isAdmin && (
+            <div className="form-alert is-warning">
+              <AlertCircle size={18} />
+              <span>
+                Your updates will be submitted for admin review. Changes will be
+                reflected on the live site once approved.
+              </span>
+            </div>
+          )}
 
           <form onSubmit={saveBusiness}>
             <div className="app-grid">
@@ -1067,26 +1110,39 @@ export default function OwnerListingPage() {
                     if (!tab) return null;
                     let parsed;
                     try {
-                      let jsonStr =
-                        tab.value || (tab.rootType === "array" ? "[]" : "{}");
-                      parsed = JSON.parse(jsonStr);
+                      const rawValue = tab.value;
+                      if (typeof rawValue === "string") {
+                        const jsonStr =
+                          rawValue.trim() ||
+                          (tab.rootType === "array" ? "[]" : "{}");
+                        parsed = JSON.parse(jsonStr);
 
-                      // Handle double-encoded JSON (backend may return JSON strings encoded as JSON)
-                      if (typeof parsed === "string") {
-                        console.warn(
-                          "Double-encoded JSON detected for tab:",
-                          tab.key,
-                          "Parsing again...",
-                        );
-                        parsed = JSON.parse(parsed);
+                        // Handle double-encoded JSON strings
+                        if (typeof parsed === "string" && parsed !== "null") {
+                          parsed = JSON.parse(parsed);
+                        }
+                      } else if (rawValue && typeof rawValue === "object") {
+                        parsed = rawValue;
+                      } else {
+                        parsed = tab.rootType === "array" ? [] : {};
+                      }
+
+                      // Fallback check to prevent JsonEditor from crashing on null/non-array data
+                      if (tab.rootType === "array" && !Array.isArray(parsed)) {
+                        parsed = [];
+                      } else if (
+                        tab.rootType === "object" &&
+                        (Array.isArray(parsed) || !parsed)
+                      ) {
+                        parsed = {};
                       }
                     } catch (e) {
                       console.error("JSON parse error:", e);
                       return (
-                        <FormMessage
-                          message="Invalid JSON data."
-                          tone="error"
-                        />
+                        <div className="form-alert is-error">
+                          <AlertCircle size={18} />
+                          <span>Invalid JSON format in {tab.label} data.</span>
+                        </div>
                       );
                     }
                     return (
@@ -1125,6 +1181,21 @@ export default function OwnerListingPage() {
               >
                 {isAdmin ? "Save Changes" : "Submit for Review"}
               </button>
+              {canonicalPath && (
+                <a
+                  href={canonicalPath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <ExternalLink size={16} /> View Live Profile
+                </a>
+              )}
               <button
                 className="btn btn-ghost"
                 type="button"

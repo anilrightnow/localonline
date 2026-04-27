@@ -26,6 +26,21 @@ import {
 import { trackAnalyticsEvent } from "../lib/analytics";
 import { getAuthToken, setAuthTokenCookie } from "../lib/auth";
 import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
+import { getUserSessionFromToken, hasRole } from "../lib/session";
+import {
+  Phone,
+  Globe,
+  MessageCircle,
+  Mail,
+  Info,
+  Clock,
+  Image as ImageIcon,
+  Menu as MenuIcon,
+  Star,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import axios from "axios";
 
 type Props = {
   parsed: ParsedSeoRoute;
@@ -558,6 +573,29 @@ export default function SeoPage({
   const [contactPasswordVisible, setContactPasswordVisible] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
 
+  // Review form state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [authGatePurpose, setAuthGatePurpose] = useState<"contact" | "review">(
+    "contact",
+  );
+
+  const session = useMemo(() => {
+    if (typeof window === "undefined") return { roles: [] };
+    return getUserSessionFromToken(getAuthToken());
+  }, [contactUnlocked]);
+
+  const isStrictUser =
+    session.roles.includes("User") &&
+    !hasRole(session, "Admin") &&
+    !hasRole(session, "SuperAdmin") &&
+    !session.roles.includes("Owner");
+
   useEffect(() => {
     if (parsed.kind !== "business") return;
     if (!businessData?.detail?.cid) return;
@@ -712,10 +750,10 @@ export default function SeoPage({
   const hasMenuItems = menuSections.some((section) => section.items.length > 0);
   const detailTabs: Array<{ id: DetailTab; label: string }> = [
     { id: "overview", label: "Overview" },
-    { id: "about", label: "About" },
-    { id: "reviews", label: "Rating Reviews" },
+    { id: "about", label: "Details" },
+    { id: "reviews", label: "Reviews" },
     ...(hasMenuItems ? [{ id: "menu" as DetailTab, label: "Menu" }] : []),
-    { id: "gallery", label: "Photo Gallery" },
+    { id: "gallery", label: "Photos" },
   ];
   const generatedNarrative = useMemo(() => {
     if (!businessData) return "";
@@ -1016,6 +1054,39 @@ export default function SeoPage({
     })),
   };
 
+  const onSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewError(null);
+    setReviewMessage(null);
+    setReviewSubmitting(true);
+
+    try {
+      const token = getAuthToken();
+      const apiBaseUrl = getApiBaseUrl();
+      const res = await axios.post(
+        `${apiBaseUrl}/api/reviews/business-token/${encodeURIComponent(businessData!.detail.businessToken)}`,
+        { rating: reviewRating, title: reviewTitle, comment: reviewComment },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      );
+      setReviewMessage(res.data?.message || "Review submitted successfully.");
+
+      // Clear form and close after a delay
+      setTimeout(() => {
+        setShowReviewForm(false);
+        setReviewMessage(null);
+        setReviewTitle("");
+        setReviewComment("");
+        setReviewRating(5);
+      }, 2000);
+    } catch (err: any) {
+      setReviewError(
+        getApiErrorMessageFromResponse(err, "Failed to submit review."),
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
   const onRegisterForContact = async (e: React.FormEvent) => {
     e.preventDefault();
     setContactError(null);
@@ -1148,6 +1219,13 @@ export default function SeoPage({
                     className={`pub-tab-btn ${activeTab === tab.id ? "is-active" : ""}`}
                     onClick={() => setActiveTab(tab.id)}
                   >
+                    <span className="tab-icon">
+                      {tab.id === "overview" && <Info size={16} />}
+                      {tab.id === "about" && <Clock size={16} />}
+                      {tab.id === "reviews" && <Star size={16} />}
+                      {tab.id === "menu" && <MenuIcon size={16} />}
+                      {tab.id === "gallery" && <ImageIcon size={16} />}
+                    </span>
                     {tab.label}
                   </button>
                 ))}
@@ -1172,12 +1250,14 @@ export default function SeoPage({
                   />
                   {businessData.detail.phone ? (
                     <div className="pub-contact-panel">
-                      <p>
-                        <strong>Phone:</strong>{" "}
-                        {contactUnlocked
-                          ? businessData.detail.phone
-                          : maskPhone(businessData.detail.phone)}
-                      </p>
+                      <div className="contact-info-main">
+                        <Phone size={20} className="text-muted" />
+                        <span className="phone-number">
+                          {contactUnlocked
+                            ? businessData.detail.phone
+                            : maskPhone(businessData.detail.phone)}
+                        </span>
+                      </div>
                       {contactUnlocked ? (
                         <div className="pub-contact-actions">
                           {whatsappLink(
@@ -1195,14 +1275,14 @@ export default function SeoPage({
                               target="_blank"
                               rel="noreferrer noopener"
                             >
-                              Contact on WhatsApp
+                              <MessageCircle size={14} /> WhatsApp
                             </a>
                           ) : null}
                           <a
                             className="pub-chip"
                             href={emailShareLink(businessData.detail)}
                           >
-                            Share via Email
+                            <Mail size={14} /> Share
                           </a>
                         </div>
                       ) : (
@@ -1253,6 +1333,25 @@ export default function SeoPage({
                     </div>
                   ) : null}
                   <div className="pub-contact-actions">
+                    {isStrictUser && (
+                      <a
+                        className="pub-ad-btn"
+                        style={{
+                          background: "#f59e0b",
+                          borderColor: "#f59e0b",
+                        }}
+                        onClick={() => {
+                          if (contactUnlocked) {
+                            setShowReviewForm(true);
+                          } else {
+                            setAuthGatePurpose("review");
+                            setShowContactGate(true);
+                          }
+                        }}
+                      >
+                        <Star size={16} /> Submit Rating
+                      </a>
+                    )}
                     <a
                       className="pub-ad-btn"
                       href={`/claims?businessToken=${encodeURIComponent(businessData.detail.businessToken)}`}
@@ -1431,7 +1530,7 @@ export default function SeoPage({
                   {businessData.reviews?.length ? (
                     <div>
                       <h3>Approved Reviews</h3>
-                      <ul>
+                      <div className="pub-review-list">
                         {(showAllApprovedReviews
                           ? businessData.reviews
                           : businessData.reviews.slice(0, 4)
@@ -1445,7 +1544,7 @@ export default function SeoPage({
                             <div className="pub-muted">{review.comment}</div>
                           </li>
                         ))}
-                      </ul>
+                      </div>
                       {businessData.reviews.length > 4 ? (
                         <button
                           type="button"
@@ -1461,13 +1560,33 @@ export default function SeoPage({
                   ) : (
                     <p className="pub-muted">No approved reviews yet.</p>
                   )}
-                  <p>
-                    <a
-                      href={`/reviews?businessToken=${encodeURIComponent(businessData.detail.businessToken)}`}
-                    >
-                      Write a review
-                    </a>
-                  </p>
+                  {isStrictUser && (
+                    <p style={{ marginTop: 20 }}>
+                      <button
+                        type="button"
+                        className="btn-link"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          padding: 0,
+                          color: "var(--teal-600)",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          fontWeight: 600,
+                        }}
+                        onClick={() => {
+                          if (contactUnlocked) {
+                            setShowReviewForm(true);
+                          } else {
+                            setAuthGatePurpose("review");
+                            setShowContactGate(true);
+                          }
+                        }}
+                      >
+                        Write a review
+                      </button>
+                    </p>
+                  )}
                 </>
               ) : null}
 
@@ -1894,7 +2013,9 @@ export default function SeoPage({
                   type="button"
                   className="password-toggle"
                   onClick={() => setContactPasswordVisible((v) => !v)}
-                  aria-label={contactPasswordVisible ? "Hide password" : "Show password"}
+                  aria-label={
+                    contactPasswordVisible ? "Hide password" : "Show password"
+                  }
                 >
                   {contactPasswordVisible ? "Hide" : "Show"}
                 </button>
@@ -1919,6 +2040,105 @@ export default function SeoPage({
                   type="button"
                   className="pub-inline-btn"
                   onClick={() => setShowContactGate(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {showReviewForm ? (
+        <div className="pub-contact-gate" role="dialog" aria-modal="true">
+          <div
+            className="pub-contact-card"
+            style={{ width: "min(520px, 100%)" }}
+          >
+            <div className="pub-modal-header">
+              <h3>Submit Review</h3>
+              <p className="pub-muted">
+                Share your experience with {effectiveBusinessName}
+              </p>
+            </div>
+
+            {reviewMessage && (
+              <div className="form-alert is-success">
+                <CheckCircle2 size={18} />
+                <span>{reviewMessage}</span>
+              </div>
+            )}
+
+            {reviewError && (
+              <div className="form-alert is-error">
+                <AlertCircle size={18} />
+                <span>{reviewError}</span>
+              </div>
+            )}
+
+            <form onSubmit={onSubmitReview} className="auth-form">
+              <div className="form-row">
+                <label>Rating</label>
+                <div
+                  className="pub-stars-wrap"
+                  style={{
+                    fontSize: "1.5rem",
+                    cursor: "pointer",
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={28}
+                      className={
+                        star <= reviewRating ? "star-filled" : "star-empty"
+                      }
+                      onClick={() => setReviewRating(star)}
+                      fill={star <= reviewRating ? "currentColor" : "none"}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="rev-title">Headline</label>
+                <input
+                  id="rev-title"
+                  className="form-input"
+                  placeholder="Summarize your visit"
+                  value={reviewTitle}
+                  onChange={(e) => setReviewTitle(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="rev-comment">Review Details</label>
+                <textarea
+                  id="rev-comment"
+                  className="form-textarea"
+                  placeholder="What did you like or dislike?"
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  required
+                  style={{ minHeight: 120 }}
+                />
+              </div>
+
+              <div className="pub-contact-actions" style={{ marginTop: 10 }}>
+                <button
+                  type="submit"
+                  className="pub-search-btn"
+                  disabled={reviewSubmitting}
+                >
+                  {reviewSubmitting ? "Submitting..." : "Post Review"}
+                </button>
+                <button
+                  type="button"
+                  className="pub-inline-btn"
+                  onClick={() => setShowReviewForm(false)}
                 >
                   Cancel
                 </button>

@@ -7,6 +7,7 @@ import TopProgress from "../shared/TopProgress";
 import { clearAuthTokenCookie, getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
 import { getUserSessionFromToken } from "../../lib/session";
+import { LogIn, LogOut, User, Sun, Moon, PlusCircle } from "lucide-react";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -100,31 +101,38 @@ export default function SiteShell({ children }: SiteShellProps) {
             <Link href="/">Home</Link>
             <Link href="/about">About</Link>
             <Link href="/claims">Claim</Link>
-            <Link href="/owner/listing">Add Listing</Link>
+            <Link href="/owner/listing" className="pub-nav-highlight">
+              <PlusCircle size={16} /> Add Listing
+            </Link>
             <Link href="/reviews">Reviews</Link>
             <Link href="/community/events">Events</Link>
             {isClient && isLoggedIn ? (
               <>
                 {session.email === "user@test.local" ? (
-                  <Link href="/profile">Dashboard</Link>
+                  <Link href="/profile">
+                    <User size={16} /> Account
+                  </Link>
                 ) : null}
                 <button
                   type="button"
-                  className="pub-theme-btn"
+                  className="pub-nav-btn logout"
                   onClick={onLogout}
                 >
-                  Logout
+                  <LogOut size={16} />
                 </button>
               </>
             ) : (
-              <Link href="/auth/login">Login</Link>
+              <Link href="/auth/login" className="pub-nav-btn login">
+                <LogIn size={16} /> Login
+              </Link>
             )}
             <button
               type="button"
               className="pub-theme-btn"
               onClick={() => setDarkMode((v) => !v)}
+              aria-label="Toggle theme"
             >
-              {darkMode ? "Light" : "Dark"}
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </nav>
         </div>

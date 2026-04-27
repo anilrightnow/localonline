@@ -12,6 +12,7 @@ import {
   type HomeApiResponse,
 } from "../lib/publicApi";
 import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
+import { Search, MapPin, ShieldCheck, TrendingUp } from "lucide-react";
 
 type Props = {
   data: HomeApiResponse;
@@ -91,21 +92,64 @@ export default function HomePage({
           />
         </SectionCard>
 
-        <SectionCard title="How This Works">
-          <div className="pub-grid-2">
-            <p className="pub-muted">
-              1. Search by city, area, category, place type, or business name.
+        <SectionCard title="How This Works" className="how-it-works">
+          <div className="container">
+            <h2 className="section-title">
+              Experience <span>LocalOnline</span>
+            </h2>
+            <p className="section-subtitle">
+              Your simple 4-step guide to navigating the neighborhood.
             </p>
-            <p className="pub-muted">
-              2. Open location pages and compare relevant listings.
-            </p>
-            <p className="pub-muted">
-              3. Navigate to verified business details with all details.
-            </p>
-            <p className="pub-muted">
-              4. Business owner can manage their listings and engage with
-              customers for free.
-            </p>
+
+            <div className="steps-grid">
+              <div className="step-card">
+                <div className="step-number">01</div>
+                <div className="step-icon">
+                  <Search size={32} strokeWidth={1.5} />
+                </div>
+                <h3>Smart Search</h3>
+                <p>
+                  Find services by society, plaza, or category. Tailored for the
+                  Noida Extension ecosystem.
+                </p>
+              </div>
+
+              <div className="step-card">
+                <div className="step-number">02</div>
+                <div className="step-icon">
+                  <MapPin size={32} strokeWidth={1.5} />
+                </div>
+                <h3>Compare Local</h3>
+                <p>
+                  Browse relevant listings within your immediate area. View
+                  ratings and proximity in one glance.
+                </p>
+              </div>
+
+              <div className="step-card">
+                <div className="step-number">03</div>
+                <div className="step-icon">
+                  <ShieldCheck size={32} strokeWidth={1.5} />
+                </div>
+                <h3>Verified Details</h3>
+                <p>
+                  Access deep-dive profiles with one-click calling, WhatsApp,
+                  and authentic resident reviews.
+                </p>
+              </div>
+
+              <div className="step-card highlight">
+                <div className="step-number">04</div>
+                <div className="step-icon">
+                  <TrendingUp size={32} strokeWidth={1.5} />
+                </div>
+                <h3>Owner Hub</h3>
+                <p>
+                  Claim your business for free. Update your catalog and engage
+                  directly with your neighbors.
+                </p>
+              </div>
+            </div>
           </div>
         </SectionCard>
 

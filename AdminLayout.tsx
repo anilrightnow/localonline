@@ -39,7 +39,9 @@ export default function AdminLayout({
 
   const currentPage = useMemo(() => {
     if (title) return title;
-    return navItems.find((item) => item.href === pathname)?.label || "Dashboard";
+    return (
+      navItems.find((item) => item.href === pathname)?.label || "Dashboard"
+    );
   }, [navItems, pathname, title]);
   const displayName = userName?.trim() ? userName : "User";
   const initials = displayName
@@ -57,12 +59,16 @@ export default function AdminLayout({
 
   return (
     <div className="admin-shell">
-      <aside className={`admin-sidebar ${isSidebarOpen ? "is-open" : "is-collapsed"}`}>
+      <aside
+        className={`admin-sidebar ${isSidebarOpen ? "is-open" : "is-collapsed"}`}
+      >
         <div className="admin-brand">
           <div className="admin-brand-icon">
             <span>LO</span>
           </div>
-          {isSidebarOpen && <span className="admin-brand-text">LocalOnline</span>}
+          {isSidebarOpen && (
+            <span className="admin-brand-text">LocalOnline</span>
+          )}
         </div>
 
         <nav className="admin-nav">
@@ -75,14 +81,18 @@ export default function AdminLayout({
                 className={`admin-nav-link ${isActive ? "is-active" : ""}`}
               >
                 <item.icon size={20} className="admin-nav-icon" />
-                {isSidebarOpen && <span className="admin-nav-label">{item.label}</span>}
+                {isSidebarOpen && (
+                  <span className="admin-nav-label">{item.label}</span>
+                )}
               </Link>
             );
           })}
         </nav>
 
         <div className="admin-user">
-          <div className="admin-user-avatar">{initials || displayName.charAt(0)}</div>
+          <div className="admin-user-avatar">
+            {initials || displayName.charAt(0)}
+          </div>
           {isSidebarOpen && (
             <div className="admin-user-meta">
               <p className="admin-user-name">{displayName}</p>
@@ -92,10 +102,12 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {isSidebarOpen && <div className="admin-backdrop" onClick={() => setSidebarOpen(false)} />}
+      {isSidebarOpen && (
+        <div className="admin-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
 
       <div className="admin-main">
-        <header className="admin-topbar">
+        <header className="admin-topbar glass">
           <div className="admin-topbar-left">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -113,7 +125,11 @@ export default function AdminLayout({
           </div>
 
           <div className="admin-topbar-right">
-            <button className="admin-icon-btn" type="button" aria-label="Notifications">
+            <button
+              className="admin-icon-btn"
+              type="button"
+              aria-label="Notifications"
+            >
               <Bell size={20} />
               <span className="admin-icon-dot" />
             </button>
@@ -123,7 +139,7 @@ export default function AdminLayout({
             <div className="admin-account">
               <button className="admin-account-btn" type="button">
                 <span className="admin-account-label">Account</span>
-                <span className="admin-account-avatar">
+                <span className="admin-account-avatar-wrap">
                   <UserIcon size={16} />
                 </span>
                 <ChevronDown size={14} className="admin-account-caret" />
@@ -137,7 +153,11 @@ export default function AdminLayout({
                   <Settings size={16} /> Settings
                 </Link>
                 <div className="admin-menu-sep" />
-                <button className="admin-menu-logout" onClick={onLogout} type="button">
+                <button
+                  className="admin-menu-logout"
+                  onClick={onLogout}
+                  type="button"
+                >
                   <LogOut size={16} /> Log Out
                 </button>
               </div>

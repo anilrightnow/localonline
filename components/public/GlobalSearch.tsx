@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
+import { Search, MapPin, Building2, Tag, LayoutGrid } from "lucide-react";
 
 type Suggestion = {
   type: string;
@@ -343,7 +344,15 @@ export default function GlobalSearch() {
                   void router.push(item.href);
                 }}
               >
-                <span>{item.label}</span>
+                <div className="pub-search-item-content">
+                  <span className="pub-search-item-icon">
+                    {item.type === "category" && <Tag size={16} />}
+                    {item.type === "placetype" && <LayoutGrid size={16} />}
+                    {item.type === "place" && <MapPin size={16} />}
+                    {item.type === "business" && <Building2 size={16} />}
+                  </span>
+                  <span className="pub-search-item-label">{item.label}</span>
+                </div>
                 <span className="pub-search-type">
                   {formatSuggestionType(item.type)}
                 </span>

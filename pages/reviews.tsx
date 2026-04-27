@@ -78,7 +78,9 @@ export default function ReviewsPage() {
     try {
       const authToken = getAuthToken();
       const response = await axios.get(
-        apiUrl(`/api/public-search/business-token/${encodeURIComponent(token)}`),
+        apiUrl(
+          `/api/public-search/business-token/${encodeURIComponent(token)}`,
+        ),
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         },
@@ -135,7 +137,9 @@ export default function ReviewsPage() {
     if (!targetBusinessToken) return;
     try {
       const response = await axios.get(
-        apiUrl(`/api/reviews/business-token/${encodeURIComponent(targetBusinessToken)}`),
+        apiUrl(
+          `/api/reviews/business-token/${encodeURIComponent(targetBusinessToken)}`,
+        ),
       );
       setReviews(response.data ?? []);
     } catch {
@@ -155,7 +159,9 @@ export default function ReviewsPage() {
     try {
       const token = getAuthToken();
       const response = await axios.post(
-        apiUrl(`/api/reviews/business-token/${encodeURIComponent(businessToken)}`),
+        apiUrl(
+          `/api/reviews/business-token/${encodeURIComponent(businessToken)}`,
+        ),
         { rating, title, comment },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
@@ -192,108 +198,6 @@ export default function ReviewsPage() {
       subtitle="Submit reviews and manage your moderation status with filters and paging."
     >
       {message ? <FormMessage message={message} tone="success" /> : null}
-
-      <div className="app-card">
-        <h2>Submit Review</h2>
-        <form onSubmit={onSubmit}>
-          <div className="form-row">
-            <label>Business</label>
-            <div
-              className="app-grid"
-              style={{ gridTemplateColumns: "2fr auto" }}
-            >
-              <input
-                className="form-input"
-                value={businessQuery}
-                onChange={(e) => setBusinessQuery(e.target.value)}
-                placeholder="Search business by name"
-              />
-              <button
-                className="btn btn-ghost"
-                type="button"
-                onClick={() => void searchBusinesses()}
-              >
-                Search
-              </button>
-            </div>
-            {businessOptions.length ? (
-              <div className="app-card" style={{ marginTop: 8 }}>
-                {businessOptions.map((b) => (
-                  <button
-                    key={b.businessToken}
-                    type="button"
-                    className="btn btn-ghost"
-                    style={{ marginRight: 8, marginBottom: 8 }}
-                    onClick={() => {
-                      setBusinessToken(b.businessToken);
-                      setBusinessName(b.name);
-                      setBusinessOptions([]);
-                      void loadReviews(b.businessToken);
-                    }}
-                  >
-                    {b.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <div className="form-input" style={{ background: "#f8fafc" }}>
-              {businessLoading
-                ? "Loading business..."
-                : businessName || "Select a business from search."}
-            </div>
-            <input type="hidden" value={businessToken} />
-          </div>
-          <div className="form-row">
-            <label htmlFor="rating">Rating (1-5)</label>
-            <input
-              className="form-input"
-              id="rating"
-              type="number"
-              min={1}
-              max={5}
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              required
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="title">Title</label>
-            <input
-              className="form-input"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="comment">Comment</label>
-            <textarea
-              className="form-textarea"
-              id="comment"
-              rows={4}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-          <div className="app-actions">
-            <button
-              className="btn btn-primary"
-              type="submit"
-              disabled={!businessToken}
-            >
-              Submit Review
-            </button>
-            <button
-              className="btn btn-ghost"
-              type="button"
-              disabled={!businessToken}
-              onClick={() => loadReviews(businessToken)}
-            >
-              Refresh Approved
-            </button>
-          </div>
-        </form>
-      </div>
 
       <div className="app-card">
         <h2>My Reviews</h2>

@@ -22,6 +22,7 @@ export type SearchBusinessItem = {
   thumbUrl?: string | null;
   imageUrl?: string | null;
   photoUrl?: string | null;
+  phone?: string | null;
 };
 
 export type HomeApiResponse = {

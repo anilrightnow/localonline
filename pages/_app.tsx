@@ -1,13 +1,39 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Script from "next/script";
 import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
+import { useApiHealth } from "../lib/useApiHealth";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
+  const { isHealthy } = useApiHealth();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Redirect to maintenance page if API is down (but not if already on maintenance page)
+  useEffect(() => {
+    if (!isMounted || isMounted === null) return;
+
+    // If we explicitly know the API is down (isHealthy === false), redirect
+    if (isHealthy === false && router.pathname !== "/maintenance") {
+      router.push("/maintenance").catch(() => {
+        // Silently handle navigation errors
+      });
+    }
+
+    // If we're on maintenance page and API is healthy again, redirect to home
+    if (isHealthy === true && router.pathname === "/maintenance") {
+      router.push("/").catch(() => {
+        // Silently handle navigation errors
+      });
+    }
+  }, [isHealthy, router.pathname, isMounted]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

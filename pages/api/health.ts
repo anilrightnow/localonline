@@ -13,7 +13,7 @@ export default async function handler(
 ) {
   try {
     // Attempt a simple health check call to your backend API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 

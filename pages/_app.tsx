@@ -111,6 +111,14 @@ export default function App({ Component, pageProps }: AppProps) {
         `}
       </Script>
       {isGoogleAdsEnabled && (
+        <Script
+          id="google-adsense"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8129203343952744"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      )}
+      {isGoogleAdsEnabled && (
         <>
           <Script
             async

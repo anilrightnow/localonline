@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
-import GoogleAdSlot from "../components/public/GoogleAdSlot";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
@@ -1260,11 +1259,7 @@ export default function SeoPage({
                       thumbnailUrl: visibleMediaUrls[0] ?? fallbackListThumb,
                     }}
                   />
-                  <GoogleAdSlot
-                    slot="detail-overview-rectangle"
-                    size="medium-rectangle"
-                    className="pub-detail-ad"
-                  />
+
                   {businessData.detail.phone ? (
                     <div className="pub-contact-panel">
                       <div className="contact-info-main">
@@ -1772,11 +1767,6 @@ export default function SeoPage({
             </>
           ) : apiData ? (
             <>
-              <GoogleAdSlot
-                slot="list-top-leaderboard"
-                size="leaderboard"
-                className="pub-ad-placement"
-              />
               <p>
                 Found <strong>{apiData.pagination.totalCount}</strong> listings.
               </p>
@@ -1811,23 +1801,9 @@ export default function SeoPage({
                     );
                     if (index !== 2) return card;
                     return (
-                      <div key={`${item.businessToken}-with-ad`}>
-                        {card}
-                        <GoogleAdSlot
-                          slot="list-in-feed-after-third"
-                          size="in-feed"
-                          className="pub-ad-placement"
-                        />
-                      </div>
+                      <div key={`${item.businessToken}-with-ad`}>{card}</div>
                     );
                   })}
-                  {apiData.items.length > 0 && apiData.items.length < 3 ? (
-                    <GoogleAdSlot
-                      slot="list-in-feed-short-results"
-                      size="in-feed"
-                      className="pub-ad-placement"
-                    />
-                  ) : null}
                 </div>
               )}
               {apiData.items.length > 0 ? (

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 
-const HEALTH_CHECK_INTERVAL = 15000; // Check every 15 seconds
+const HEALTH_CHECK_INTERVAL = 1500000000; // Check every 15 seconds
 const API_HEALTH_ENDPOINT = '/api/health';
 
 export function useApiHealth() {

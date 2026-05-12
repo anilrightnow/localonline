@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
+import GoogleAdSlot from "../components/public/GoogleAdSlot";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
@@ -290,8 +291,10 @@ function pickMediaUrl(item: any): string | undefined {
 
 function toExternalUrl(url?: string | null): string | null {
   if (!url) return null;
-  const trimmed = url.trim();
+  let trimmed = url.trim();
   if (!trimmed) return null;
+  const index: number = trimmed.indexOf("?utm_source=");
+  trimmed = index !== -1 ? trimmed.substring(0, index) : trimmed;
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://"))
     return trimmed;
   return `https://${trimmed}`;
@@ -589,11 +592,16 @@ export default function SeoPage({
     "contact",
   );
 
+  const [isClientMounted, setIsClientMounted] = useState(false);
+
+  useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
+
   const session = useMemo<UserSession>(() => {
-    if (typeof window === "undefined")
-      return { userId: null, email: null, roles: [] };
+    if (!isClientMounted) return { userId: null, email: null, roles: [] };
     return getUserSessionFromToken(getAuthToken());
-  }, [contactUnlocked]);
+  }, [isClientMounted, contactUnlocked]);
 
   const isStrictUser =
     session.roles.includes("User") &&
@@ -1244,12 +1252,18 @@ export default function SeoPage({
                     business={{
                       businessToken: businessData.detail.businessToken,
                       name: businessData.detail.name,
+                      description: businessData.detail.description,
                       address: businessData.detail.address,
                       rating: businessData.detail.rating,
                       totalReviews: businessData.detail.totalReviews,
                       canonicalPath: businessData.canonical.canonicalPath,
                       thumbnailUrl: visibleMediaUrls[0] ?? fallbackListThumb,
                     }}
+                  />
+                  <GoogleAdSlot
+                    slot="detail-overview-rectangle"
+                    size="medium-rectangle"
+                    className="pub-detail-ad"
                   />
                   {businessData.detail.phone ? (
                     <div className="pub-contact-panel">
@@ -1299,21 +1313,22 @@ export default function SeoPage({
                       )}
                     </div>
                   ) : null}
-                  {toExternalUrl(businessData.detail.websiteLink) ? (
+                  {(() => {
+                    const siteUrl = toExternalUrl(businessData.detail.websiteLink);
+                    return siteUrl ? (
                     <p>
                       Website:{" "}
                       <a
                         style={{ overflowWrap: "anywhere" }}
-                        href={
-                          toExternalUrl(businessData.detail.websiteLink) ?? "#"
-                        }
+                        href={siteUrl}
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        {businessData.detail.websiteLink}
+                        {siteUrl}
                       </a>
                     </p>
-                  ) : null}
+                    ) : null;
+                  })()}
 
                   {generatedNarrative ? (
                     <div className="pub-hours-block">
@@ -1441,27 +1456,25 @@ export default function SeoPage({
                               <strong>{groupTitle}</strong>
                             ) : null}
                             <table className="pub-hours-table">
-                              {hours.map((row, rowIndex) => (
-                                <tr
-                                  key={`${(row as any).Day ?? row.day ?? "day"}-${rowIndex}`}
-                                >
-                                  <td>
-                                    {
-                                      ((row as any).Day ??
-                                        getDayNameOnly(row.day ?? "") ??
-                                        "Day") as string
-                                    }
-                                    :{" "}
-                                  </td>
-                                  <td>
-                                    {
-                                      ((row as any).Time ??
-                                        parseHoursRange(row.time) ??
-                                        "N/A") as string
-                                    }
-                                  </td>
-                                </tr>
-                              ))}
+                              <tbody>
+                                {hours.map((row, rowIndex) => (
+                                  <tr
+                                    key={`${(row as any).Day ?? row.day ?? "day"}-${rowIndex}`}
+                                  >
+                                    <td>
+                                      {
+                                        ((row as any).Day ??
+                                          getDayNameOnly(row.day ?? "") ??
+                                          "Day") as string
+                                      }
+                                      :{" "}
+                                    </td>
+                                    <td>
+                                    {((row as any).Time ?? row.time ?? "N/A")}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
                             </table>
                           </div>
                         );
@@ -1533,7 +1546,10 @@ export default function SeoPage({
                   {businessData.reviews?.length ? (
                     <div>
                       <h3>Approved Reviews</h3>
-                      <div className="pub-review-list">
+                      <ul
+                        className="pub-review-list"
+                        style={{ listStyle: "none", padding: 0 }}
+                      >
                         {(showAllApprovedReviews
                           ? businessData.reviews
                           : businessData.reviews.slice(0, 4)
@@ -1547,7 +1563,7 @@ export default function SeoPage({
                             <div className="pub-muted">{review.comment}</div>
                           </li>
                         ))}
-                      </div>
+                      </ul>
                       {businessData.reviews.length > 4 ? (
                         <button
                           type="button"
@@ -1757,6 +1773,11 @@ export default function SeoPage({
             </>
           ) : apiData ? (
             <>
+              <GoogleAdSlot
+                slot="list-top-leaderboard"
+                size="leaderboard"
+                className="pub-ad-placement"
+              />
               <p>
                 Found <strong>{apiData.pagination.totalCount}</strong> listings.
               </p>
@@ -1793,43 +1814,20 @@ export default function SeoPage({
                     return (
                       <div key={`${item.businessToken}-with-ad`}>
                         {card}
-                        <div
-                          className="pub-ad pub-ad-inline"
-                          style={{ marginTop: 12 }}
-                        >
-                          <div
-                            className="pub-ad-media"
-                            role="img"
-                            aria-label="Advertisement placeholder"
-                          >
-                            Ad space
-                          </div>
-                          <div className="pub-ad-body">
-                            <h3 className="pub-ad-title">Sponsored listing</h3>
-                            <p className="pub-muted">
-                              Promote your business in this result list.
-                            </p>
-                          </div>
-                        </div>
+                        <GoogleAdSlot
+                          slot="list-in-feed-after-third"
+                          size="in-feed"
+                          className="pub-ad-placement"
+                        />
                       </div>
                     );
                   })}
                   {apiData.items.length > 0 && apiData.items.length < 3 ? (
-                    <div className="pub-ad pub-ad-inline">
-                      <div
-                        className="pub-ad-media"
-                        role="img"
-                        aria-label="Advertisement placeholder"
-                      >
-                        Ad space
-                      </div>
-                      <div className="pub-ad-body">
-                        <h3 className="pub-ad-title">Sponsored listing</h3>
-                        <p className="pub-muted">
-                          Promote your business in this result list.
-                        </p>
-                      </div>
-                    </div>
+                    <GoogleAdSlot
+                      slot="list-in-feed-short-results"
+                      size="in-feed"
+                      className="pub-ad-placement"
+                    />
                   ) : null}
                 </div>
               )}

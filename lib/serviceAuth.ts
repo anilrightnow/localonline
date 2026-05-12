@@ -39,11 +39,14 @@ export async function getServiceToken(apiBaseUrl: string): Promise<string | null
 
   let res: Response | null = null;
   for (let attempt = 0; attempt <= 2; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     try {
       res = await fetch(`${apiBaseUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       });
       if (!res.ok && isRetriableStatus(res.status) && attempt < 2) {
         await sleep(350 * (attempt + 1));
@@ -55,6 +58,8 @@ export async function getServiceToken(apiBaseUrl: string): Promise<string | null
         throw err;
       }
       await sleep(350 * (attempt + 1));
+    } finally {
+      clearTimeout(timeout);
     }
   }
   if (!res) {
@@ -79,7 +84,14 @@ export async function fetchWithServiceAuth(
   init?: RequestInit,
   authToken?: string | null,
 ): Promise<Response> {
-  const token = authToken ?? (await getServiceToken(apiBaseUrl));
+  let token = authToken ?? null;
+  if (!token) {
+    try {
+      token = await getServiceToken(apiBaseUrl);
+    } catch {
+      token = null;
+    }
+  }
   const headers = new Headers(init?.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
   return fetch(url, { ...init, headers });
@@ -91,7 +103,14 @@ export async function fetchSitemapWithServiceAuth(
   init?: RequestInit,
   authToken?: string | null,
 ): Promise<Response> {
-  const token = authToken ?? (await getServiceToken(apiBaseUrl));
+  let token = authToken ?? null;
+  if (!token) {
+    try {
+      token = await getServiceToken(apiBaseUrl);
+    } catch {
+      token = null;
+    }
+  }
   const headers = new Headers(init?.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
   headers.set("Accept", "application/xml");

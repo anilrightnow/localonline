@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import GlobalSearch from "./GlobalSearch";
-import { getApiBaseUrl } from "../../lib/publicApi";
 import TopProgress from "../shared/TopProgress";
 import { clearAuthTokenCookie, getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
@@ -56,13 +55,12 @@ export default function SiteShell({ children }: SiteShellProps) {
 
   useEffect(() => {
     let mounted = true;
-    const apiBaseUrl = getApiBaseUrl();
     const token = getAuthToken();
-    const authHeaders = token
-      ? { Authorization: `Bearer ${token}` }
+    const requestInit = token
+      ? { headers: { Authorization: `Bearer ${token}` } }
       : undefined;
 
-    fetch(`${apiBaseUrl}/api/analytics/site/summary`)
+    apiFetch("/api/analytics/site/summary", requestInit)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!mounted || !data) return;
@@ -70,7 +68,7 @@ export default function SiteShell({ children }: SiteShellProps) {
         if (!Number.isNaN(total)) setSiteVisitors(total);
       })
       .catch(() => null);
-    fetch(`${apiBaseUrl}/api/public/settings`, { headers: authHeaders })
+    apiFetch("/api/public/settings", requestInit)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!mounted || !data) return;

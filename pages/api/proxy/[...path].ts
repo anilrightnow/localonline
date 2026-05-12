@@ -26,9 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const token = await getServiceToken(apiBaseUrl);
       if (token) authHeader = `Bearer ${token}`;
-    } catch (err: any) {
-      res.status(500).json({ message: err?.message || "Service auth failed." });
-      return;
+    } catch {
+      authHeader = undefined;
     }
   }
 

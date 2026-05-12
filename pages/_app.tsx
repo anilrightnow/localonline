@@ -7,6 +7,9 @@ import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
 import { useApiHealth } from "../lib/useApiHealth";
 
+const isGoogleAdsEnabled =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ENABLED === "true";
+
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { isHealthy } = useApiHealth();
@@ -71,20 +74,26 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="Local Online" />
         <meta name="apple-mobile-web-app-title" content="Local Online" />
         <meta name="theme-color" content="#0f766e" />
+        {isGoogleAdsEnabled && (
+          <meta
+            name="google-adsense-account"
+            content="ca-pub-8129203343952744"
+          />
+        )}
         <link
           rel="icon"
           type="image/png"
-          href="favicon-96x96.png"
+          href="/favicon-96x96.png"
           sizes="96x96"
         />
-        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="apple-touch-icon.png"
+          href="/apple-touch-icon.png"
         />
-        <link rel="manifest" href="site.webmanifest" />
+        <link rel="manifest" href="/site.webmanifest" />
       </Head>
       <Script id="trusted-types" strategy="beforeInteractive">
         {`
@@ -101,19 +110,23 @@ export default function App({ Component, pageProps }: AppProps) {
           }
         `}
       </Script>
-      <Script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-Y671521B04"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-Y671521B04');
-        `}
-      </Script>
+      {isGoogleAdsEnabled && (
+        <>
+          <Script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-Y671521B04"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-Y671521B04');
+            `}
+          </Script>
+        </>
+      )}
       <Component {...pageProps} />
     </>
   );

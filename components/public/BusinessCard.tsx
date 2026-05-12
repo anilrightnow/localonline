@@ -23,6 +23,37 @@ function toStars(value?: number | null): string {
   return `${"\u2605".repeat(rounded)}${"\u2606".repeat(5 - rounded)}`;
 }
 
+function cleanText(value?: string | null): string {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildBusinessDescription(
+  business: SearchBusinessItem,
+  fallbackCategory?: string,
+  fallbackArea?: string,
+  fallbackCity?: string,
+): string {
+  const description = cleanText(business.description);
+  if (description) return description;
+
+  const location = [cleanText(fallbackArea), cleanText(fallbackCity)]
+    .filter(Boolean)
+    .join(", ");
+  const category = cleanText(fallbackCategory);
+  const address = cleanText(business.address);
+  const reviewText =
+    business.rating != null
+      ? ` Rated ${business.rating.toFixed(1)} from ${business.totalReviews ?? 0} reviews.`
+      : "";
+  const locationText = location ? ` in ${location}` : "";
+  const categoryText = category ? `${category} business` : "local business";
+  const addressText = address ? ` Located at ${address}.` : "";
+
+  return `${business.name} is a ${categoryText}${locationText}.${addressText}${reviewText} View contact details, reviews, and directions for this listing.`;
+}
+
 export default function BusinessCard({
   business,
   variant = "grid",
@@ -38,6 +69,12 @@ export default function BusinessCard({
     businessName: business.name,
   });
   const thumb = resolveBusinessThumbnail(business, fallback);
+  const description = buildBusinessDescription(
+    business,
+    fallbackCategory,
+    fallbackArea,
+    fallbackCity,
+  );
 
   return (
     <article
@@ -100,9 +137,7 @@ export default function BusinessCard({
           {business.address ?? "Address unavailable"}
         </p>
 
-        {variant === "list" && business.description && (
-          <p className="pub-biz-desc">{business.description}</p>
-        )}
+        <p className="pub-biz-desc">{description}</p>
 
         {/* Added Action Buttons for better UX/Monetization tracking */}
         <div className="pub-biz-actions">
@@ -110,11 +145,6 @@ export default function BusinessCard({
             <a href={`tel:${business.phone}`} className="pub-btn-call">
               <Phone size={14} /> Call
             </a>
-          )}
-          {showDetailsButton && (
-            <Link href={business.canonicalPath} className="pub-btn-view">
-              Details <ArrowRight size={14} />
-            </Link>
           )}
         </div>
       </div>

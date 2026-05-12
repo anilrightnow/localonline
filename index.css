@@ -1453,7 +1453,7 @@ select.form-select {
 .pub-biz-card-list {
   flex-direction: row; /* Side-by-side for Search results */
   max-width: 100%;
-  max-height: 220px;
+  max-height: 251px;
   margin-bottom: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1530,6 +1530,107 @@ position: relative;
 
 .pub-ad-inline {
   background: color-mix(in oklab, var(--surface) 90%, #38bdf8 10%);
+}
+
+.pub-ad-placement {
+  margin: 16px 0;
+}
+
+.pub-google-ad {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
+    var(--surface);
+  color: var(--text);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.pub-google-ad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+
+.pub-google-ad-label {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface) 92%, white 8%);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
+.pub-google-ad-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  padding: 14px;
+  text-align: center;
+}
+
+.pub-google-ad-inner strong {
+  font-size: 0.95rem;
+}
+
+.pub-google-ad-inner span,
+.pub-google-ad-inner small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.pub-google-ad-leaderboard {
+  min-height: 90px;
+  max-width: 970px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pub-google-ad-large-mobile-banner {
+  min-height: 100px;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pub-google-ad-in-feed {
+  min-height: 170px;
+}
+
+.pub-google-ad-medium-rectangle {
+  min-height: 250px;
+  max-width: 336px;
+}
+
+.pub-google-ad-responsive-display {
+  min-height: 280px;
+}
+
+.pub-grid-ad-span {
+  grid-column: 1 / -1;
+}
+
+.pub-detail-ad {
+  margin: 14px 0 18px;
 }
 
 .pub-modal-backdrop {
@@ -1647,7 +1748,7 @@ margin: 0 0 8px 0;
   color: var(--slate-600);
   font-size: 0.9rem;
   line-height: 1.5;
-  margin: 0 0 16px;
+  margin: 0 0 0 0px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1693,6 +1794,15 @@ margin: 0 0 8px 0;
 
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
+  .pub-google-ad-leaderboard {
+    min-height: 100px;
+    max-width: 320px;
+  }
+
+  .pub-google-ad-medium-rectangle {
+    max-width: 100%;
+  }
+
   .pub-biz-card.pub-biz-card-list {
     flex-direction: column;
     max-height: none;

@@ -8,10 +8,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const cookieToken = getAuthTokenFromCookieHeader(req.headers.cookie);
     const incomingAuth =
       req.headers.authorization ?? (cookieToken ? `Bearer ${cookieToken}` : undefined);
-    const token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
-    if (!incomingAuth && !token) {
-      res.status(500).json([]);
-      return;
+    let token: string | null = null;
+    if (!incomingAuth) {
+      try {
+        token = await getServiceToken(apiBaseUrl);
+      } catch {
+        token = null;
+      }
     }
     const response = await fetch(`${apiBaseUrl}/api/public-search/cities`, {
       headers: {

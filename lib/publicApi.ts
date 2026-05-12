@@ -149,13 +149,17 @@ function notifyLoading(active: boolean) {
 async function fetchWithRetry(url: string, init?: RequestInit, retries = 2) {
   let attempt = 0;
   while (true) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch(url, init);
+      const response = await fetch(url, { ...init, signal: controller.signal });
       if (!isRetriableStatus(response.status) || attempt >= retries) {
         return response;
       }
     } catch (err) {
       if (attempt >= retries) throw err;
+    } finally {
+      clearTimeout(timeout);
     }
     attempt += 1;
     await sleep(350 * attempt);
@@ -172,23 +176,36 @@ async function fetchJson<T>(
   if (typeof window === "undefined") {
     const { getServiceToken } = await import("./serviceAuth");
     const apiBaseUrl = getApiBaseUrl();
-    const token = authToken ?? (await getServiceToken(apiBaseUrl));
-    const response = await fetchWithRetry(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
-    if (!response.ok) {
+    let token = authToken ?? null;
+    if (!token) {
+      try {
+        token = await getServiceToken(apiBaseUrl);
+      } catch {
+        token = null;
+      }
+    }
+    let response: Response;
+    try {
+      response = await fetchWithRetry(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+    } catch {
       return null;
     }
+    if (!response.ok) return null;
     return (await response.json()) as T;
   }
   notifyLoading(true);
   try {
-    const response = await fetchWithRetry(url, {
-      headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
-    });
-    if (!response.ok) {
+    let response: Response;
+    try {
+      response = await fetchWithRetry(url, {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+      });
+    } catch {
       return null;
     }
+    if (!response.ok) return null;
     return (await response.json()) as T;
   } finally {
     notifyLoading(false);

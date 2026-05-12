@@ -1,8 +1,10 @@
 import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
+import GoogleAdSlot from "../components/public/GoogleAdSlot";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
@@ -72,6 +74,12 @@ export default function HomePage({
           <h1 className="pub-title">{data.seo.h1}</h1>
           <p className="pub-subtitle">{data.seo.description}</p>
         </section>
+
+        <GoogleAdSlot
+          slot="home-top-leaderboard"
+          size="leaderboard"
+          className="pub-ad-placement"
+        />
 
         <SectionCard title="Advertise Here">
           <AdRequestCard
@@ -158,8 +166,18 @@ export default function HomePage({
             <p className="pub-muted">No featured businesses available yet.</p>
           ) : (
             <div className="pub-grid">
-              {data.featuredBusinesses.map((biz) => (
-                <BusinessCard key={biz.businessToken} business={biz} />
+              {data.featuredBusinesses.map((biz, index) => (
+                <Fragment key={biz.businessToken}>
+                  <BusinessCard key={biz.businessToken} business={biz} />
+                  {index === 5 ? (
+                    <GoogleAdSlot
+                      key="home-featured-in-feed-ad"
+                      slot="home-featured-in-feed"
+                      size="in-feed"
+                      className="pub-grid-ad-span"
+                    />
+                  ) : null}
+                </Fragment>
               ))}
             </div>
           )}

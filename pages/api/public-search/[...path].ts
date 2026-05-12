@@ -14,9 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let token: string | null = null;
   try {
     token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
-  } catch (err: any) {
-    res.status(500).json({ message: err?.message || "Service auth failed." });
-    return;
+  } catch {
+    token = null;
   }
   const response = await fetch(targetUrl, {
     method: req.method,

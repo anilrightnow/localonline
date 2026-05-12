@@ -1313,22 +1313,21 @@ export default function SeoPage({
                       )}
                     </div>
                   ) : null}
-                  {(() => {
-                    const siteUrl = toExternalUrl(businessData.detail.websiteLink);
-                    return siteUrl ? (
+                  {toExternalUrl(businessData.detail.websiteLink) ? (
                     <p>
                       Website:{" "}
                       <a
                         style={{ overflowWrap: "anywhere" }}
-                        href={siteUrl}
+                        href={
+                          toExternalUrl(businessData.detail.websiteLink) ?? "#"
+                        }
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        {siteUrl}
+                        {toExternalUrl(businessData.detail.websiteLink)}
                       </a>
                     </p>
-                    ) : null;
-                  })()}
+                  ) : null}
 
                   {generatedNarrative ? (
                     <div className="pub-hours-block">
@@ -1470,7 +1469,7 @@ export default function SeoPage({
                                       :{" "}
                                     </td>
                                     <td>
-                                    {((row as any).Time ?? row.time ?? "N/A")}
+                                      {(row as any).Time ?? row.time ?? "N/A"}
                                     </td>
                                   </tr>
                                 ))}

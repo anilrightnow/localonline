@@ -2,7 +2,24 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import AdminLayout from "@/AdminLayout";
+import { useRequireAuth } from "@/lib/auth";
+import { getUserSessionFromToken } from "@/lib/session";
 import styles from "./success.module.css";
+import {
+  LayoutDashboard,
+  DollarSign,
+  List,
+  MessageSquare,
+  Settings,
+} from "lucide-react";
+
+const adminNavItems = [
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Monetization", href: "/admin/monetization", icon: DollarSign },
+  { label: "Listings", href: "/admin/listings", icon: List },
+  { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
+];
 
 export default function SuccessPage() {
   const router = useRouter();
@@ -26,6 +43,23 @@ export default function SuccessPage() {
     }
   }, [countdown, router]);
 
+  const { isAuthenticated, isChecking, token } = useRequireAuth();
+
+  if (isChecking) {
+    // Render a loading state while authentication is being checked
+    return <div>Loading authentication...</div>;
+  }
+
+  if (!isAuthenticated) {
+    // The useRequireAuth hook handles redirection if not authenticated,
+    // so we can return null here or a minimal message.
+    return null;
+  }
+
+  const session = getUserSessionFromToken(token);
+  const userRole = session.roles.length > 0 ? session.roles[0] : "User"; // Use the first role found
+  const userName = session.email || "Unknown User"; // Fallback if email is not available
+
   const getServiceName = () => {
     switch (serviceType) {
       case "featured-listing":
@@ -42,7 +76,12 @@ export default function SuccessPage() {
   };
 
   return (
-    <AdminLayout title="Payment Successful">
+    <AdminLayout
+      title="Payment Successful"
+      userRole={userRole}
+      userName={userName}
+      navItems={adminNavItems}
+    >
       <div className={styles.container}>
         <div className={styles.successCard}>
           <div className={styles.checkmark}>
@@ -63,11 +102,11 @@ export default function SuccessPage() {
           <div className={styles.details}>
             <div className={styles.detail}>
               <span className={styles.label}>Service:</span>
-              <span className={styles.value}>{getServiceName()}</span>
+              <span className={styles.value}>{String(getServiceName())}</span>
             </div>
             <div className={styles.detail}>
               <span className={styles.label}>Payment ID:</span>
-              <span className={styles.value}>{paymentId}</span>
+              <span className={styles.value}>{String(paymentId || "")}</span>
             </div>
             {cid && (
               <div className={styles.detail}>
@@ -84,11 +123,11 @@ export default function SuccessPage() {
           </div>
 
           <div className={styles.actions}>
-            <Link href="/dashboard">
-              <a className={styles.primaryBtn}>Go to Dashboard</a>
+            <Link href="/dashboard" className={styles.primaryBtn}>
+              Go to Dashboard
             </Link>
-            <Link href="/">
-              <a className={styles.secondaryBtn}>Back to Home</a>
+            <Link href="/" className={styles.secondaryBtn}>
+              Back to Home
             </Link>
           </div>
 

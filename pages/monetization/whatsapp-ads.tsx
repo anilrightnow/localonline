@@ -2,8 +2,26 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/AdminLayout";
 import { apiClient } from "@/lib/apiClient";
+import { useRequireAuth } from "@/lib/auth";
+import { getUserSessionFromToken } from "@/lib/session";
 import RazorpayPaymentButton from "@/components/monetization/RazorpayPaymentButton";
 import styles from "./whatsapp-ads.module.css";
+import {
+  LayoutDashboard,
+  DollarSign,
+  List,
+  MessageSquare,
+  Settings,
+} from "lucide-react";
+
+// Define navigation items for the admin layout
+const adminNavItems = [
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Monetization", href: "/admin/monetization", icon: DollarSign },
+  { label: "Listings", href: "/admin/listings", icon: List },
+  { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
+];
 
 export default function WhatsAppAdsPage() {
   const router = useRouter();
@@ -16,6 +34,23 @@ export default function WhatsAppAdsPage() {
   const [error, setError] = useState<string | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
+
+  const { isAuthenticated, isChecking, token } = useRequireAuth();
+
+  if (isChecking) {
+    // Render a loading state while authentication is being checked
+    return <div>Loading authentication...</div>;
+  }
+
+  if (!isAuthenticated) {
+    // The useRequireAuth hook handles redirection if not authenticated,
+    // so we can return null here or a minimal message.
+    return null;
+  }
+
+  const session = getUserSessionFromToken(token);
+  const userRole = session.roles.length > 0 ? session.roles[0] : "User"; // Use the first role found
+  const userName = session.email || "Unknown User"; // Fallback if email is not available
 
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +102,12 @@ export default function WhatsAppAdsPage() {
 
   if (campaignId && paymentId) {
     return (
-      <AdminLayout title="WhatsApp Campaign - Payment">
+      <AdminLayout
+        title="WhatsApp Campaign - Payment"
+        userRole={userRole}
+        userName={userName}
+        navItems={adminNavItems}
+      >
         <div className={styles.container}>
           <div className={styles.card}>
             <h2>Complete Your WhatsApp Campaign</h2>
@@ -139,7 +179,12 @@ export default function WhatsAppAdsPage() {
   }
 
   return (
-    <AdminLayout title="Create WhatsApp Campaign">
+    <AdminLayout
+      title="Create WhatsApp Campaign"
+      userRole={userRole}
+      userName={userName}
+      navItems={adminNavItems}
+    >
       <div className={styles.container}>
         <div className={styles.card}>
           <h2>Create WhatsApp Campaign</h2>

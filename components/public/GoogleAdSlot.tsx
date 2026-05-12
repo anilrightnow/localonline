@@ -12,6 +12,9 @@ type GoogleAdSlotProps = {
   className?: string;
 };
 
+const isGoogleAdsEnabled =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ENABLED === "true";
+
 const sizeMap: Record<
   GoogleAdSize,
   { title: string; dimensions: string; format: string }
@@ -49,6 +52,10 @@ export default function GoogleAdSlot({
   label,
   className = "",
 }: GoogleAdSlotProps) {
+  if (!isGoogleAdsEnabled) {
+    return null;
+  }
+
   const meta = sizeMap[size];
 
   return (
@@ -69,9 +76,7 @@ export default function GoogleAdSlot({
   );
 }
 
-export function GoogleLeaderboardAd(
-  props: Omit<GoogleAdSlotProps, "size">,
-) {
+export function GoogleLeaderboardAd(props: Omit<GoogleAdSlotProps, "size">) {
   return <GoogleAdSlot {...props} size="leaderboard" />;
 }
 

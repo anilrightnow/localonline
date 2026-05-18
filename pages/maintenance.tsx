@@ -213,7 +213,7 @@ export default function MaintenancePage() {
               ✉️ support@localonline.in
             </a>
             <a
-              href="tel:+919015593157"
+              href="tel:+919268109317"
               style={{
                 color: "#667eea",
                 textDecoration: "none",
@@ -231,7 +231,7 @@ export default function MaintenancePage() {
                   "none";
               }}
             >
-              📞 +91 9015593157
+              📞 +91 9268109317
             </a>
           </div>
         </div>

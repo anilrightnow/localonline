@@ -111,6 +111,30 @@ export default function AboutPage() {
             <li>Discover local events and communities in one place.</li>
           </ul>
         </SectionCard>
+
+        <SectionCard title="Contact Our Team">
+          <p>
+            Have questions or need assistance? Our support team is ready to help
+            you navigate your neighborhood marketplace.
+          </p>
+          <ul>
+            <li>
+              <strong>Email:</strong>{" "}
+              <a href="mailto:support@localonline.in">support@localonline.in</a>
+            </li>
+            <li>
+              <strong>Phone:</strong>{" "}
+              <a href="tel:+919268109317">+91 9268109317</a>
+            </li>
+          </ul>
+          <p style={{ marginTop: 15 }}>
+            You can also visit our{" "}
+            <a href="/contact" style={{ fontWeight: 600 }}>
+              Contact Us
+            </a>{" "}
+            page to send us a direct message.
+          </p>
+        </SectionCard>
       </SiteShell>
     </>
   );

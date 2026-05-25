@@ -1,4 +1,6 @@
-﻿import type { GetServerSideProps } from "next";
+import type { GetServerSideProps } from "next";
+import { fetchBlogSitemapCount, getApiBaseUrl } from "../lib/publicApi";
+
 type Props = Record<string, never>;
 
 function getSiteBase(req: Parameters<GetServerSideProps>[0]["req"]): string {
@@ -28,12 +30,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   res,
 }) => {
   const siteBase = getSiteBase(req);
+  const blogSitemapCount = await fetchBlogSitemapCount(getApiBaseUrl());
+  const blogShardCount = Math.max(1, blogSitemapCount?.shardCount ?? 1);
+  const blogPaths = Array.from(
+    { length: blogShardCount },
+    (_, index) => `/sitemaps/blogs/${index + 1}.xml`,
+  );
   const paths = [
     "/sitemaps/cities.xml",
     "/sitemaps/city-areas.xml",
     "/sitemaps/city-categories/1.xml",
     "/sitemaps/city-area-categories/1.xml",
     "/sitemaps/businesses/1.xml",
+    ...blogPaths,
     "/sitemaps/city-area-place-types/1.xml",
     "/sitemaps/city-area-place-type-places/1.xml",
   ];

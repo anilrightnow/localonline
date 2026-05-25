@@ -162,6 +162,9 @@ export default function SiteShell({ children }: SiteShellProps) {
               <Link className="pub-footer-link" href="/about">
                 About
               </Link>
+              <Link className="pub-footer-link" href="/blog">
+                Blog
+              </Link>
               <Link className="pub-footer-link" href="/privacy">
                 Privacy
               </Link>

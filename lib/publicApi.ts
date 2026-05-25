@@ -129,6 +129,36 @@ export type SitemapResponse = {
 body: string;
 }
 
+export type BlogPostSummary = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  featuredImage?: string | null;
+  authorName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BlogPost = BlogPostSummary & {
+  content: string;
+};
+
+export type BlogListResponse = {
+  items: BlogPostSummary[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalCount: number;
+  };
+};
+
+export type BlogSitemapCountResponse = {
+  totalCount: number;
+  shardSize: number;
+  shardCount: number;
+};
+
 export function getApiBaseUrl() {
   return process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
 }
@@ -267,4 +297,24 @@ export async function fetchSitemapData(
   return fetchJson<SitemapResponse>(`${apiBaseUrl}/${siteMapPath}`, {
     authToken,
   });
+}
+
+export async function fetchBlogPosts(apiBaseUrl: string, page = 1, limit = 12) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  return fetchJson<BlogListResponse>(`${apiBaseUrl}/api/blogs?${params}`);
+}
+
+export async function fetchBlogPost(apiBaseUrl: string, slug: string) {
+  return fetchJson<BlogPost>(
+    `${apiBaseUrl}/api/blogs/${encodeURIComponent(slug)}`,
+  );
+}
+
+export async function fetchBlogSitemapCount(apiBaseUrl: string) {
+  return fetchJson<BlogSitemapCountResponse>(
+    `${apiBaseUrl}/api/blogs/sitemap-count`,
+  );
 }

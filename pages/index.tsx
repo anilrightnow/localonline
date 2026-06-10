@@ -106,7 +106,7 @@ export default function HomePage({
             </div>
           </div>
         </section>
-        <div className="home-ad-banner">
+        <section className="home-ad-banner">
           <Script id="at-options" strategy="afterInteractive">
             {`
               atOptions = {
@@ -122,9 +122,9 @@ export default function HomePage({
             src="https://www.highperformanceformat.com/62432709b5a6fdf9300bdb63f72a30b0/invoke.js"
             strategy="afterInteractive"
           />
-        </div>
+        </section>
 
-        <div className="home-ad-banner">
+        <section className="home-ad-banner">
           {/* @ts-ignore */}
           <AdRequestCard
             variant="banner"
@@ -132,61 +132,19 @@ export default function HomePage({
             subtitle="Promote your business to thousands of residents across Noida Extension, Gaur City, and Crossing Republik."
             ctaLabel="Advertise With Us"
           />
-        </div>
+        </section>
 
-        <div className="bento-container">
-          <div className="bento-full">
-            <SectionCard title="Explore Search Paths">
-              <SeoLinkSections
-                links={{
-                  cities: data.topCities,
-                  categories: data.topCategories,
-                  areas: data.topAreas,
-                  placeTypes: data.topPlaceTypes,
-                  places: [],
-                }}
-              />
-            </SectionCard>
-          </div>
-        </div>
-
-        <style jsx>{`
-          .bento-container {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 20px;
-            padding: 20px;
-          }
-          .bento-full {
-            grid-column: span 12;
-          }
-          .home-ad-banner {
-            padding: 0 20px;
-            margin-top: 20px;
-          }
-          .pub-grid :global(.pub-ad-card.variant-banner) {
-            grid-column: 1 / -1;
-            width: 100%;
-          }
-          .pub-grid :global(.pub-ad-media) {
-            width: 100%;
-            height: 200px;
-            overflow: hidden;
-          } /* Closing brace added here */
-          .pub-grid :global(.pub-ad-media img) {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          @media (max-width: 768px) {
-            .bento-container {
-              grid-template-columns: 1fr;
-            }
-            .bento-full {
-              grid-column: span 12;
-            }
-          }
-        `}</style>
+        <SectionCard title="Explore Search Paths">
+          <SeoLinkSections
+            links={{
+              cities: data.topCities,
+              categories: data.topCategories,
+              areas: data.topAreas,
+              placeTypes: data.topPlaceTypes,
+              places: [],
+            }}
+          />
+        </SectionCard>
 
         <SectionCard
           title="How This Works"

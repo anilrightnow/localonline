@@ -6,7 +6,15 @@ import TopProgress from "../shared/TopProgress";
 import { clearAuthTokenCookie, getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
 import { getUserSessionFromToken } from "../../lib/session";
-import { LogIn, LogOut, User, Sun, Moon, PlusCircle } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  User,
+  Sun,
+  Moon,
+  PlusCircle,
+  ArrowUp,
+} from "lucide-react";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -17,6 +25,7 @@ export default function SiteShell({ children }: SiteShellProps) {
   const [isClient, setIsClient] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [siteVisitors, setSiteVisitors] = useState<number | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [siteName, setSiteName] = useState("LocalOnline");
   const [supportEmail, setSupportEmail] = useState<string | null>(
     "support@localonline.in",
@@ -42,6 +51,18 @@ export default function SiteShell({ children }: SiteShellProps) {
     document.cookie = `theme=${darkMode ? "dark" : "light"}; Path=/; Expires=${expires.toUTCString()}`;
     return () => document.body.classList.remove("theme-dark");
   }, [darkMode]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   async function onLogout() {
     if (typeof window === "undefined") return;
@@ -159,11 +180,9 @@ export default function SiteShell({ children }: SiteShellProps) {
                   {supportEmail}
                 </a>
               ) : null}
-              <br />
-              <a className="pub-footer-link" href="tel:9268109317">
-                Mobile: 9268109317
+              <a className="pub-footer-link" href="tel:9218109317">
+                Mobile: 9218109317
               </a>
-              <p>Timing: Mon-Sat 9AM-5PM</p>
             </div>
             <div className="pub-footer-links">
               <p className="pub-footer-title">Company</p>
@@ -201,6 +220,16 @@ export default function SiteShell({ children }: SiteShellProps) {
           </p>
         </div>
       </footer>
+
+      {showScrollTop && (
+        <button
+          className="scroll-to-top"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <ArrowUp size={24} />
+        </button>
+      )}
     </div>
   );
 }

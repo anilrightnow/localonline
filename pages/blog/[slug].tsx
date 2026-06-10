@@ -26,7 +26,10 @@ const emptyLinks: RelatedLinks = {
 };
 
 function getSiteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(
+    /\/+$/,
+    "",
+  );
 }
 
 function sanitizeHtml(html: string) {
@@ -47,7 +50,9 @@ function formatDate(value: string) {
   });
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<Props> = async ({
+  params,
+}) => {
   const slug = String(params?.slug || "");
   const apiBaseUrl = getApiBaseUrl();
   const [post, homeData] = await Promise.all([
@@ -136,10 +141,14 @@ export default function BlogPostPage({ post, links }: Props) {
             <p className="blog-lede">{post.excerpt}</p>
             {post.featuredImage ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.featuredImage} alt="" className="blog-featured-image" />
+              <img
+                src={post.featuredImage}
+                alt=""
+                className="blog-featured-image"
+              />
             ) : null}
           </header>
-          <div
+          <section
             className="blog-content"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />

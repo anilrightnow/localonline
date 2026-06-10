@@ -125,6 +125,12 @@ export default function App({ Component, pageProps }: AppProps) {
             letter-spacing: -0.03em;
             text-transform: uppercase;
           }
+          .pub-container {
+            max-width: 1600px !important;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+          }
           .pub-card, section, .section-card-inner {
             background-color: var(--surface) !important;
             border: 1px solid var(--border) !important;

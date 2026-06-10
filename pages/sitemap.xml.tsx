@@ -1,6 +1,5 @@
 import type { GetServerSideProps } from "next";
 import { fetchBlogSitemapCount, getApiBaseUrl } from "../lib/publicApi";
-
 type Props = Record<string, never>;
 
 function getSiteBase(req: Parameters<GetServerSideProps>[0]["req"]): string {

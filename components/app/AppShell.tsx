@@ -1,6 +1,10 @@
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
-import { clearAuthTokenCookie, getAuthToken, useRequireAuth } from "../../lib/auth";
+import {
+  clearAuthTokenCookie,
+  getAuthToken,
+  useRequireAuth,
+} from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import TopProgress from "../shared/TopProgress";
@@ -13,6 +17,7 @@ import {
   ClipboardCheck,
   FileText,
   Gavel,
+  Import,
   LayoutDashboard,
   Megaphone,
   Settings,
@@ -45,7 +50,11 @@ const USER_NAV: NavItem[] = [
 const ADMIN_NAV: NavItem[] = [
   { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: BadgeDollarSign },
+  {
+    href: "/admin/subscriptions",
+    label: "Subscriptions",
+    icon: BadgeDollarSign,
+  },
   { href: "/admin/promotions", label: "Promotions", icon: Megaphone },
   { href: "/admin/ad-requests", label: "Ad Requests", icon: ClipboardCheck },
   { href: "/admin/listing-updates", label: "Listing Updates", icon: FileText },
@@ -55,19 +64,39 @@ const ADMIN_NAV: NavItem[] = [
 ];
 
 const SUPERADMIN_NAV: NavItem[] = [
-  { href: "/superadmin/settings", label: "SuperAdmin Settings", icon: Settings },
+  {
+    href: "/superadmin/settings",
+    label: "SuperAdmin Settings",
+    icon: Settings,
+  },
   { href: "/superadmin/users", label: "User Management", icon: Users },
   { href: "/superadmin/roles", label: "Role Management", icon: ShieldCheck },
+  {
+    label: "Data Import",
+    href: "/admin/import-sql",
+    icon: Import,
+  },
 ];
 
-export default function AppShell({ title, subtitle, requiredRole, children }: AppShellProps) {
+export default function AppShell({
+  title,
+  subtitle,
+  requiredRole,
+  children,
+}: AppShellProps) {
   const router = useRouter();
   const { isChecking, isAuthenticated } = useRequireAuth();
   const session = useMemo(() => getUserSessionFromToken(getAuthToken()), []);
   const isAdmin = hasRole(session, "Admin");
   const isSuperAdmin = hasRole(session, "SuperAdmin");
   const isOwner = session.roles.includes("Owner");
-  const roleLabel = isSuperAdmin ? "SuperAdmin" : isAdmin ? "Admin" : isOwner ? "Owner" : "User";
+  const roleLabel = isSuperAdmin
+    ? "SuperAdmin"
+    : isAdmin
+      ? "Admin"
+      : isOwner
+        ? "Owner"
+        : "User";
   const displayName = session.email ?? "Signed in";
 
   const nav = [
@@ -111,7 +140,11 @@ export default function AppShell({ title, subtitle, requiredRole, children }: Ap
         >
           <section className="app-card">
             <div className="app-actions">
-              <button className="btn btn-primary" type="button" onClick={() => router.push("/profile")}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => router.push("/profile")}
+              >
                 Go to profile
               </button>
             </div>

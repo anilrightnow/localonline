@@ -7,6 +7,7 @@ import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
 import SeoLinkSections from "../components/public/SeoLinkSections";
 import SiteShell from "../components/public/SiteShell";
+import HomeCategoryLinks from "../components/public/HomeCategoryLinks";
 import {
   fetchHomeData,
   getApiBaseUrl,
@@ -69,31 +70,111 @@ export default function HomePage({
         />
       </Head>
       <SiteShell>
-        <section className="pub-hero">
-          <h1 className="pub-title">{data.seo.h1}</h1>
-          <p className="pub-subtitle">{data.seo.description}</p>
+        <section className="pub-home-hero">
+          {/* 1. The Background Video */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="pub-home-hero-video"
+            poster="/ads_place_holder.png"
+          >
+            <source src="/uploads/localonline-banner.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          {/* 
+      Note: The dark overlay (::after) is automatically 
+      applied via your index.css (lines 1838-1844).
+  */}
+
+          {/* 2. The Content Layer */}
+          <div className="pub-container">
+            <div className="pub-kicker">Empowering Local Markets</div>
+            <h1 className="pub-title">{data.seo.h1}</h1>
+            <p className="pub-subtitle">{data.seo.description}</p>
+
+            <div className="pub-hero-chips">
+              <a href="/owner/listing" className="pub-hero-chip">
+                🚀 List Your Business
+              </a>
+              <a href="#how-it-works" className="pub-hero-chip">
+                💡 How it Works
+              </a>
+            </div>
+          </div>
         </section>
 
-        <SectionCard title="Advertise Here">
+        <div className="home-ad-banner">
+          {/* @ts-ignore */}
           <AdRequestCard
-            title="Reach customers nearby"
-            subtitle="Promote your business in front of local customers exploring these listings."
-            ctaLabel="Send request"
+            variant="banner"
+            title="Grow Your Local Reach"
+            subtitle="Promote your business to thousands of residents across Noida Extension, Gaur City, and Crossing Republik."
+            ctaLabel="Advertise With Us"
           />
-        </SectionCard>
-        <SectionCard title="Explore Local Search Paths">
-          <SeoLinkSections
-            links={{
-              cities: data.topCities,
-              categories: data.topCategories,
-              areas: data.topAreas,
-              placeTypes: data.topPlaceTypes,
-              places: [],
-            }}
-          />
-        </SectionCard>
+        </div>
 
-        <SectionCard title="How This Works" className="how-it-works">
+        <div className="bento-container">
+          <div className="bento-full">
+            <SectionCard title="Explore Search Paths">
+              <SeoLinkSections
+                links={{
+                  cities: data.topCities,
+                  categories: data.topCategories,
+                  areas: data.topAreas,
+                  placeTypes: data.topPlaceTypes,
+                  places: [],
+                }}
+              />
+            </SectionCard>
+          </div>
+        </div>
+
+        <style jsx>{`
+          .bento-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            padding: 20px;
+          }
+          .bento-full {
+            grid-column: span 12;
+          }
+          .home-ad-banner {
+            padding: 0 20px;
+            margin-top: 20px;
+          }
+          .pub-grid :global(.pub-ad-card.variant-banner) {
+            grid-column: 1 / -1;
+            width: 100%;
+          }
+          .pub-grid :global(.pub-ad-media) {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+          } /* Closing brace added here */
+          .pub-grid :global(.pub-ad-media img) {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          @media (max-width: 768px) {
+            .bento-container {
+              grid-template-columns: 1fr;
+            }
+            .bento-full {
+              grid-column: span 12;
+            }
+          }
+        `}</style>
+
+        <SectionCard
+          title="How This Works"
+          className="how-it-works"
+          id="how-it-works"
+        >
           <div className="container">
             <h2 className="section-title">
               Experience <span>LocalOnline</span>
@@ -151,9 +232,16 @@ export default function HomePage({
                 </p>
               </div>
             </div>
+            <div
+              className="pub-hero-chips"
+              style={{ marginTop: "30px", justifyContent: "center" }}
+            >
+              <a href="/how-it-works" className="pub-hero-chip">
+                💡 Read Full How-to Guide
+              </a>
+            </div>
           </div>
         </SectionCard>
-
         <SectionCard title="Featured Businesses">
           {data.featuredBusinesses.length === 0 ? (
             <p className="pub-muted">No featured businesses available yet.</p>
@@ -161,13 +249,22 @@ export default function HomePage({
             <div className="pub-grid">
               {data.featuredBusinesses.map((biz, index) => (
                 <Fragment key={biz.businessToken}>
-                  <BusinessCard key={biz.businessToken} business={biz} />
+                  <BusinessCard business={biz} />
+                  {/* Insert ad banner after every 10th item */}
+                  {(index + 1) % 10 === 0 && (
+                    /* @ts-ignore */
+                    <AdRequestCard
+                      variant="banner"
+                      title="Reach customers nearby"
+                      subtitle="Promote your business here."
+                      ctaLabel="Send request"
+                    />
+                  )}
                 </Fragment>
               ))}
             </div>
           )}
         </SectionCard>
-
         <SectionCard title="For Business Owners">
           <div className="pub-grid-2">
             <p className="pub-muted">
@@ -192,6 +289,39 @@ export default function HomePage({
             <Link className="pub-ad-btn" href="/community/events">
               Local Events
             </Link>
+          </div>
+        </SectionCard>
+        <SectionCard title="Frequently Asked Questions">
+          <div className="pub-faq-list">
+            <article className="pub-faq-item">
+              <h3>How do I find businesses near my city or area?</h3>
+              <p className="pub-muted">
+                Select a city in the search bar, then search by category, area,
+                society, landmark, or business name.
+              </p>
+            </article>
+            <article className="pub-faq-item">
+              <h3>Can I call or WhatsApp a business from LocalOnline?</h3>
+              <p className="pub-muted">
+                Yes. Business profiles show available contact actions such as
+                call, WhatsApp, website, directions, and sharing.
+              </p>
+            </article>
+            <article className="pub-faq-item">
+              <h3>How can owners claim or update a listing?</h3>
+              <p className="pub-muted">
+                Owners can use Claim Listing or Add Listing to request access,
+                update details, and submit changes for review.
+              </p>
+            </article>
+            <article className="pub-faq-item">
+              <h3>What cities and local categories are supported?</h3>
+              <p className="pub-muted">
+                LocalOnline supports city and category pages such as
+                restaurants, salons, gyms, sabji mandi, and many neighborhood
+                services.
+              </p>
+            </article>
           </div>
         </SectionCard>
       </SiteShell>

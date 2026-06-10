@@ -1,7 +1,7 @@
 import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
@@ -37,7 +37,6 @@ import {
   MessageCircle,
   Mail,
   Info,
-  Clock,
   Image as ImageIcon,
   Menu as MenuIcon,
   Star,
@@ -54,7 +53,7 @@ type Props = {
   currentPage: number;
 };
 
-type DetailTab = "overview" | "about" | "reviews" | "menu" | "gallery";
+type DetailTab = "overview" | "reviews" | "menu" | "gallery";
 type MenuRenderItem = {
   name: string;
   detail: string;
@@ -762,7 +761,6 @@ export default function SeoPage({
   const hasMenuItems = menuSections.some((section) => section.items.length > 0);
   const detailTabs: Array<{ id: DetailTab; label: string }> = [
     { id: "overview", label: "Overview" },
-    { id: "about", label: "Details" },
     { id: "reviews", label: "Reviews" },
     ...(hasMenuItems ? [{ id: "menu" as DetailTab, label: "Menu" }] : []),
     { id: "gallery", label: "Photos" },
@@ -1231,7 +1229,6 @@ export default function SeoPage({
                   >
                     <span className="tab-icon">
                       {tab.id === "overview" && <Info size={16} />}
-                      {tab.id === "about" && <Clock size={16} />}
                       {tab.id === "reviews" && <Star size={16} />}
                       {tab.id === "menu" && <MenuIcon size={16} />}
                       {tab.id === "gallery" && <ImageIcon size={16} />}
@@ -1312,7 +1309,7 @@ export default function SeoPage({
                     <p>
                       Website:{" "}
                       <a
-                        style={{ overflowWrap: "anywhere" }}
+                        className="external-link"
                         href={
                           toExternalUrl(businessData.detail.websiteLink) ?? "#"
                         }
@@ -1347,11 +1344,7 @@ export default function SeoPage({
                   <div className="pub-contact-actions">
                     {isStrictUser && (
                       <a
-                        className="pub-ad-btn"
-                        style={{
-                          background: "#f59e0b",
-                          borderColor: "#f59e0b",
-                        }}
+                        className="pub-ad-btn submit-rating-btn"
                         onClick={() => {
                           if (contactUnlocked) {
                             setShowReviewForm(true);
@@ -1380,7 +1373,7 @@ export default function SeoPage({
                 </>
               ) : null}
 
-              {activeTab === "about" ? (
+              {activeTab === "overview" ? (
                 <>
                   {aboutItems.length > 0 ? (
                     <div>
@@ -1540,10 +1533,7 @@ export default function SeoPage({
                   {businessData.reviews?.length ? (
                     <div>
                       <h3>Approved Reviews</h3>
-                      <ul
-                        className="pub-review-list"
-                        style={{ listStyle: "none", padding: 0 }}
-                      >
+                      <ul className="pub-review-list approved-reviews">
                         {(showAllApprovedReviews
                           ? businessData.reviews
                           : businessData.reviews.slice(0, 4)
@@ -1577,16 +1567,7 @@ export default function SeoPage({
                     <p style={{ marginTop: 20 }}>
                       <button
                         type="button"
-                        className="btn-link"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          color: "var(--teal-600)",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          fontWeight: 600,
-                        }}
+                        className="btn-link review-write-btn"
                         onClick={() => {
                           if (contactUnlocked) {
                             setShowReviewForm(true);
@@ -1764,6 +1745,13 @@ export default function SeoPage({
                   </ul>
                 </div>
               ) : null}
+              {/* @ts-ignore */}
+              <AdRequestCard
+                variant="banner"
+                title="Advertise Here"
+                subtitle="Promote your business in front of local customers exploring this listing."
+                ctaLabel="Send request"
+              />
             </>
           ) : apiData ? (
             <>
@@ -1780,10 +1768,9 @@ export default function SeoPage({
                 </div>
               ) : (
                 <div className="pub-list-results">
-                  {apiData.items.map((item, index) => {
-                    const card = (
+                  {apiData.items.map((item, index) => (
+                    <Fragment key={item.businessToken}>
                       <BusinessCard
-                        key={item.businessToken}
                         variant="list"
                         fallbackCategory={humanizeSlug(parsed.categorySlug)}
                         fallbackArea={effectiveAreaName}
@@ -1798,21 +1785,20 @@ export default function SeoPage({
                             fallbackListThumb,
                         }}
                       />
-                    );
-                    if (index !== 2) return card;
-                    return (
-                      <div key={`${item.businessToken}-with-ad`}>{card}</div>
-                    );
-                  })}
+                      {/* Insert ad banner after every 5th item */}
+                      {(index + 1) % 5 === 0 && (
+                        /* @ts-ignore */
+                        <AdRequestCard
+                          variant="banner"
+                          title="Advertise in this area"
+                          subtitle="Reach customers searching in this neighborhood right now."
+                          ctaLabel="Send request"
+                        />
+                      )}
+                    </Fragment>
+                  ))}
                 </div>
               )}
-              {apiData.items.length > 0 ? (
-                <AdRequestCard
-                  title="Advertise in this area"
-                  subtitle="Reach customers searching in this neighborhood right now."
-                  ctaLabel="Request a slot"
-                />
-              ) : null}
               {totalPages > 1 ? (
                 <nav className="pub-pagination" aria-label="Pagination">
                   {currentPage > 1 ? (
@@ -2027,10 +2013,7 @@ export default function SeoPage({
 
       {showReviewForm ? (
         <div className="pub-contact-gate" role="dialog" aria-modal="true">
-          <div
-            className="pub-contact-card"
-            style={{ width: "min(520px, 100%)" }}
-          >
+          <div className="pub-contact-card review-modal">
             <div className="pub-modal-header">
               <h3>Submit Review</h3>
               <p className="pub-muted">
@@ -2055,15 +2038,7 @@ export default function SeoPage({
             <form onSubmit={onSubmitReview} className="auth-form">
               <div className="form-row">
                 <label>Rating</label>
-                <div
-                  className="pub-stars-wrap"
-                  style={{
-                    fontSize: "1.5rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    gap: "8px",
-                  }}
-                >
+                <div className="pub-stars-wrap review-rating-wrap">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
@@ -2099,7 +2074,6 @@ export default function SeoPage({
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   required
-                  style={{ minHeight: 120 }}
                 />
               </div>
 
@@ -2123,6 +2097,60 @@ export default function SeoPage({
           </div>
         </div>
       ) : null}
+
+      <style jsx>{`
+        .pub-tab-btn.is-active {
+          border-color: #ffb800 !important;
+          color: #ffb800 !important;
+        }
+        .external-link {
+          overflow-wrap: anywhere;
+        }
+        .submit-rating-btn {
+          background: #ffb800;
+          border-color: #ffb800;
+          color: #000;
+          font-weight: 700;
+        }
+        .approved-reviews {
+          list-style: none;
+          padding: 0;
+        }
+        .review-write-btn {
+          background: none;
+          border: none;
+          padding: 0;
+          color: var(--teal-600);
+          cursor: pointer;
+          text-decoration: underline;
+          font-weight: 600;
+        }
+        .review-modal {
+          width: min(520px, 100%);
+        }
+        .review-rating-wrap {
+          font-size: 1.5rem;
+          cursor: pointer;
+          display: flex;
+          gap: 8px;
+        }
+        .form-textarea {
+          min-height: 120px;
+        }
+        .review-form-actions {
+          margin-top: 10px;
+        }
+        .pub-contact-card .form-field {
+          margin-top: 8px;
+        }
+        .contact-error-msg {
+          color: #b91c1c;
+          white-space: pre-line;
+        }
+        .ad-req-wrapper {
+          margin-top: 10px;
+        }
+      `}</style>
     </>
   );
 }

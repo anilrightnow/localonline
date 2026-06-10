@@ -23,6 +23,7 @@ export default function SiteShell({ children }: SiteShellProps) {
   );
   const token = typeof window !== "undefined" ? getAuthToken() : null;
   const session = useMemo(() => getUserSessionFromToken(token), [token]);
+  //const isSuperAdmin = hasRole(session, "SuperAdmin");
   const isLoggedIn = Boolean(session.userId || session.email);
 
   useEffect(() => {
@@ -96,14 +97,15 @@ export default function SiteShell({ children }: SiteShellProps) {
             <span className="pub-sr-only">{siteName}</span>
           </Link>
           <nav id="pub-main-nav" className="pub-nav" aria-label="Primary">
-            <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
-            <Link href="/claims">Claim</Link>
-            <Link href="/owner/listing" className="pub-nav-highlight">
+            <Link href="/" className="pub-nav-btn">
+              Home
+            </Link>
+            <Link href="/claims" className="pub-nav-btn">
+              Claim
+            </Link>
+            <Link href="/owner/listing" className="pub-nav-btn">
               <PlusCircle size={16} /> Add Listing
             </Link>
-            <Link href="/reviews">Reviews</Link>
-            <Link href="/community/events">Events</Link>
             {isClient && isLoggedIn ? (
               <>
                 {session.email === "user@test.local" ? (
@@ -111,16 +113,17 @@ export default function SiteShell({ children }: SiteShellProps) {
                     <User size={16} /> Account
                   </Link>
                 ) : null}
+
                 <button
                   type="button"
-                  className="pub-nav-btn logout"
+                  className="pub-nav-btn"
                   onClick={onLogout}
                 >
                   <LogOut size={16} />
                 </button>
               </>
             ) : (
-              <Link href="/auth/login" className="pub-nav-btn login">
+              <Link href="/auth/login" className="pub-nav-btn">
                 <LogIn size={16} /> Login
               </Link>
             )}
@@ -156,6 +159,11 @@ export default function SiteShell({ children }: SiteShellProps) {
                   {supportEmail}
                 </a>
               ) : null}
+              <br />
+              <a className="pub-footer-link" href="tel:9268109317">
+                Mobile: 9268109317
+              </a>
+              <p>Timing: Mon-Sat 9AM-5PM</p>
             </div>
             <div className="pub-footer-links">
               <p className="pub-footer-title">Company</p>
@@ -164,6 +172,9 @@ export default function SiteShell({ children }: SiteShellProps) {
               </Link>
               <Link className="pub-footer-link" href="/blog">
                 Blog
+              </Link>
+              <Link className="pub-footer-link" href="/reviews">
+                Reviews
               </Link>
               <Link className="pub-footer-link" href="/privacy">
                 Privacy

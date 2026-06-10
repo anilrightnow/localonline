@@ -225,8 +225,8 @@ export default function DashboardPage() {
     >
       {loading ? (
         <div
-          className="app-card"
-          style={{ textAlign: "center", padding: "40px" }}
+          // Removed inline style and added class for styling
+          className="dashboard-loader app-card"
         >
           <p className="app-muted">Loading your personalized dashboard...</p>
         </div>
@@ -234,79 +234,48 @@ export default function DashboardPage() {
         <>
           <div className="app-grid">
             {kpis.map((item) => (
-              <div
-                className="app-card"
-                key={item.label}
-                style={{ display: "flex", alignItems: "center", gap: "16px" }}
-              >
-                <div
-                  style={{
-                    background: `${item.color}15`,
-                    color: item.color,
-                    padding: "12px",
-                    borderRadius: "12px",
-                  }}
-                >
+              <div className="app-card kpi-card" key={item.label}>
+                <div className="kpi-icon-wrap">
                   <item.icon size={24} />
                 </div>
-                <div>
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "0.8rem",
-                      color: "#64748b",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {item.label}
-                  </h3>
-                  <p
-                    style={{
-                      margin: "4px 0 0",
-                      fontSize: "1.4rem",
-                      fontWeight: 800,
-                    }}
-                  >
-                    {item.value}
-                  </p>
+                <div className="kpi-content">
+                  <h3 className="kpi-label">{item.label}</h3>
+                  <p className="kpi-value">{item.value}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="app-grid" style={{ marginTop: "16px" }}>
-            <section className="app-card">
-              <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>
+          <div className="app-grid dashboard-secondary-grid">
+            <section
+              // Removed inline style and added class for styling
+              className="app-card recent-activity-card"
+            >
+              <h2 className="card-title activity-card-title">
                 Recent Activity
               </h2>
-              <div style={{ display: "grid", gap: "10px" }}>
+              <div
+                // Removed inline style and added class for styling
+                className="activity-list"
+              >
                 {activities.length === 0 ? (
                   <p className="app-subtitle">No recent updates to display.</p>
                 ) : (
                   activities.map((activity, idx) => (
                     <div
                       key={idx}
-                      style={{
-                        padding: "12px",
-                        borderBottom:
-                          idx === activities.length - 1
-                            ? "none"
-                            : "1px solid #f1f5f9",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
+                      className={`activity-row ${idx === activities.length - 1 ? "is-last" : ""}`}
                     >
                       <div>
-                        <p style={{ margin: 0, fontWeight: 700 }}>
+                        <p
+                          // Removed inline style and added class for styling
+                          className="activity-title"
+                        >
                           {activity.title}
                         </p>
                         <p
-                          style={{
-                            margin: "4px 0 0",
-                            fontSize: "0.85rem",
-                            color: "#64748b",
-                          }}
+                          // Removed inline style and added class for styling
+                          className="activity-meta"
                         >
                           {activity.meta}
                         </p>
@@ -314,8 +283,7 @@ export default function DashboardPage() {
                       {activity.link && (
                         <Link
                           href={activity.link}
-                          className="btn btn-ghost"
-                          style={{ padding: "4px 8px", fontSize: "0.8rem" }}
+                          className="btn btn-ghost activity-btn"
                         >
                           View
                         </Link>
@@ -326,11 +294,14 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <section className="app-card">
-              <h2 style={{ marginTop: 0, fontSize: "1.1rem" }}>Quick Access</h2>
+            <section
+              // Removed inline style and added class for styling
+              className="app-card quick-access-card"
+            >
+              <h2 className="card-title quick-access-title">Quick Access</h2>
               <div
-                className="app-actions"
-                style={{ flexDirection: "column", alignItems: "stretch" }}
+                // Removed inline style and added class for styling
+                className="quick-access-list"
               >
                 {isAdmin && (
                   <Link
@@ -356,6 +327,91 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      <style jsx>{`
+        .dashboard-loader {
+          text-align: center;
+          padding: 40px;
+        }
+        .kpi-card {
+          --kpi-color: #000; /* Fallback, actual color set by JS */
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .app-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .kpi-icon-wrap {
+          background: color-mix(in srgb, var(--kpi-color) 15%, transparent);
+          color: var(--kpi-color);
+          padding: 12px;
+          border-radius: 12px;
+          display: flex;
+        }
+        .kpi-content {
+          flex: 1;
+        }
+        .kpi-label {
+          margin: 0;
+          font-size: 0.8rem;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+        .kpi-value {
+          margin: 4px 0 0;
+          font-size: 1.4rem;
+          font-weight: 800;
+        }
+        .dashboard-secondary-grid {
+          margin-top: 16px;
+        }
+        .recent-activity-card {
+          /* Specific styles for recent activity card if needed */
+        }
+        .quick-access-card {
+          /* Specific styles for quick access card if needed */
+        }
+        .card-title {
+          margin-top: 0;
+          font-size: 1.1rem;
+        }
+        .activity-list {
+          display: grid;
+          gap: 10px;
+        }
+        .activity-row {
+          padding: 12px;
+          border-bottom: 1px solid #f1f5f9;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .activity-row.is-last {
+          border-bottom: none;
+        }
+        .activity-title {
+          margin: 0;
+          font-weight: 700;
+        }
+        .activity-meta {
+          margin: 4px 0 0;
+          font-size: 0.85rem;
+          color: #64748b;
+        }
+        .activity-btn {
+          padding: 4px 8px;
+          font-size: 0.8rem;
+        }
+        .quick-access-list {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+      `}</style>
     </AppShell>
   );
 }

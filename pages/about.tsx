@@ -127,7 +127,10 @@ export default function AboutPage() {
               <a href="tel:+919268109317">+91 9268109317</a>
             </li>
           </ul>
-          <p style={{ marginTop: 15 }}>
+          <p
+            // Removed inline style and added class for styling
+            className="contact-page-link"
+          >
             You can also visit our{" "}
             <a href="/contact" style={{ fontWeight: 600 }}>
               Contact Us
@@ -135,6 +138,11 @@ export default function AboutPage() {
             page to send us a direct message.
           </p>
         </SectionCard>
+        <style jsx>{`
+          .contact-page-link {
+            margin-top: 15px;
+          }
+        `}</style>
       </SiteShell>
     </>
   );

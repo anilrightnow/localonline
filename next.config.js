@@ -15,7 +15,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const apiBaseUrl = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000";
+    const apiBaseUrl = process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:5000";
     return [
       { source: "/api/auth/:path*", destination: `${apiBaseUrl}/api/auth/:path*` },
       { source: "/api/user/:path*", destination: `${apiBaseUrl}/api/user/:path*` },
@@ -34,6 +34,7 @@ const nextConfig = {
       { source: "/api/ad-requests/:path*", destination: `${apiBaseUrl}/api/ad-requests/:path*` },
       { source: "/api/admin/ad-requests/:path*", destination: `${apiBaseUrl}/api/admin/ad-requests/:path*` },
       { source: "/api/analytics/:path*", destination: `${apiBaseUrl}/api/analytics/:path*` },
+      { source: "/api/public-search/:path*", destination: `${apiBaseUrl}/api/public-search/:path*` },
     ];
   },
 };

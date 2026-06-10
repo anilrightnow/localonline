@@ -23,11 +23,15 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (!isMounted || isMounted === null) return;
 
+    let maintenanceTimer: NodeJS.Timeout | null = null;
+
     // If we explicitly know the API is down (isHealthy === false), redirect
     if (isHealthy === false && router.pathname !== "/maintenance") {
-      router.push("/maintenance").catch(() => {
-        // Silently handle navigation errors
-      });
+      maintenanceTimer = setTimeout(() => {
+        router.push("/maintenance").catch(() => {
+          // Silently handle navigation errors
+        });
+      }, 60000); // Wait 60 seconds before redirecting to maintenance
     }
 
     // If we're on maintenance page and API is healthy again, redirect to home
@@ -36,7 +40,11 @@ export default function App({ Component, pageProps }: AppProps) {
         // Silently handle navigation errors
       });
     }
-  }, [isHealthy, router.pathname, isMounted]);
+
+    return () => {
+      if (maintenanceTimer) clearTimeout(maintenanceTimer);
+    };
+  }, [isHealthy, router.pathname, isMounted, router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -74,6 +82,55 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="Local Online" />
         <meta name="apple-mobile-web-app-title" content="Local Online" />
         <meta name="theme-color" content="#0f766e" />
+        {/* Preload fonts for faster perceived loading */}
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+          as="style"
+        />
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
+        <style>{`
+          :root {
+            --midnight: #0A0A0C;
+            --surface: #16161A;
+            --marigold: #FFB800;
+            --emerald: #10B981;
+            --border: #27272A;
+          }
+          body {
+            background-color: var(--midnight);
+            color: #E4E4E7;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+          }
+          h1, h2, h3, .pub-title {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+          }
+          .pub-card, section, .section-card-inner {
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 16px !important;
+          }
+        `}</style>
         {isGoogleAdsEnabled && (
           <meta
             name="google-adsense-account"

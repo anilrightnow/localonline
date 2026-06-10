@@ -61,7 +61,9 @@ export default function ClaimsPage() {
     try {
       const authToken = getAuthToken();
       const response = await axios.get(
-        apiUrl(`/api/public-search/business-token/${encodeURIComponent(token)}`),
+        apiUrl(
+          `/api/public-search/business-token/${encodeURIComponent(token)}`,
+        ),
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         },
@@ -199,7 +201,9 @@ export default function ClaimsPage() {
                   placeholder="Search business by name"
                 />
                 <button
-                  className="btn btn-ghost"
+                  // Removed inline style and added class for styling
+                  // style={{ marginRight: 8, marginBottom: 8 }}
+                  className="btn btn-ghost business-search-btn"
                   type="button"
                   onClick={() => void searchBusinesses()}
                 >
@@ -212,8 +216,9 @@ export default function ClaimsPage() {
                     <button
                       key={b.businessToken}
                       type="button"
-                      className="btn btn-ghost"
-                      style={{ marginRight: 8, marginBottom: 8 }}
+                      // Removed inline style and added class for styling
+                      // style={{ marginRight: 8, marginBottom: 8 }}
+                      className="btn btn-ghost business-option-btn"
                       onClick={() => {
                         setBusinessToken(b.businessToken);
                         setBusinessName(b.name);
@@ -225,7 +230,11 @@ export default function ClaimsPage() {
                   ))}
                 </div>
               ) : null}
-              <div className="form-input" style={{ background: "#f8fafc" }}>
+              <div
+                // Removed inline style and added class for styling
+                // style={{ background: "#f8fafc" }}
+                className="form-input business-name-display"
+              >
                 {businessLoading
                   ? "Loading business..."
                   : businessName || "Select a business from search."}
@@ -296,7 +305,7 @@ export default function ClaimsPage() {
               </ul>
             ) : null}
             <button
-              className="btn btn-primary"
+              className="btn btn-primary submit-claim-btn"
               type="submit"
               disabled={!businessToken}
             >

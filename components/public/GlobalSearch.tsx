@@ -64,6 +64,9 @@ export default function GlobalSearch() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(storageKey, selectedCitySlug);
+    window.dispatchEvent(
+      new CustomEvent("localonline:city-change", { detail: selectedCitySlug }),
+    );
   }, [selectedCitySlug]);
 
   // Update city from route

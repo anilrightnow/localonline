@@ -128,7 +128,10 @@ export default function ContactPage() {
           </SectionCard>
 
           <SectionCard title="Direct Support">
-            <div style={{ display: "grid", gap: "20px" }}>
+            <div
+              // Removed inline style and added class for styling
+              className="direct-support-grid"
+            >
               <div>
                 <h3 style={{ marginTop: 0 }}>Email</h3>
                 <p className="pub-muted">
@@ -136,7 +139,12 @@ export default function ContactPage() {
                     href="mailto:support@localonline.in"
                     style={{ color: "var(--teal-600)", fontWeight: 600 }}
                   >
-                    support@localonline.in
+                    <span
+                      // Removed inline style and added class for styling
+                      className="support-email-link"
+                    >
+                      support@localonline.in
+                    </span>
                   </a>
                 </p>
               </div>
@@ -147,7 +155,12 @@ export default function ContactPage() {
                     href="tel:+919268109317"
                     style={{ color: "var(--teal-600)", fontWeight: 600 }}
                   >
-                    +91 9268109317
+                    <span
+                      // Removed inline style and added class for styling
+                      className="support-phone-link"
+                    >
+                      +91 9268109317
+                    </span>
                   </a>
                 </p>
               </div>
@@ -161,6 +174,17 @@ export default function ContactPage() {
             </div>
           </SectionCard>
         </div>
+        <style jsx>{`
+          .direct-support-grid {
+            display: grid;
+            gap: 20px;
+          }
+          .support-email-link,
+          .support-phone-link {
+            color: var(--teal-600);
+            font-weight: 600;
+          }
+        `}</style>
       </SiteShell>
     </>
   );

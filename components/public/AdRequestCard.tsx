@@ -25,12 +25,18 @@ const emptyPayload: AdRequestPayload = {
 };
 
 type AdRequestCardProps = {
+  variant?: "banner" | "sidebar";
   title: string;
   subtitle: string;
   ctaLabel: string;
 };
 
-export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCardProps) {
+export default function AdRequestCard({
+  variant = "banner",
+  title,
+  subtitle,
+  ctaLabel,
+}: AdRequestCardProps) {
   const [payload, setPayload] = useState<AdRequestPayload>(emptyPayload);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -67,14 +73,22 @@ export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCa
   return (
     <>
       <div className="pub-ad">
-        <div className="pub-ad-media" role="img" aria-label="Advertisement placeholder">
+        <div
+          className="pub-ad-media"
+          role="img"
+          aria-label="Advertisement placeholder"
+        >
           Ad space
         </div>
         <div className="pub-ad-body">
           <h3 className="pub-ad-title">{title}</h3>
           <p className="pub-muted">{subtitle}</p>
           <div className="pub-ad-actions">
-            <button className="pub-ad-btn" type="button" onClick={() => setIsOpen(true)}>
+            <button
+              className="pub-ad-btn"
+              type="button"
+              onClick={() => setIsOpen(true)}
+            >
               {ctaLabel}
             </button>
           </div>
@@ -87,7 +101,9 @@ export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCa
             <div className="pub-modal-header">
               <div>
                 <h3 className="pub-modal-title">Advertise in this area</h3>
-                <p className="pub-muted">Share your details and we will reach out.</p>
+                <p className="pub-muted">
+                  Share your details and we will reach out.
+                </p>
               </div>
               <button
                 className="btn btn-ghost"
@@ -158,10 +174,16 @@ export default function AdRequestCard({ title, subtitle, ctaLabel }: AdRequestCa
                 onChange={(e) => updateField("message", e.target.value)}
                 required
               />
-              {message ? <FormMessage message={message} tone="success" /> : null}
+              {message ? (
+                <FormMessage message={message} tone="success" />
+              ) : null}
               {error ? <FormMessage message={error} tone="error" /> : null}
               <div className="pub-ad-actions">
-                <button className="pub-ad-btn" type="submit" disabled={isSubmitting}>
+                <button
+                  className="pub-ad-btn"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Submitting..." : ctaLabel}
                 </button>
               </div>

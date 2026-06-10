@@ -64,10 +64,14 @@ export default function AdminLayout({
       >
         <div className="admin-brand">
           <div className="admin-brand-icon">
-            <span>LO</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/favicon.svg" alt="" />
           </div>
           {isSidebarOpen && (
-            <span className="admin-brand-text">LocalOnline</span>
+            <span className="admin-brand-text">
+              <span>LocalOnline</span>
+              <small>{userRole} workspace</small>
+            </span>
           )}
         </div>
 

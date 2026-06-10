@@ -104,6 +104,11 @@ const PlansPage = () => {
           </article>
         ))}
       </div>
+      <style jsx>{`
+        .app-card h3 {
+          margin-top: 0;
+        }
+      `}</style>
     </AppShell>
   );
 };

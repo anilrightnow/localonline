@@ -344,7 +344,11 @@ export default function ReviewsPage() {
             </tbody>
           </table>
         ) : null}
-        <div className="app-actions" style={{ marginTop: 12 }}>
+        <div
+          // Removed inline style and added class for styling
+          // style={{ marginTop: 12 }}
+          className="app-actions review-pagination"
+        >
           <button
             className="btn btn-ghost"
             type="button"
@@ -379,6 +383,30 @@ export default function ReviewsPage() {
           ))}
         </ul>
       </div>
+
+      <style jsx>{`
+        .review-pagination {
+          margin-top: 12px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th {
+          text-align: left;
+          border-bottom: 1px solid #d9e2ec;
+          padding: 8px 4px;
+        }
+        td {
+          border-bottom: 1px solid #edf2f7;
+          padding: 8px 4px;
+        }
+        .app-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+        }
+      `}</style>
     </AppShell>
   );
 }

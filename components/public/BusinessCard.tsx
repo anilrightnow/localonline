@@ -4,7 +4,14 @@ import {
   fallbackThumbnail,
   resolveBusinessThumbnail,
 } from "../../lib/thumbnail";
-import { Star, MapPin, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  Phone,
+  ArrowRight,
+  CheckCircle2,
+  Navigation,
+} from "lucide-react";
 
 type BusinessCardProps = {
   business: SearchBusinessItem;
@@ -146,6 +153,11 @@ export default function BusinessCard({
               <Phone size={14} /> Call
             </a>
           )}
+          {showDetailsButton ? (
+            <Link href={business.canonicalPath} className="pub-btn-directions">
+              <Navigation size={14} /> Details <ArrowRight size={14} />
+            </Link>
+          ) : null}
         </div>
       </div>
     </article>

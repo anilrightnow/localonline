@@ -1,6 +1,7 @@
 import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import { Fragment } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
@@ -105,6 +106,23 @@ export default function HomePage({
             </div>
           </div>
         </section>
+        <div className="home-ad-banner">
+          <Script id="at-options" strategy="afterInteractive">
+            {`
+              atOptions = {
+                'key' : '62432709b5a6fdf9300bdb63f72a30b0',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+              };
+            `}
+          </Script>
+          <Script
+            src="https://www.highperformanceformat.com/62432709b5a6fdf9300bdb63f72a30b0/invoke.js"
+            strategy="afterInteractive"
+          />
+        </div>
 
         <div className="home-ad-banner">
           {/* @ts-ignore */}

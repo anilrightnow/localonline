@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  compress: true, // Enables compression for better transfer sizes
+  images: {
+    formats: ['image/avif', 'image/webp'], // Support modern high-compression formats
+    minimumCacheTTL: 60,
+  },
   async headers() {
     return [
       {
@@ -9,6 +14,24 @@ const nextConfig = {
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/uploads/localonline-banner.mp4",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // Cache for 1 year
+          },
+        ],
+      },
+      {
+        source: "/(ads_place_holder.png|ads_place_holder.webp|ads_place_holder.avif)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable", // Cache for 1 year
           },
         ],
       },

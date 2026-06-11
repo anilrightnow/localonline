@@ -127,7 +127,6 @@ export default function App({ Component, pageProps }: AppProps) {
           }
           .pub-card, section, .section-card-inner {
             background-color: var(--surface) !important;
-            border: 1px solid var(--border) !important;
             border-radius: 16px !important;
           }
         `}</style>

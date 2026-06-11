@@ -3649,7 +3649,7 @@ a:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(5, 31, 39, 0.75), rgba(5, 31, 39, 0.4));
+  background: linear-gradient(90deg, rgba(5, 31, 39, 0.3), rgba(5, 31, 39, 0.2));
   z-index: 2;
 }
 

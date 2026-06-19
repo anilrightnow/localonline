@@ -75,8 +75,8 @@ export default function HomePage({
           {/* 1. The Background Video */}
           <video
             autoPlay
-            muted
             loop
+            controls
             playsInline
             className="pub-home-hero-video"
             poster="/ads_place_holder.png"
@@ -230,7 +230,7 @@ export default function HomePage({
                   {(index + 1) % 10 === 0 && (
                     /* @ts-ignore */
                     <AdRequestCard
-                      variant="banner"
+                      variant="sidebar"
                       title="Reach customers nearby"
                       subtitle="Promote your business here."
                       ctaLabel="Send request"

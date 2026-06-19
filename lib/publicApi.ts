@@ -17,6 +17,7 @@ export type SearchBusinessItem = {
   description?: string | null;
   address?: string | null;
   rating?: number | null;
+  isVerified?: boolean | null;
   totalReviews?: number | null;
   canonicalPath: string;
   thumbnailUrl?: string | null;
@@ -104,6 +105,7 @@ export type BusinessApiResponse = {
     mediaJson?: string | null;
     menuJson?: string | null;
     fullJson?: string | null;
+    isVerified?: boolean | null;
   };
   reviews: Array<{
     rating: number;

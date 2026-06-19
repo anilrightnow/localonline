@@ -127,6 +127,9 @@ export default function SiteShell({ children }: SiteShellProps) {
             <Link href="/owner/listing" className="pub-nav-btn">
               <PlusCircle size={16} /> Add Listing
             </Link>
+            <Link href="/contact" className="pub-nav-btn">
+              Contact Us
+            </Link>
             {isClient && isLoggedIn ? (
               <>
                 {session.email === "user@test.local" ? (

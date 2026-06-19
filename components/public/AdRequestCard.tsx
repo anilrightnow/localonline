@@ -74,7 +74,7 @@ export default function AdRequestCard({
     <>
       <div className="pub-ad">
         <div
-          className="pub-ad-media"
+          className={`pub-ad-image pub-ad-media ${variant === "sidebar" ? "pub-ad-image-sidebar" : ""}`}
           role="img"
           aria-label="Advertisement placeholder"
         >

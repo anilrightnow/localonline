@@ -105,9 +105,11 @@ export default function BusinessCard({
               <Star size={12} fill="currentColor" /> Top Rated
             </span>
           )}
-          <span className="pub-biz-badge verified">
-            <CheckCircle2 size={12} /> Verified
-          </span>
+          {business.isVerified && (
+            <span className="pub-biz-badge verified">
+              <CheckCircle2 size={12} /> Verified
+            </span>
+          )}
         </Link>
       </div>
 
@@ -153,13 +155,28 @@ export default function BusinessCard({
               <Phone size={14} /> Call
             </a>
           )}
-          {showDetailsButton ? (
+
+          {variant !== "list" ? (
             <Link href={business.canonicalPath} className="pub-btn-directions">
               <Navigation size={14} /> Details <ArrowRight size={14} />
             </Link>
           ) : null}
         </div>
       </div>
+      <style jsx>{`
+        .pub-biz-badge.verified {
+          background-color: #10b981; /* Emerald 500 */
+          color: white;
+        }
+        /* When both badges are present, stack them */
+        .top-rated + .verified {
+          top: 40px; /* Adjust this value based on the height of the top badge + margin */
+        }
+        .pub-biz-badge.verified :global(svg) {
+          /* Ensure icon color is white */
+          color: white;
+        }
+      `}</style>
     </article>
   );
 }

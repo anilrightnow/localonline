@@ -26,7 +26,7 @@ import {
   Users,
 } from "lucide-react";
 
-type RoleRequirement = "Admin" | "SuperAdmin";
+export type RoleRequirement = "Admin" | "SuperAdmin";
 
 type AppShellProps = {
   title: string;
@@ -39,14 +39,22 @@ type NavItem = AdminNavItem;
 
 const USER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/claims", label: "Claims", icon: ClipboardCheck },
+  //{ href: "/claims", label: "Claims", icon: ClipboardCheck },
   { href: "/reviews", label: "Reviews", icon: FileText },
-  { href: "/owner/listing", label: "Owner Listing", icon: Building2 },
-  { href: "/community/events", label: "Events", icon: CalendarDays },
-  { href: "/community/societies", label: "Societies", icon: Users },
+  //{ href: "/owner/listing", label: "Owner Listing", icon: Building2 },
+  //{ href: "/community/events", label: "Events", icon: CalendarDays },
+  //{ href: "/community/societies", label: "Societies", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
-
+const OWNER_NAV: NavItem[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/claims", label: "Claims", icon: ClipboardCheck },
+  //{ href: "/reviews", label: "Reviews", icon: FileText },
+  { href: "/owner/listing", label: "Owner Listing", icon: Building2 },
+  //{ href: "/community/events", label: "Events", icon: CalendarDays },
+  //{ href: "/community/societies", label: "Societies", icon: Users },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
 const ADMIN_NAV: NavItem[] = [
   { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
@@ -99,11 +107,11 @@ export default function AppShell({
         : "User";
   const displayName = session.email ?? "Signed in";
 
-  const nav = [
-    ...USER_NAV,
-    ...(isAdmin ? ADMIN_NAV : []),
-    ...(isSuperAdmin ? SUPERADMIN_NAV : []),
-  ];
+  let nav = [...USER_NAV];
+  if (isOwner) nav = [...OWNER_NAV];
+  if (isAdmin) nav = [...ADMIN_NAV];
+  if (isSuperAdmin) nav = [...ADMIN_NAV, ...SUPERADMIN_NAV];
+
   const roleDenied = requiredRole ? !hasRole(session, requiredRole) : false;
 
   async function onLogout() {

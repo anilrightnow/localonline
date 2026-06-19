@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /owner/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /claims/
+Disallow: /reviews/
+Disallow: /plans/
+Allow: /
+
+Sitemap: https://localonline.in/sitemap.xml

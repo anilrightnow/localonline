@@ -129,6 +129,7 @@ export default function App({ Component, pageProps }: AppProps) {
             background-color: var(--surface) !important;
             border-radius: 16px !important;
           }
+          
         `}</style>
         {isGoogleAdsEnabled && (
           <meta

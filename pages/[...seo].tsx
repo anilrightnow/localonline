@@ -1208,7 +1208,11 @@ export default function SeoPage({
 
         <SectionCard
           title={
-            parsed.kind === "business" ? "Business Details" : "Search Results"
+            parsed.kind === "business"
+              ? businessData?.detail?.name
+                ? ""
+                : "Business Details"
+              : "Search Results"
           }
         >
           {parsed.kind === "business" && businessData ? (
@@ -1254,13 +1258,14 @@ export default function SeoPage({
                       totalReviews: businessData.detail.totalReviews,
                       canonicalPath: businessData.canonical.canonicalPath,
                       thumbnailUrl: visibleMediaUrls[0] ?? fallbackListThumb,
+                      isVerified: businessData.detail.isVerified,
                     }}
                   />
 
                   {businessData.detail.phone ? (
                     <div className="pub-contact-panel">
                       <div className="contact-info-main">
-                        <Phone size={20} className="text-muted" />
+                        <Phone size={24} className="text-muted" />
                         <span className="phone-number">
                           {contactUnlocked
                             ? businessData.detail.phone
@@ -1274,7 +1279,7 @@ export default function SeoPage({
                             businessData.detail.name,
                           ) ? (
                             <a
-                              className="pub-chip"
+                              className="pub-chip whatsapp-chip"
                               href={
                                 whatsappLink(
                                   businessData.detail.phone,
@@ -1284,14 +1289,14 @@ export default function SeoPage({
                               target="_blank"
                               rel="noreferrer noopener"
                             >
-                              <MessageCircle size={14} /> WhatsApp
+                              <MessageCircle size={16} /> WhatsApp
                             </a>
                           ) : null}
                           <a
-                            className="pub-chip"
+                            className="pub-chip email-chip"
                             href={emailShareLink(businessData.detail)}
                           >
-                            <Mail size={14} /> Share
+                            <Mail size={16} /> Share
                           </a>
                         </div>
                       ) : (
@@ -1323,19 +1328,34 @@ export default function SeoPage({
 
                   {generatedNarrative ? (
                     <div className="pub-hours-block">
-                      <h3>Business Overview</h3>
+                      <h3>
+                        {businessData?.detail?.name
+                          ? businessData.detail.name
+                          : "Business"}{" "}
+                        Overview
+                      </h3>
                       <p className="pub-muted">{generatedNarrative}</p>
                     </div>
                   ) : null}
                   {businessData.ownerProfile?.about ? (
                     <div>
-                      <h3>Owner Updates</h3>
+                      <h3>
+                        {businessData?.detail?.name
+                          ? businessData.detail.name
+                          : "Business"}{" "}
+                        Owner Updates
+                      </h3>
                       <p className="pub-muted">
                         {businessData.ownerProfile.about}
                       </p>
                       {businessData.ownerProfile.services?.length ? (
                         <p>
-                          <strong>Services:</strong>{" "}
+                          <strong>
+                            {businessData?.detail?.name
+                              ? businessData.detail.name
+                              : "Business"}{" "}
+                            Services:
+                          </strong>{" "}
                           {businessData.ownerProfile.services.join(", ")}
                         </p>
                       ) : null}
@@ -1377,7 +1397,14 @@ export default function SeoPage({
                 <>
                   {aboutItems.length > 0 ? (
                     <div>
-                      {!hideBusinessInfoHeading ? <h3>Business Info</h3> : null}
+                      {!hideBusinessInfoHeading ? (
+                        <h3>
+                          {businessData?.detail?.name
+                            ? businessData.detail.name
+                            : "Business"}{" "}
+                          Info
+                        </h3>
+                      ) : null}
                       <div className="pub-facts-grid">
                         {aboutItems.slice(0, 24).map((item, index) => {
                           const key = item.Key ?? item.key ?? "Info";
@@ -1422,7 +1449,12 @@ export default function SeoPage({
                   )}
                   {hoursGroups.length > 0 ? (
                     <div>
-                      <h3>Business Hours</h3>
+                      <h3>
+                        {businessData?.detail?.name
+                          ? businessData.detail.name
+                          : "Business"}{" "}
+                        Working Hours
+                      </h3>
                       {hoursGroups.map((group, index) => {
                         const hours = group.Hours ?? group.hours ?? [];
                         if (hours.length === 0) return null;
@@ -2149,6 +2181,16 @@ export default function SeoPage({
         }
         .ad-req-wrapper {
           margin-top: 10px;
+        }
+        .whatsapp-chip {
+          background-color: #25d366;
+          color: white;
+          border-color: #25d366;
+        }
+        .email-chip {
+          background-color: #f1f5f9;
+          color: #1e293b;
+          border-color: #e2e8f0;
         }
       `}</style>
     </>

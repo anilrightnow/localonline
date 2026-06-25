@@ -1691,10 +1691,9 @@ position: relative;
   aspect-ratio: 16 / 5;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: url('/ads_place_holder.png') center / cover no-repeat;
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: var(--white);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.4px;
@@ -1703,7 +1702,7 @@ position: relative;
 .pub-ad-image-sidebar {
   width: 100%;
   max-width: 300px;
-  aspect-ratio: 4 / 0 !important;
+  aspect-ratio:5 / 8 !important;
 }
 .pub-ad-body {
   display: grid;

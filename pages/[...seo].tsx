@@ -1751,38 +1751,14 @@ export default function SeoPage({
                   )}
                 </>
               ) : null}
-              {activeTab === "overview" &&
-              businessData.activePromotions?.length ? (
-                <div>
-                  <h3>Promotions</h3>
-                  <ul>
-                    {businessData.activePromotions.map((promo, index) => (
-                      <li key={`${promo.type}-${promo.endsAt}-${index}`}>
-                        <strong>{promo.type}</strong> until{" "}
-                        {new Date(promo.endsAt).toLocaleDateString()}
-                        {promo.targetUrl ? (
-                          <>
-                            {" "}
-                            <a
-                              href={promo.targetUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Visit
-                            </a>
-                          </>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+
               {/* @ts-ignore */}
               <AdRequestCard
                 variant="banner"
                 title="Advertise Here"
                 subtitle="Promote your business in front of local customers exploring this listing."
                 ctaLabel="Send request"
+                type="BannerDetail"
               />
             </>
           ) : apiData ? (
@@ -1825,6 +1801,7 @@ export default function SeoPage({
                           title="Advertise in this area"
                           subtitle="Reach customers searching in this neighborhood right now."
                           ctaLabel="Send request"
+                          type="BannerSearch"
                         />
                       )}
                     </Fragment>

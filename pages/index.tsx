@@ -109,23 +109,6 @@ export default function HomePage({
             </div>
           </div>
         </section>
-        <section className="home-ad-banner">
-          <Script id="at-options" strategy="afterInteractive">
-            {`
-              atOptions = {
-                'key' : '62432709b5a6fdf9300bdb63f72a30b0',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-              };
-            `}
-          </Script>
-          <Script
-            src="https://www.highperformanceformat.com/62432709b5a6fdf9300bdb63f72a30b0/invoke.js"
-            strategy="afterInteractive"
-          />
-        </section>
 
         <section className="home-ad-banner">
           {/* @ts-ignore */}
@@ -134,6 +117,7 @@ export default function HomePage({
             title="Grow Your Local Reach"
             subtitle="Promote your business to thousands of residents across Noida Extension, Gaur City, and Crossing Republik."
             ctaLabel="Advertise With Us"
+            type="BannerHome"
           />
         </section>
 
@@ -237,6 +221,7 @@ export default function HomePage({
                       title="Reach customers nearby"
                       subtitle="Promote your business here."
                       ctaLabel="Send request"
+                      type="FeaturedList"
                     />
                   )}
                 </Fragment>

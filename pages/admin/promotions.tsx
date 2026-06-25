@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import axios from "axios";
 import AppShell from "../../components/app/AppShell";
 import { getAuthToken } from "../../lib/auth";
@@ -7,7 +7,7 @@ import { apiUrl } from "../../lib/apiClient";
 import FormMessage from "../../components/shared/FormMessage";
 
 type SearchBusinessItem = {
-  businessToken: string;
+  businessToken?: string;
   name: string;
   address?: string | null;
   citySlug?: string | null;
@@ -16,9 +16,7 @@ type SearchBusinessItem = {
 
 export default function PromotionsPage() {
   const [businessToken, setBusinessToken] = useState("");
-  const [businessQuery, setBusinessQuery] = useState("");
-  const [businessOptions, setBusinessOptions] = useState<SearchBusinessItem[]>([]);
-  const [selectedBusiness, setSelectedBusiness] = useState<SearchBusinessItem | null>(null);
+  const [businessName, setBusinessName] = useState("");
   const [type, setType] = useState("FeaturedList");
   const [status, setStatus] = useState("Draft");
   const [price, setPrice] = useState("0");
@@ -42,10 +40,10 @@ export default function PromotionsPage() {
           price: Number(price),
           startsAt,
           endsAt,
-          bannerImageUrl: bannerImageUrl || null,
-          targetUrl: targetUrl || null,
+          bannerImageUrl: bannerImageUrl,
+          targetUrl: targetUrl,
         },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
       setMessage("Promotion saved.");
     } catch (error) {
@@ -53,92 +51,55 @@ export default function PromotionsPage() {
     }
   }
 
-  useEffect(() => {
-    const term = businessQuery.trim();
-    if (term.length < 2) {
-      setBusinessOptions([]);
-      return;
-    }
-    const token = getAuthToken();
-    axios
-      .get(apiUrl("/api/owner-listings/search"), {
-        params: { q: term, limit: 15 },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      .then((res) => setBusinessOptions(res.data ?? []))
-      .catch(() => setBusinessOptions([]));
-  }, [businessQuery]);
-
   return (
-    <AppShell requiredRole="Admin" title="Promotions" subtitle="Create and manage paid placement records.">
+    <AppShell
+      requiredRole="Admin"
+      title="Promotions"
+      subtitle="Create and manage paid placement records."
+    >
       <div className="app-card">
         <form onSubmit={onSubmit}>
           <div className="form-row">
-            <label>Business</label>
+            <label>Business Name</label>
             <input
               className="form-input"
-              placeholder="Type business name"
-              value={businessQuery}
-              onChange={(e) => {
-                setBusinessQuery(e.target.value);
-                setSelectedBusiness(null);
-                setBusinessToken("");
-              }}
+              placeholder="Enter business name manually"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
             />
-            {selectedBusiness ? (
-              <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
-                <span>
-                  Selected: <strong>{selectedBusiness.name}</strong>
-                  {selectedBusiness.areaSlug ? `, ${selectedBusiness.areaSlug}` : ""}
-                  {selectedBusiness.citySlug ? `, ${selectedBusiness.citySlug}` : ""}
-                </span>
-                <button
-                  className="btn btn-ghost"
-                  type="button"
-                  onClick={() => {
-                    setSelectedBusiness(null);
-                    setBusinessQuery("");
-                    setBusinessToken("");
-                  }}
-                >
-                  Clear
-                </button>
-              </div>
-            ) : null}
-            {businessOptions.length > 0 ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-                {businessOptions.map((option) => (
-                  <button
-                    key={option.businessToken}
-                    className="btn btn-ghost"
-                    type="button"
-                    onClick={() => {
-                      setSelectedBusiness(option);
-                      setBusinessQuery(option.name);
-                      setBusinessToken(option.businessToken);
-                      setBusinessOptions([]);
-                    }}
-                  >
-                    {option.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
           </div>
           <div className="form-row">
             <label>Business Ref (token)</label>
-            <input className="form-input" placeholder="Auto-filled when selected" value={businessToken} onChange={(e) => setBusinessToken(e.target.value)} required />
+            <input
+              className="form-input"
+              placeholder="Enter business token manually"
+              value={businessToken}
+              onChange={(e) => setBusinessToken(e.target.value)}
+              required
+            />
           </div>
           <div className="form-row">
             <label>Type</label>
-            <select className="form-select" value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="FeaturedList">FeaturedList</option>
-              <option value="Banner">Banner</option>
+            <select
+              className="form-select"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="FeaturedList">Featured List - Home Page</option>
+              <option value="BannerHome">Banner - Home Page</option>
+              <option value="BannerDetail">
+                Banner on Details Page (Bottom)
+              </option>
+              <option value="BannerSearch">Search Result</option>
             </select>
           </div>
           <div className="form-row">
             <label>Status</label>
-            <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <select
+              className="form-select"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
               <option value="Draft">Draft</option>
               <option value="Active">Active</option>
               <option value="Paused">Paused</option>
@@ -147,25 +108,55 @@ export default function PromotionsPage() {
           </div>
           <div className="form-row">
             <label>Price</label>
-            <input className="form-input" placeholder="Price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <input
+              className="form-input"
+              placeholder="Price"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
           </div>
           <div className="form-row">
             <label>Starts At</label>
-            <input className="form-input" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
+            <input
+              className="form-input"
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              required
+            />
           </div>
           <div className="form-row">
             <label>Ends At</label>
-            <input className="form-input" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} required />
+            <input
+              className="form-input"
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+              required
+            />
           </div>
           <div className="form-row">
             <label>Banner Image URL</label>
-            <input className="form-input" placeholder="https://..." value={bannerImageUrl} onChange={(e) => setBannerImageUrl(e.target.value)} />
+            <input
+              className="form-input"
+              placeholder="https://..."
+              value={bannerImageUrl}
+              onChange={(e) => setBannerImageUrl(e.target.value)}
+            />
           </div>
           <div className="form-row">
             <label>Target URL</label>
-            <input className="form-input" placeholder="https://..." value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)} />
+            <input
+              className="form-input"
+              placeholder="https://..."
+              value={targetUrl}
+              onChange={(e) => setTargetUrl(e.target.value)}
+            />
           </div>
-          <button className="btn btn-primary" type="submit">Save Promotion</button>
+          <button className="btn btn-primary" type="submit">
+            Save Promotion
+          </button>
         </form>
       </div>
       {message ? <FormMessage message={message} tone="success" /> : null}

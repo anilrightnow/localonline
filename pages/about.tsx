@@ -1,6 +1,7 @@
 import Head from "next/head";
 import SiteShell from "../components/public/SiteShell";
 import SectionCard from "../components/public/SectionCard";
+import { MessageCircle } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -125,6 +126,18 @@ export default function AboutPage() {
             <li>
               <strong>Phone:</strong>{" "}
               <a href="tel:+919268109317">+91 9268109317</a>
+            </li>
+            <li>
+              <a
+                href="https://wa.me/919268109317"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat on WhatsApp"
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                <MessageCircle size={16} style={{ marginRight: "8px" }} />
+                Chat on WhatsApp
+              </a>
             </li>
           </ul>
           <p

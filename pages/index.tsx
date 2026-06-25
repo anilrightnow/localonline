@@ -100,6 +100,9 @@ export default function HomePage({
               <a href="/owner/listing" className="pub-hero-chip">
                 🚀 List Your Business
               </a>
+              <a href="/promote-your-business" className="pub-hero-chip">
+                🌟 Promote Your Business
+              </a>
               <a href="#how-it-works" className="pub-hero-chip">
                 💡 How it Works
               </a>

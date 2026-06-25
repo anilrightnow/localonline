@@ -1,0 +1,54 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Plan {
+  id                String        @id @default(cuid())
+  name              String        @unique
+  price             Float
+  discountAnnually  Float         @default(0)
+  discountQuarterly Float         @default(0)
+  isActive          Boolean       @default(true)
+  features          PlanFeature[]
+  userPlans         UserPlan[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model PlanFeature {
+  id        String   @id @default(cuid())
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  feature   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, feature])
+}
+
+model UserPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id])
+  planPrice   Float
+  paidAmount  Float
+  startDate   DateTime
+  endDate     DateTime
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id        String     @id @default(cuid())
+  // ... other user fields
+  userPlans UserPlan[]
+}

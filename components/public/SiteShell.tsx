@@ -14,6 +14,7 @@ import {
   Moon,
   PlusCircle,
   ArrowUp,
+  MessageCircle,
 } from "lucide-react";
 
 type SiteShellProps = {
@@ -184,8 +185,18 @@ export default function SiteShell({ children }: SiteShellProps) {
                 </a>
               ) : null}
               <br />{" "}
-              <a className="pub-footer-link" href="tel:9218109317">
-                Mobile: 9218109317
+              <a className="pub-footer-link" href="tel:+919268109317">
+                Mobile: 9268109317
+              </a>
+              <br />
+              <a
+                className="pub-footer-link"
+                href="https://wa.me/919268109317"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle size={14} style={{ marginRight: "4px" }} />
+                WhatsApp
               </a>
             </div>
             <div className="pub-footer-links">

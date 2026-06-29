@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 
-const HEALTH_CHECK_INTERVAL = 1500000000; // Check every 15 seconds
+const HEALTH_CHECK_INTERVAL = 1800000; // Check every 30 minutes (30 * 60 * 1000)
 const API_HEALTH_ENDPOINT = '/api/health';
 
 export function useApiHealth() {
@@ -10,7 +10,7 @@ export function useApiHealth() {
   const router = useRouter();
   const hasInitialCheckRun = useRef(false);
 
-  const checkHealth = async () => {
+  const checkHealth = useCallback(async () => {
     setIsChecking(true);
     try {
       const controller = new AbortController();
@@ -36,7 +36,7 @@ export function useApiHealth() {
     } finally {
       setIsChecking(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Initial check - run immediately on mount
@@ -59,7 +59,7 @@ export function useApiHealth() {
       clearInterval(interval);
       router.events.off('routeChangeStart', handleRouteChange);
     };
-  }, [router]);
+  }, [checkHealth, router.events]); // Use router.events instead of full router object
 
   return {
     isHealthy,

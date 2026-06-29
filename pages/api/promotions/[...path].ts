@@ -3,58 +3,52 @@ import { getServiceToken } from "../../../lib/serviceAuth";
 import { getAuthTokenFromCookieHeader } from "../../../lib/authCookie";
 
 function buildTargetUrl(req: NextApiRequest, apiBaseUrl: string): string {
-  const path = req.query.path
-    ? Array.isArray(req.query.path)
-      ? req.query.path
-      : [req.query.path]
+  const pathParam = req.query.path;
+  const path = pathParam
+    ? Array.isArray(pathParam)
+      ? pathParam
+      : [pathParam]
     : [];
   const qsIndex = req.url?.indexOf("?") ?? -1;
   const queryString = qsIndex >= 0 ? req.url?.slice(qsIndex) ?? "" : "";
-  const targetPath = `/${path.join("/")}`.replace(/\/+$/, "");
+  const targetPath = path.length > 0
+    ? `/api/promotions/${path.join("/")}`.replace(/\/+$/, "")
+    : "/api/promotions";
   return `${apiBaseUrl.replace(/\/+$/, "")}${targetPath}${queryString}`;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-   const apiBaseUrl =
-     process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:5000";
+  const apiBaseUrl =
+    process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:5000";
 
   const cookieToken = getAuthTokenFromCookieHeader(req.headers.cookie);
   const incomingAuth = req.headers.authorization ?? (cookieToken ? `Bearer ${cookieToken}` : undefined);
 
-  let authHeader = incomingAuth;
-  if (!authHeader) {
-    try {
-      const token = await getServiceToken(apiBaseUrl);
-      if (token) authHeader = `Bearer ${token}`;
-    } catch {
-      authHeader = undefined;
-    }
-  }
-
-  const method = req.method ?? "GET";
-  const targetUrl = buildTargetUrl(req, apiBaseUrl);
-
-  const headers: Record<string, string> = {};
-  if (authHeader) headers["Authorization"] = authHeader;
-  if (req.headers["content-type"]) {
-    headers["Content-Type"] = String(req.headers["content-type"]);
+  let token: string | null = null;
+  try {
+    token = incomingAuth ? null : await getServiceToken(apiBaseUrl);
+  } catch {
+    token = null;
   }
 
   let body: BodyInit | undefined;
-  if (method !== "GET" && method !== "HEAD") {
+  if (req.method !== "GET" && req.method !== "HEAD") {
     if (req.body == null) {
       body = undefined;
     } else if (typeof req.body === "string") {
       body = req.body;
     } else {
-      headers["Content-Type"] = headers["Content-Type"] || "application/json";
       body = JSON.stringify(req.body);
     }
   }
 
-  const response = await fetch(targetUrl, {
-    method,
-    headers,
+  const response = await fetch(buildTargetUrl(req, apiBaseUrl), {
+    method: req.method ?? "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(incomingAuth ? { Authorization: incomingAuth } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body,
   });
 

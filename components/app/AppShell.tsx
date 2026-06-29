@@ -10,21 +10,22 @@ import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import TopProgress from "../shared/TopProgress";
 import AdminLayout, { AdminNavItem } from "../../AdminLayout";
 import {
-  BadgeDollarSign,
-  BarChart3,
-  Building2,
-  CalendarDays,
-  ClipboardCheck,
-  FileText,
-  Gavel,
-  Import,
-  LayoutDashboard,
-  Megaphone,
-  Settings,
-  ShieldCheck,
-  UserCog,
-  Users,
-} from "lucide-react";
+   BadgeDollarSign,
+   BarChart3,
+   Building2,
+   CalendarDays,
+   ClipboardCheck,
+   Database,
+   FileText,
+   Gavel,
+   Import,
+   LayoutDashboard,
+   Megaphone,
+   Settings,
+   ShieldCheck,
+   UserCog,
+   Users,
+ } from "lucide-react";
 
 export type RoleRequirement = "Admin" | "SuperAdmin";
 
@@ -56,20 +57,21 @@ const OWNER_NAV: NavItem[] = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 const ADMIN_NAV: NavItem[] = [
-  { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  {
-    href: "/admin/subscriptions",
-    label: "Subscriptions",
-    icon: BadgeDollarSign,
-  },
-  { href: "/admin/promotions", label: "Promotions", icon: Megaphone },
-  { href: "/admin/ad-requests", label: "Ad Requests", icon: ClipboardCheck },
-  { href: "/admin/listing-updates", label: "Listing Updates", icon: FileText },
-  { href: "/admin/moderation", label: "Moderation", icon: Gavel },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/roles", label: "Roles", icon: UserCog },
-];
+   { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
+   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+   {
+     href: "/admin/subscriptions",
+     label: "Subscriptions",
+     icon: BadgeDollarSign,
+   },
+   { href: "/admin/promotions", label: "Promotions", icon: Megaphone },
+   { href: "/admin/ad-requests", label: "Ad Requests", icon: ClipboardCheck },
+   { href: "/admin/listing-updates", label: "Listing Updates", icon: FileText },
+   { href: "/admin/scraped-businesses", label: "Scraped Businesses", icon: Database },
+   { href: "/admin/moderation", label: "Moderation", icon: Gavel },
+   { href: "/admin/users", label: "Users", icon: Users },
+   { href: "/admin/roles", label: "Roles", icon: UserCog },
+ ];
 
 const SUPERADMIN_NAV: NavItem[] = [
   {

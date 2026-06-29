@@ -34,6 +34,62 @@ function formatSuggestionType(value: string): string {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+const placeholders = [
+  "Search in Crossing Republic, Greater Noida West",
+  "Search restaurants, shops, services",
+  "Find local businesses near you",
+  "Discover categories and place types",
+];
+
+function useTypewriterPlaceholders(
+  inputFocused: boolean,
+  disabled: boolean,
+): string {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!inputFocused || disabled || placeholders.length === 0) {
+      return;
+    }
+
+    const currentText = placeholders[currentIndex];
+
+    const updateCharIndex = () => {
+      if (!isDeleting && charIndex < currentText.length) {
+        setCharIndex(charIndex + 1);
+      } else if (isDeleting && charIndex > 0) {
+        setCharIndex(charIndex - 1);
+      } else if (!isDeleting && charIndex === currentText.length) {
+        timeoutRef.current = setTimeout(() => {
+          setIsDeleting(true);
+          setCharIndex(currentText.length - 1);
+        }, 1500);
+        return;
+      } else if (isDeleting && charIndex === 0) {
+        setIsDeleting(false);
+        setCurrentIndex((prev) => (prev + 1) % placeholders.length);
+      }
+    };
+
+    timeoutRef.current = setTimeout(updateCharIndex, isDeleting ? 50 : 80);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [currentIndex, charIndex, isDeleting, inputFocused, disabled]);
+
+  if (placeholders.length === 0) {
+    return "Search...";
+  }
+
+  return placeholders[currentIndex].slice(0, charIndex);
+}
+
 export default function GlobalSearch() {
   const router = useRouter();
   const listboxId = useId();
@@ -52,6 +108,15 @@ export default function GlobalSearch() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Auto-focus on mount when no query pre-filled
+  useEffect(() => {
+    if (query.length === 0 && inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true);
+    }
+  }, [query]);
 
   // Load saved city
   useEffect(() => {
@@ -251,6 +316,9 @@ export default function GlobalSearch() {
     }
   };
 
+  // Get the typewriter placeholder but don't show animation when user has typed something
+  const typewriterPlaceholder = useTypewriterPlaceholders(isFocused, query.length > 0);
+
   return (
     <div className="pub-search-wrap">
       <form className="pub-search-form" onSubmit={onSubmit}>
@@ -282,12 +350,14 @@ export default function GlobalSearch() {
             type="search"
             value={query}
             ref={inputRef}
+            autoFocus
             onChange={(e) => {
               suppressOpenRef.current = false;
               setQuery(e.target.value);
             }}
             onKeyDown={onKeyDown}
             onFocus={() => {
+              setIsFocused(true);
               // Only open if we already have suggestions AND can search
               // This prevents reopening after navigation/Enter
               if (canSearch && items.length > 0 && !suppressOpenRef.current) {
@@ -295,9 +365,10 @@ export default function GlobalSearch() {
               }
             }}
             onBlur={() => {
+              setIsFocused(false);
               window.setTimeout(closeDropdown, 150);
             }}
-            placeholder="Search in Crossing Republic, Greater Noida West"
+            placeholder={query ? "Search..." : typewriterPlaceholder}
             autoComplete="off"
             role="combobox"
             aria-expanded={open}

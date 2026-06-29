@@ -31,7 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
         router.push("/maintenance").catch(() => {
           // Silently handle navigation errors
         });
-      }, 60000); // Wait 60 seconds before redirecting to maintenance
+      }, 600000000); // Wait 60 seconds before redirecting to maintenance
     }
 
     // If we're on maintenance page and API is healthy again, redirect to home

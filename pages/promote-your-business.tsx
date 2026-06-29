@@ -31,7 +31,6 @@ const plans: Plan[] = [
       "Claim your business listing",
       "Update basic information",
       "Display photos",
-      //"Receive and respond to reviews",
     ],
     icon: <CheckCircle className="h-6 w-6 text-gray-500" />,
     cta: "Claim Now",
@@ -63,7 +62,6 @@ const plans: Plan[] = [
       "Featured listing placement",
       "Medium-sized banner ad placement",
       "Access to listing analytics",
-      //"Lead notifications via email",
     ],
     icon: <Award className="h-6 w-6 text-blue-500" />,
     cta: "Request Now",
@@ -91,14 +89,12 @@ const allFeatures = [
   "Claim your business listing",
   "Update basic information",
   "Display photos",
-  //"Receive and respond to reviews",
   "Premium badge on your listing",
   "Improved ranking in search results",
   "Inclusion in one banner ad rotation",
   "Featured listing placement",
   "Medium-sized banner ad placement",
   "Access to listing analytics",
-  //"Lead notifications via email",
   "Top featured listing placement",
   "Homepage banner ad placement",
   "Priority customer support",
@@ -118,8 +114,6 @@ export default function PromoteYourBusinessPage({
   const [error, setError] = useState<string | null>(null);
 
   const displayPlans = useMemo(() => {
-    // You can augment fetchedPlans with icons and other UI data here
-    // For now, we'll use the hardcoded ones for UI and fetched for data logic
     return plans;
   }, [fetchedPlans]);
 
@@ -148,7 +142,6 @@ export default function PromoteYourBusinessPage({
         response.data?.message ||
           "Your request has been sent. We will contact you shortly.",
       );
-      // Reset form
       setName("");
       setEmail("");
       setContact("");
@@ -179,100 +172,145 @@ export default function PromoteYourBusinessPage({
             </p>
           </div>
 
-          <div className="mt-12 overflow-x-auto">
-            <table className="w-full pricing-table">
-              <thead>
-                <tr>
-                  <th className="text-left feature-header">Features</th>
-                  {displayPlans.map((plan) => (
-                    <th
-                      key={plan.name}
-                      className={plan.recommended ? "recommended" : ""}
-                    >
-                      {plan.recommended && (
-                        <div className="recommended-badge">Most Popular</div>
-                      )}
-                      {plan.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="price-row">
-                  <td className="font-semibold">Monthly Price</td>
-                  {displayPlans.map((plan) => (
-                    <td
-                      key={`${plan.name}-monthly`}
-                      className={plan.recommended ? "recommended" : ""}
-                    >
-                      {plan.priceMonthly}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="price-row">
-                  <td className="font-semibold">Quarterly Price</td>
-                  {displayPlans.map((plan) => (
-                    <td
-                      key={`${plan.name}-quarterly`}
-                      className={plan.recommended ? "recommended" : ""}
-                    >
-                      {plan.priceQuarterly}
-                    </td>
-                  ))}
-                </tr>
-                <tr className="price-row annual-price-row">
-                  <td className="font-semibold">Annual Price</td>
-                  {displayPlans.map((plan) => (
-                    <td
-                      key={`${plan.name}-annual`}
-                      className={plan.recommended ? "recommended" : ""}
-                    >
-                      {plan.priceAnnual}
-                    </td>
-                  ))}
-                </tr>
-                {allFeatures.map((feature) => (
-                  <tr key={feature}>
-                    <td>{feature}</td>
-                    {displayPlans.map((plan) => {
-                      const planFeatures = new Set(plan.features);
-                      const hasFeature = planFeatures.has(feature);
-                      return (
-                        <td
-                          key={`${plan.name}-${feature}`}
-                          className={plan.recommended ? "recommended" : ""}
-                        >
-                          {hasFeature ? (
-                            <CheckCircle className="h-6 w-6 text-green-500 mx-auto" />
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-                <tr>
-                  <td></td>
-                  {displayPlans.map((plan) => (
-                    <td
-                      key={`${plan.name}-cta`}
-                      className={plan.recommended ? "recommended" : ""}
-                    >
-                      <a
-                        href={plan.href || "#request-form"}
-                        onClick={() =>
-                          !plan.href ? setSelectedPlan(plan.name) : null
-                        }
-                        className="mt-4 block w-full text-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+          <div className="mt-12">
+            <div className="pricing-table-desktop overflow-x-auto">
+              <table className="w-full pricing-table">
+                <thead>
+                  <tr>
+                    <th className="text-left feature-header">Features</th>
+                    {displayPlans.map((plan) => (
+                      <th
+                        key={plan.name}
+                        className={plan.recommended ? "recommended" : ""}
                       >
-                        {plan.cta}
-                      </a>
-                    </td>
+                        {plan.recommended && (
+                          <div className="recommended-badge">Most Popular</div>
+                        )}
+                        {plan.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="price-row">
+                    <td className="font-semibold">Monthly Price</td>
+                    {displayPlans.map((plan) => (
+                      <td
+                        key={`${plan.name}-monthly`}
+                        className={plan.recommended ? "recommended" : ""}
+                      >
+                        {plan.priceMonthly}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="price-row">
+                    <td className="font-semibold">Quarterly Price</td>
+                    {displayPlans.map((plan) => (
+                      <td
+                        key={`${plan.name}-quarterly`}
+                        className={plan.recommended ? "recommended" : ""}
+                      >
+                        {plan.priceQuarterly}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="price-row annual-price-row">
+                    <td className="font-semibold">Annual Price</td>
+                    {displayPlans.map((plan) => (
+                      <td
+                        key={`${plan.name}-annual`}
+                        className={plan.recommended ? "recommended" : ""}
+                      >
+                        {plan.priceAnnual}
+                      </td>
+                    ))}
+                  </tr>
+                  {allFeatures.map((feature) => (
+                    <tr key={feature}>
+                      <td>{feature}</td>
+                      {displayPlans.map((plan) => {
+                        const planFeatures = new Set(plan.features);
+                        const hasFeature = planFeatures.has(feature);
+                        return (
+                          <td
+                            key={`${plan.name}-${feature}`}
+                            className={plan.recommended ? "recommended" : ""}
+                          >
+                            {hasFeature ? (
+                              <CheckCircle className="h-6 w-6 text-green-500 mx-auto" />
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
                   ))}
-                </tr>
-              </tbody>
-            </table>
+                  <tr>
+                    <td></td>
+                    {displayPlans.map((plan) => (
+                      <td
+                        key={`${plan.name}-cta`}
+                        className={plan.recommended ? "recommended" : ""}
+                      >
+                        <a
+                          href={plan.href || "#request-form"}
+                          onClick={() =>
+                            !plan.href ? setSelectedPlan(plan.name) : null
+                          }
+                          className="mt-4 block w-full text-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+                        >
+                          {plan.cta}
+                        </a>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pricing-table-mobile grid gap-6">
+              {displayPlans.map((plan) => (
+                <div key={plan.name} className={`pricing-plan-card ${plan.recommended ? "recommended" : ""}`}>
+                  {plan.recommended && (
+                    <div className="recommended-badge-mobile">Most Popular</div>
+                  )}
+                  <h3 className="plan-name">{plan.name}</h3>
+                  <div className="plan-prices">
+                    <div className="plan-price-row">
+                      <span>Monthly:</span> {plan.priceMonthly}
+                    </div>
+                    <div className="plan-price-row">
+                      <span>Quarterly:</span> {plan.priceQuarterly}
+                    </div>
+                    <div className="plan-price-row annual">
+                      <span>Annual:</span> {plan.priceAnnual}
+                    </div>
+                  </div>
+                  <ul className="plan-features">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="plan-feature-item">
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={plan.href || "#request-form"}
+                    onClick={(e) => {
+                      if (!plan.href) {
+                        e.preventDefault();
+                        setSelectedPlan(plan.name);
+                        document.getElementById("request-form")?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="plan-cta-btn"
+                  >
+                    {plan.cta}
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -385,14 +423,98 @@ export default function PromoteYourBusinessPage({
           </div>
         </section>
         <style jsx>{`
-          .py-12 {
-            padding-top: 3rem;
-            padding-bottom: 3rem;
+          .pricing-table-mobile {
+            display: none;
           }
-          .mt-12 {
-            margin-top: 3rem;
+          .pricing-plan-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
           }
-          /* === Pricing Table UX/UI Styles === */
+          .pricing-plan-card.recommended {
+            border: 2px solid var(--marigold);
+            background: rgba(255, 184, 0, 0.02);
+          }
+          .recommended-badge-mobile {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--marigold);
+            color: var(--midnight);
+            padding: 4px 16px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          }
+          .plan-name {
+            margin: 12px 0 16px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text);
+          }
+          .plan-prices {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+          }
+          .plan-price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+          }
+          .plan-price-row span {
+            color: var(--muted);
+            font-weight: 500;
+          }
+          .plan-price-row.annual {
+            color: var(--marigold);
+            font-weight: 700;
+          }
+          .plan-price-row.annual span {
+            color: var(--marigold);
+          }
+          .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px;
+            display: grid;
+            gap: 10px;
+          }
+          .plan-feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.95rem;
+          }
+          .plan-feature-item span {
+            color: var(--text);
+          }
+          .plan-cta-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: var(--teal-600);
+            color: white;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+          }
+          .plan-cta-btn:hover {
+            background: var(--teal-700);
+          }
+
           .pricing-table {
             border-collapse: separate;
             border-spacing: 0;
@@ -479,7 +601,15 @@ export default function PromoteYourBusinessPage({
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
           }
 
-          /* === Form UX/UI Styles === */
+          @media (max-width: 768px) {
+            .pricing-table-desktop {
+              display: none;
+            }
+            .pricing-table-mobile {
+              display: grid;
+            }
+          }
+
           .request-form-card {
             background-color: var(--surface);
             padding: 2rem;
@@ -558,7 +688,7 @@ export const getServerSideProps: GetServerSideProps<{
     console.error("Failed to fetch plans", error);
     return {
       props: {
-        plans: [], // Fallback to empty array on error
+        plans: [],
       },
     };
   }

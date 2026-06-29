@@ -388,6 +388,41 @@ p.lead {
   line-height: 1.2;
 }
 
+.pub-search-placeholder {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 16px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+  background: var(--surface);
+  padding: 0 4px;
+  margin-left: -4px;
+}
+
+.pub-search-placeholder::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--muted);
+  margin-left: 2px;
+  animation: pub-placeholder-cursor 1s infinite;
+  vertical-align: middle;
+}
+
+@keyframes pub-placeholder-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.pub-search-placeholder-hidden {
+  display: none;
+}
+
 .pub-search-inset-btn {
   position: absolute;
   right: 6px;

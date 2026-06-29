@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { getAuthToken } from "../../lib/auth";
 import { apiFetch } from "../../lib/apiClient";
-import { Search, MapPin, Building2, Tag, LayoutGrid } from "lucide-react";
+import { MapPin, Building2, Tag, LayoutGrid } from "lucide-react";
 
 type Suggestion = {
   type: string;
@@ -41,17 +41,14 @@ const placeholders = [
   "Discover categories and place types",
 ];
 
-function useTypewriterPlaceholders(
-  inputFocused: boolean,
-  disabled: boolean,
-): string {
+function useTypewriterPlaceholders(disabled: boolean): string {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!inputFocused || disabled || placeholders.length === 0) {
+    if (disabled || placeholders.length === 0) {
       return;
     }
 
@@ -81,7 +78,7 @@ function useTypewriterPlaceholders(
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, charIndex, isDeleting, inputFocused, disabled]);
+  }, [currentIndex, charIndex, isDeleting, disabled]);
 
   if (placeholders.length === 0) {
     return "Search...";
@@ -108,15 +105,6 @@ export default function GlobalSearch() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [isFocused, setIsFocused] = useState(false);
-
-  // Auto-focus on mount when no query pre-filled
-  useEffect(() => {
-    if (query.length === 0 && inputRef.current) {
-      inputRef.current.focus();
-      setIsFocused(true);
-    }
-  }, [query]);
 
   // Load saved city
   useEffect(() => {
@@ -316,8 +304,8 @@ export default function GlobalSearch() {
     }
   };
 
-  // Get the typewriter placeholder but don't show animation when user has typed something
-  const typewriterPlaceholder = useTypewriterPlaceholders(isFocused, query.length > 0);
+  // Animation only stops when query has content
+  const typewriterPlaceholder = useTypewriterPlaceholders(query.length > 0);
 
   return (
     <div className="pub-search-wrap">
@@ -357,7 +345,6 @@ export default function GlobalSearch() {
             }}
             onKeyDown={onKeyDown}
             onFocus={() => {
-              setIsFocused(true);
               // Only open if we already have suggestions AND can search
               // This prevents reopening after navigation/Enter
               if (canSearch && items.length > 0 && !suppressOpenRef.current) {
@@ -365,10 +352,8 @@ export default function GlobalSearch() {
               }
             }}
             onBlur={() => {
-              setIsFocused(false);
               window.setTimeout(closeDropdown, 150);
             }}
-            placeholder={query ? "Search..." : typewriterPlaceholder}
             autoComplete="off"
             role="combobox"
             aria-expanded={open}
@@ -377,6 +362,12 @@ export default function GlobalSearch() {
               activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined
             }
           />
+          <label
+            htmlFor="global-search"
+            className={`pub-search-placeholder ${query ? "pub-search-placeholder-hidden" : ""}`}
+          >
+            {typewriterPlaceholder}
+          </label>
           <button
             className="pub-search-inset-btn"
             type="submit"

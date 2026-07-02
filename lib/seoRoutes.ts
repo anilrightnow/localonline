@@ -5,11 +5,13 @@ export type SeoPageKind =
   | "cityAreaCategory"
   | "cityAreaPlaceType"
   | "cityAreaPlaceTypePlace"
-  | "business";
+  | "business"
+  | "category"
+  | "areaCategory";
 
 export type ParsedSeoRoute = {
   kind: SeoPageKind;
-  citySlug: string;
+  citySlug?: string;
   areaSlug?: string;
   categorySlug?: string;
   placeTypeSlug?: string;
@@ -253,6 +255,19 @@ export function parseSeoSegments(segments: string[]): ParsedSeoRoute | null {
     };
   }
 
+  const categorySlug = readPrefixedSegment(segments[0], "k-");
+  if (categorySlug && segments.length === 1) {
+    return { kind: "category", categorySlug };
+  }
+
+  const areaSlug = readPrefixedSegment(segments[0], "a-");
+  if (areaSlug && segments.length === 2) {
+    const catSlug = readPrefixedSegment(segments[1], "k-");
+    if (catSlug) {
+      return { kind: "areaCategory", areaSlug, categorySlug: catSlug };
+    }
+  }
+
   return null;
 }
 
@@ -279,6 +294,14 @@ export function buildCanonicalPath(parsed: ParsedSeoRoute): string {
 
   if (parsed.kind === "cityAreaPlaceTypePlace") {
     return `/c-${parsed.citySlug}/a-${parsed.areaSlug}/t-${parsed.placeTypeSlug}/p-${parsed.placeSlug}`;
+  }
+
+  if (parsed.kind === "category") {
+    return `/k-${parsed.categorySlug}`;
+  }
+
+  if (parsed.kind === "areaCategory") {
+    return `/a-${parsed.areaSlug}/k-${parsed.categorySlug}`;
   }
 
   return `/${parsed.businessComposite}`;

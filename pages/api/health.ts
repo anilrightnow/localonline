@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 type ResponseData = {
-  status: 'ok' | 'error';
+  status: 'ok' | 'error' | 'maintenance';
   message?: string;
   timestamp: string;
   backend?: string;
+  maintenance?: boolean;
 };
 
 export default async function handler(
@@ -12,10 +13,9 @@ export default async function handler(
   res: NextApiResponse<ResponseData>
 ) {
   try {
-    // Attempt a simple health check call to your backend API
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeout = setTimeout(() => controller.abort(), 3000);
 
     const response = await fetch(`${apiUrl}/api/health`, {
       method: 'GET',
@@ -28,9 +28,19 @@ export default async function handler(
     clearTimeout(timeout);
 
     if (response.ok) {
+      const data = await response.json();
+      // Handle maintenance mode response
+      if (data.status === 'maintenance') {
+        return res.status(503).json({
+          status: 'maintenance',
+          message: data.message || 'System is under maintenance',
+          timestamp: data.timestamp,
+          maintenance: true,
+        });
+      }
       return res.status(200).json({
         status: 'ok',
-        timestamp: new Date().toISOString(),
+        timestamp: data.timestamp,
         backend: 'connected',
       });
     }

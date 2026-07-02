@@ -5,46 +5,29 @@ import { useRouter } from "next/router";
 import Script from "next/script";
 import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
-import { useApiHealth } from "../lib/useApiHealth";
 
 const isGoogleAdsEnabled =
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ENABLED === "true";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const { isHealthy } = useApiHealth();
   const [isMounted, setIsMounted] = useState(false);
+
+  const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "1";
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Redirect to maintenance page if API is down (but not if already on maintenance page)
   useEffect(() => {
-    if (!isMounted || isMounted === null) return;
+    if (!isMounted) return;
 
-    let maintenanceTimer: NodeJS.Timeout | null = null;
-
-    // If we explicitly know the API is down (isHealthy === false), redirect
-    if (isHealthy === false && router.pathname !== "/maintenance") {
-      maintenanceTimer = setTimeout(() => {
-        router.push("/maintenance").catch(() => {
-          // Silently handle navigation errors
-        });
-      }, 60000); // Wait 60 seconds before redirecting to maintenance
+    if (maintenanceMode && router.pathname !== "/maintenance") {
+      router.push("/maintenance").catch(() => {});
+    } else if (!maintenanceMode && router.pathname === "/maintenance") {
+      router.push("/").catch(() => {});
     }
-
-    // If we're on maintenance page and API is healthy again, redirect to home
-    if (isHealthy === true && router.pathname === "/maintenance") {
-      router.push("/").catch(() => {
-        // Silently handle navigation errors
-      });
-    }
-
-    return () => {
-      if (maintenanceTimer) clearTimeout(maintenanceTimer);
-    };
-  }, [isHealthy, router.pathname, isMounted, router]);
+  }, [maintenanceMode, router.pathname, isMounted, router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -82,7 +65,6 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="Local Online" />
         <meta name="apple-mobile-web-app-title" content="Local Online" />
         <meta name="theme-color" content="#0f766e" />
-        {/* Preload fonts for faster perceived loading */}
         <link
           rel="preload"
           href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
@@ -129,7 +111,6 @@ export default function App({ Component, pageProps }: AppProps) {
             background-color: var(--surface) !important;
             border-radius: 16px !important;
           }
-          
         `}</style>
         {isGoogleAdsEnabled && (
           <meta

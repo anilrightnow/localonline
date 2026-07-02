@@ -2287,27 +2287,27 @@ function buildApiPath(
 ): string | null {
   const pageQuery = currentPage > 1 ? `?page=${currentPage}` : "";
   if (parsed.kind === "city") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}${pageQuery}`;
   }
 
   if (parsed.kind === "cityArea") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}/area/${encodeURIComponent(parsed.areaSlug ?? "")}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}/area/${encodeURIComponent(parsed.areaSlug ?? "")}${pageQuery}`;
   }
 
   if (parsed.kind === "cityCategory") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}/category/${encodeURIComponent(parsed.categorySlug ?? "")}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}/category/${encodeURIComponent(parsed.categorySlug ?? "")}${pageQuery}`;
   }
 
   if (parsed.kind === "cityAreaCategory") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/category/${encodeURIComponent(parsed.categorySlug ?? "")}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/category/${encodeURIComponent(parsed.categorySlug ?? "")}${pageQuery}`;
   }
 
   if (parsed.kind === "cityAreaPlaceType") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/place-type/${encodeURIComponent(parsed.placeTypeSlug ?? "")}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/place-type/${encodeURIComponent(parsed.placeTypeSlug ?? "")}${pageQuery}`;
   }
 
   if (parsed.kind === "cityAreaPlaceTypePlace") {
-    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug)}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/place-type/${encodeURIComponent(parsed.placeTypeSlug ?? "")}/place/${encodeURIComponent(parsed.placeSlug ?? "")}${pageQuery}`;
+    return `/api/public-search/city/${encodeURIComponent(parsed.citySlug ?? "")}/area/${encodeURIComponent(parsed.areaSlug ?? "")}/place-type/${encodeURIComponent(parsed.placeTypeSlug ?? "")}/place/${encodeURIComponent(parsed.placeSlug ?? "")}${pageQuery}`;
   }
 
   return null;

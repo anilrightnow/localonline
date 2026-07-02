@@ -22,7 +22,6 @@ export default function MaintenancePage() {
     typeof router.query.from === "string" ? router.query.from : "/";
 
   const handleTryAgain = () => {
-    // Redirect to the original path the user was trying to access
     router.push(fromPath);
   };
 

@@ -14,17 +14,50 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [showResendLink, setShowResendLink] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
+    setShowResendLink(false);
     try {
-      const response = await axios.post(apiUrl("/api/auth/login"), { email, password });
+      const response = await axios.post(apiUrl("/api/auth/login"), {
+        email,
+        password,
+      });
       setAuthTokenCookie(response.data.access_token);
-      const returnUrl = typeof router.query.returnUrl === "string" ? router.query.returnUrl : "/dashboard";
+      const returnUrl =
+        typeof router.query.returnUrl === "string"
+          ? router.query.returnUrl
+          : "/dashboard";
       router.push(returnUrl);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Invalid email or password"));
+      const errorMessage = getApiErrorMessage(err, "Invalid email or password");
+      setError(errorMessage);
+      if (axios.isAxiosError(err) && err.response?.data?.needsVerification) {
+        setShowResendLink(true);
+      }
+    }
+  };
+
+  const handleResendVerification = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setError(null);
+    setMessage("Sending a new verification email...");
+    setShowResendLink(false);
+
+    try {
+      const { data } = await axios.post(
+        apiUrl("/api/auth/resend-verification"),
+        { email },
+      );
+      setMessage(data.message);
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Could not send verification email."));
+      setMessage(null);
     }
   };
 
@@ -33,9 +66,12 @@ const LoginPage = () => {
       <div className="auth-card">
         <div className="auth-header">
           <h2 className="auth-title">Welcome back</h2>
-          <p className="auth-subtitle">Sign in to manage your account and listings.</p>
+          <p className="auth-subtitle">
+            Sign in to manage your account and listings.
+          </p>
         </div>
         <FormMessage message={error} tone="error" />
+        <FormMessage message={message} tone="success" />
         <form onSubmit={handleLogin} className="auth-form">
           <FormField id="login-email" label="Email">
             <input
@@ -62,6 +98,13 @@ const LoginPage = () => {
               Login
             </button>
           </div>
+          {showResendLink && (
+            <div className="auth-extra-action">
+              <a href="#" onClick={handleResendVerification}>
+                Resend verification email
+              </a>
+            </div>
+          )}
         </form>
         <div className="auth-links">
           <Link className="btn btn-ghost" href="/auth/forgot-password">

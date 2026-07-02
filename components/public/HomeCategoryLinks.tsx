@@ -11,7 +11,7 @@ const categories = [
 ];
 
 export default function HomeCategoryLinks() {
-  const [citySlug, setCitySlug] = useState("gautam-buddha-nagar");
+  const [citySlug, setCitySlug] = useState("ghaziabad");
 
   useEffect(() => {
     const saved = window.localStorage

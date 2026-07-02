@@ -21,7 +21,7 @@ type Promotion = {
 export default function PromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Form state
   const [businessToken, setBusinessToken] = useState("");
   const [type, setType] = useState("FeaturedList");
@@ -66,7 +66,9 @@ export default function PromotionsPage() {
     } catch (err: any) {
       const msg = err?.message || "Unknown error";
       if (msg.includes("fetch failed") || msg.includes("ECONNREFUSED")) {
-        setError("Unable to connect to API server. Please ensure it's running.");
+        setError(
+          "Unable to connect to API server. Please ensure it's running.",
+        );
       } else {
         setError(msg);
       }
@@ -103,7 +105,7 @@ export default function PromotionsPage() {
           method: editingId ? "PUT" : "POST",
           headers,
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -123,7 +125,9 @@ export default function PromotionsPage() {
 
       loadPromotions();
     } catch (err: any) {
-      setMessage(typeof err.message === "string" ? err.message : "Save failed.");
+      setMessage(
+        typeof err.message === "string" ? err.message : "Save failed.",
+      );
     }
   }
 
@@ -133,7 +137,9 @@ export default function PromotionsPage() {
     setType(p.type);
     setStatus(p.status);
     setPrice(String(p.price));
-    setStartsAt(p.startsAt ? new Date(p.startsAt).toISOString().slice(0, 16) : "");
+    setStartsAt(
+      p.startsAt ? new Date(p.startsAt).toISOString().slice(0, 16) : "",
+    );
     setEndsAt(p.endsAt ? new Date(p.endsAt).toISOString().slice(0, 16) : "");
     setBannerImageUrl(p.bannerImageUrl || "");
     setTargetUrl(p.targetUrl || "");
@@ -155,7 +161,9 @@ export default function PromotionsPage() {
       }
       loadPromotions();
     } catch (err: any) {
-      setMessage(typeof err.message === "string" ? err.message : "Delete failed.");
+      setMessage(
+        typeof err.message === "string" ? err.message : "Delete failed.",
+      );
     }
   }
 
@@ -200,7 +208,9 @@ export default function PromotionsPage() {
               onChange={(e) => setType(e.target.value)}
             >
               <option value="FeaturedList">Featured List - Home Page</option>
-              <option value="Banner">Banner - Home Page</option>
+              <option value="BannerHome">Banner Home Page</option>
+              <option value="BannerDetail">Banner Detail Page</option>
+              <option value="BannerSearch">Banner Search Page</option>
             </select>
           </div>
           <div className="form-row">
@@ -269,7 +279,11 @@ export default function PromotionsPage() {
               {editingId ? "Update Promotion" : "Save Promotion"}
             </button>
             {editingId && (
-              <button className="btn btn-secondary" type="button" onClick={cancelEdit}>
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={cancelEdit}
+              >
                 Cancel
               </button>
             )}
@@ -304,8 +318,14 @@ export default function PromotionsPage() {
                   <td>{p.type}</td>
                   <td>{p.status}</td>
                   <td>${p.price}</td>
-                  <td>{p.startsAt ? new Date(p.startsAt).toLocaleDateString() : "-"}</td>
-                  <td>{p.endsAt ? new Date(p.endsAt).toLocaleDateString() : "-"}</td>
+                  <td>
+                    {p.startsAt
+                      ? new Date(p.startsAt).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td>
+                    {p.endsAt ? new Date(p.endsAt).toLocaleDateString() : "-"}
+                  </td>
                   <td>
                     <button
                       className="btn btn-sm btn-secondary"

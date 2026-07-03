@@ -338,7 +338,6 @@ export default function GlobalSearch() {
             type="search"
             value={query}
             ref={inputRef}
-            autoFocus
             onChange={(e) => {
               suppressOpenRef.current = false;
               setQuery(e.target.value);

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../../components/app/AppShell";
 import { getAuthToken, useRequireAuth } from "../../lib/auth";
-import { apiUrl, apiFetch } from "../../lib/apiClient";
+import { apiUrl, apiClient } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import { getApiErrorMessage } from "../../lib/apiError";
 import FormMessage from "../../components/shared/FormMessage";
-import axios from "axios";
 
 interface Plan {
   id: string;
@@ -50,10 +49,10 @@ export default function AdminPlansPage() {
     setLoading(true);
     try {
       const token = getAuthToken();
-      const res = await axios.get(apiUrl("/api/admin/plans/all"), {
+      const { data } = await apiClient.get("/api/admin/plans/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setPlans(res.data);
+      setPlans(data ?? []);
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -76,7 +75,7 @@ export default function AdminPlansPage() {
       : "/api/admin/plans";
 
     try {
-      await apiFetch(url, {
+      const response = await fetch(apiUrl(url), {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -89,6 +88,7 @@ export default function AdminPlansPage() {
           discountQuarterly,
         }),
       });
+      if (!response.ok) throw new Error(await response.text());
       setEditingPlan(null);
       fetchPlans();
     } catch (err) {
@@ -101,7 +101,7 @@ export default function AdminPlansPage() {
     if (!selectedPlanForFeature || !newFeature) return;
     const token = getAuthToken();
     try {
-      await apiFetch(`/api/admin/plans/${selectedPlanForFeature}/features`, {
+      const response = await fetch(apiUrl(`/api/admin/plans/${selectedPlanForFeature}/features`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,6 +109,7 @@ export default function AdminPlansPage() {
         },
         body: JSON.stringify({ feature: newFeature }),
       });
+      if (!response.ok) throw new Error(await response.text());
       setNewFeature("");
       fetchPlans();
     } catch (err) {
@@ -120,10 +121,11 @@ export default function AdminPlansPage() {
     if (!confirm("Are you sure you want to delete this feature?")) return;
     const token = getAuthToken();
     try {
-      await apiFetch(`/api/admin/plans/features/${featureId}`, {
+      const response = await fetch(apiUrl(`/api/admin/plans/features/${featureId}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!response.ok) throw new Error(await response.text());
       fetchPlans();
     } catch (err) {
       setError(getApiErrorMessage(err));

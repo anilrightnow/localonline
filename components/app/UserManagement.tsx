@@ -81,7 +81,17 @@ export default function UserManagement({
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       const items = Array.isArray(data) ? data : data?.items;
-      setUsers((items as UserRow[]) ?? []);
+      const normalized = (items ?? []).map((raw: any) => ({
+        id: String(raw.Id ?? raw.id ?? ''),
+        email: String(raw.Email ?? raw.email ?? ''),
+        emailConfirmed: raw.EmailConfirmed ?? raw.emailConfirmed,
+        phoneNumber: raw.PhoneNumber ?? raw.phoneNumber,
+        createdAt: raw.CreatedAt ?? raw.createdAt,
+        role: raw.role,
+        roles: raw.roles,
+        lastLoginAt: raw.lastLoginAt,
+      }));
+      setUsers(normalized);
 
       if (data.pagination) {
         setPagination(data.pagination);

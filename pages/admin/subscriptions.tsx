@@ -62,14 +62,14 @@ export default function Subscriptions() {
       const apiBaseUrl = getApiBaseUrl();
       const token = getAuthToken();
       if (!token) throw new Error("Not authenticated.");
-      const response = await fetch(`${apiBaseUrl}/api/plans`, {
+      const response = await fetch(`${apiBaseUrl}/api/plans/plans`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
         const json = await response.json();
-        setPlans(json);
+        setPlans(Array.isArray(json) ? json : []);
       }
     } catch (err) {
       console.error("Failed to load plans:", err);

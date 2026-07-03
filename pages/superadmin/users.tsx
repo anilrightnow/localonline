@@ -27,6 +27,26 @@ type RoleRow = { id: string; name: string };
 type Pagination = { page: number; pageSize: number; totalCount: number };
 type UsersResponse = { items: UserRow[]; pagination: Pagination };
 
+function normalizeUser(raw: any): UserRow {
+  return {
+    id: String(raw.Id ?? raw.id ?? ''),
+    email: raw.Email ?? raw.email ?? null,
+    userName: raw.UserName ?? raw.userName ?? null,
+    fullName: raw.fullName ?? null,
+    phoneNumber: raw.PhoneNumber ?? raw.phoneNumber ?? null,
+    mobile: raw.mobile ?? null,
+    gender: raw.gender ?? null,
+    emailConfirmed: Boolean(raw.EmailConfirmed ?? raw.emailConfirmed),
+    phoneNumberConfirmed: Boolean(raw.phoneNumberConfirmed),
+    twoFactorEnabled: Boolean(raw.TwoFactorEnabled ?? raw.twoFactorEnabled),
+    lockoutEnabled: Boolean(raw.lockoutEnabled),
+    accessFailedCount: Number(raw.AccessFailedCount ?? raw.accessFailedCount ?? 0),
+    lastLoginAt: raw.lastLoginAt ?? null,
+    lastActivityAt: raw.lastActivityAt ?? null,
+    roles: Array.isArray(raw.roles) ? raw.roles : [],
+  };
+}
+
 function formatDate(value: string | null) {
   if (!value) return "-";
   const date = new Date(value);
@@ -79,10 +99,10 @@ export default function SuperAdminUsersPage() {
       if (!res.ok) throw new Error(await res.text());
       const json = (await res.json()) as UsersResponse | UserRow[];
       if (Array.isArray(json)) {
-        setUsers(json);
+        setUsers(json.map((raw) => normalizeUser(raw)));
         setPagination({ page, pageSize: pagination.pageSize, totalCount: json.length });
       } else {
-        setUsers(json.items ?? []);
+        setUsers((json.items ?? []).map((raw) => normalizeUser(raw)));
         setPagination(json.pagination ?? { page, pageSize: pagination.pageSize, totalCount: 0 });
       }
     } catch (err) {

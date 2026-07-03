@@ -152,10 +152,10 @@ export default function OwnerListingPage() {
   }
 
   async function loadMasterData() {
-    console.log("loadMasterData called");
+    //console.log("loadMasterData called");
     try {
       const token = getAuthToken();
-      console.log("Auth token:", token ? "present" : "missing");
+      //console.log("Auth token:", token ? "present" : "missing");
       const [citiesRes, areasRes, categoriesRes] = await Promise.all([
         axios.get<MasterOption[]>(apiUrl("/api/master/cities"), {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -167,13 +167,7 @@ export default function OwnerListingPage() {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         }),
       ]);
-      console.log("Cities response:", citiesRes.data?.length || 0, "items");
-      console.log("Areas response:", areasRes.data?.length || 0, "items");
-      console.log(
-        "Categories response:",
-        categoriesRes.data?.length || 0,
-        "items",
-      );
+
       setCities(citiesRes.data ?? []);
       setAreas(areasRes.data ?? []);
       setCategories(categoriesRes.data ?? []);

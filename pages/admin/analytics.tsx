@@ -86,7 +86,7 @@ export default function AdminAnalyticsPage() {
           </div>
           <div className="app-card">
             <h3>Events by Type</h3>
-            {data.byType.length === 0 ? <p>No analytics events found.</p> : null}
+            {data.byType && data.byType.length === 0 ? <p>No analytics events found.</p> : null}
             <ul>
               {data.byType.map((item) => (
                 <li key={item.eventType}>{item.eventType}: {item.total}</li>
@@ -95,7 +95,7 @@ export default function AdminAnalyticsPage() {
           </div>
           <div className="app-card">
             <h3>Top Pages</h3>
-            {data.topPages.length === 0 ? <p>No page views yet.</p> : null}
+            {data.topPages && data.topPages.length === 0 ? <p>No page views yet.</p> : null}
             <ul>
               {data.topPages.map((item) => (
                 <li key={item.path}>{item.path}: {item.total}</li>
@@ -104,9 +104,9 @@ export default function AdminAnalyticsPage() {
           </div>
           <div className="app-card">
             <h3>Top Businesses</h3>
-            {data.topBusinesses.length === 0 ? <p>No business views yet.</p> : null}
+            {(data.topBusinesses?.length ?? 0) === 0 ? <p>No business views yet.</p> : null}
             <ul>
-              {data.topBusinesses.map((item) => (
+              {data.topBusinesses?.map((item) => (
                 <li key={item.cid}>{item.name}: {item.total}</li>
               ))}
             </ul>

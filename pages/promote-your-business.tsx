@@ -1,121 +1,128 @@
 import Head from "next/head";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import SiteShell from "../components/public/SiteShell";
 import { getApiBaseUrl } from "../lib/publicApi";
 import { getApiErrorMessage } from "../lib/apiError";
-import { CheckCircle, Zap, ShieldCheck, Gem, Award } from "lucide-react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { getAuthToken } from "../lib/auth";
+import {
+  CheckCircle,
+  Zap,
+  ShieldCheck,
+  Gem,
+  Award,
+  Star,
+  Crown,
+  Rocket,
+  TrendingUp,
+  Globe,
+  BarChart3,
+  Headphones,
+  Mail,
+} from "lucide-react";
 
-interface Plan {
+interface DynamicPlan {
+  id: string;
   name: string;
-  price: string;
+  price: number;
   priceMonthly: string;
   priceQuarterly: string;
   priceAnnual: string;
   features: string[];
-  icon: JSX.Element;
+  icon: string | null;
   cta: string;
-  recommended?: boolean;
-  href?: string;
+  recommended: boolean;
+  href: string | null;
 }
 
-const plans: Plan[] = [
-  {
-    name: "Free / Basic Listing",
-    price: "Free",
-    priceMonthly: "Free",
-    priceQuarterly: "Free",
-    priceAnnual: "Always free",
-    features: [
-      "Claim your business listing",
-      "Update basic information",
-      "Display photos",
-    ],
-    icon: <CheckCircle className="h-6 w-6 text-gray-500" />,
-    cta: "Claim Now",
-    href: "/claims",
-  },
-  {
-    name: "Starter Boost",
-    price: "₹999",
-    priceMonthly: "₹999/month",
-    priceQuarterly: "₹2,847/quarter (5% off)",
-    priceAnnual: "₹10,789/year (10% off)",
-    features: [
-      "All Basic features",
-      "Premium badge on your listing",
-      "Improved ranking in search results",
-      "Inclusion in one banner ad rotation",
-    ],
-    icon: <Zap className="h-6 w-6 text-yellow-500" />,
-    cta: "Request Now",
-  },
-  {
-    name: "Growth Plan",
-    price: "₹2,499",
-    priceMonthly: "₹2,499/month",
-    priceQuarterly: "₹7,122/quarter (5% off)",
-    priceAnnual: "₹26,989/year (10% off)",
-    features: [
-      "All Starter Boost features",
-      "Featured listing placement",
-      "Medium-sized banner ad placement",
-      "Access to listing analytics",
-    ],
-    icon: <Award className="h-6 w-6 text-blue-500" />,
-    cta: "Request Now",
-    recommended: true,
-  },
-  {
-    name: "Premium Dominance",
-    price: "₹4,999",
-    priceMonthly: "₹4,999/month",
-    priceQuarterly: "₹14,247/quarter (5% off)",
-    priceAnnual: "₹53,989/year (10% off)",
-    features: [
-      "All Growth Plan features",
-      "Top featured listing placement",
-      "Homepage banner ad placement",
-      "Priority customer support",
-      "Monthly performance reports",
-    ],
-    icon: <Gem className="h-6 w-6 text-purple-500" />,
-    cta: "Request Now",
-  },
-];
+const ICON_MAP: Record<string, React.ElementType> = {
+  Zap,
+  ShieldCheck,
+  Gem,
+  Award,
+  Star,
+  Crown,
+  Rocket,
+  TrendingUp,
+  Globe,
+  BarChart3,
+  Headphones,
+  Mail,
+  CheckCircle,
+};
 
-const allFeatures = [
-  "Claim your business listing",
-  "Update basic information",
-  "Display photos",
-  "Premium badge on your listing",
-  "Improved ranking in search results",
-  "Inclusion in one banner ad rotation",
-  "Featured listing placement",
-  "Medium-sized banner ad placement",
-  "Access to listing analytics",
-  "Top featured listing placement",
-  "Homepage banner ad placement",
-  "Priority customer support",
-  "Monthly performance reports",
-];
+function resolveIcon(iconName: string | null) {
+  if (!iconName) return CheckCircle;
+  const Component = ICON_MAP[iconName];
+  return Component || CheckCircle;
+}
 
-export default function PromoteYourBusinessPage({
-  plans: fetchedPlans,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function PromoteYourBusinessPage() {
+  const [plans, setPlans] = useState<DynamicPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [plansError, setPlansError] = useState<string | null>(null);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
   const [businessName, setBusinessName] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState("Starter Boost");
+  const [selectedPlan, setSelectedPlan] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const displayPlans = useMemo(() => {
-    return plans;
-  }, [fetchedPlans]);
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingPlans(true);
+    setPlansError(null);
+
+    async function loadPlans() {
+      try {
+        const apiBaseUrl = getApiBaseUrl();
+        const token = getAuthToken();
+        const url = `${apiBaseUrl}/api/public/plans`;
+        const response = await axios.get(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!cancelled) {
+          setPlans(Array.isArray(response.data) ? response.data : []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setPlansError(getApiErrorMessage(err, "Failed to load plans."));
+          setPlans([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingPlans(false);
+        }
+      }
+    }
+
+    void loadPlans();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayPlans = useMemo(() => plans, [plans]);
+
+  const allFeatures = useMemo(() => {
+    const set = new Set<string>();
+    for (const plan of displayPlans) {
+      for (const f of plan.features) {
+        set.add(f);
+      }
+    }
+    return Array.from(set);
+  }, [displayPlans]);
+
+  useEffect(() => {
+    if (!selectedPlan && displayPlans.length > 0) {
+      const firstNamed = displayPlans.find((p) => !p.href);
+      if (firstNamed) setSelectedPlan(firstNamed.name);
+    }
+  }, [displayPlans, selectedPlan]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,6 +132,7 @@ export default function PromoteYourBusinessPage({
 
     try {
       const apiBaseUrl = getApiBaseUrl();
+      const token = getAuthToken();
       const payload = {
         name,
         email,
@@ -137,7 +145,13 @@ export default function PromoteYourBusinessPage({
           Selected Plan: ${selectedPlan}
         `,
       };
-      const response = await axios.post(`${apiBaseUrl}/api/contact`, payload);
+      const response = await axios.post(
+        `${apiBaseUrl}/api/contact`,
+        payload,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       setMessage(
         response.data?.message ||
           "Your request has been sent. We will contact you shortly.",
@@ -172,145 +186,174 @@ export default function PromoteYourBusinessPage({
             </p>
           </div>
 
+          {plansError && (
+            <p className="app-muted text-center mt-6">{plansError}</p>
+          )}
+
           <div className="mt-12">
-            <div className="pricing-table-desktop overflow-x-auto">
-              <table className="w-full pricing-table">
-                <thead>
-                  <tr>
-                    <th className="text-left feature-header">Features</th>
-                    {displayPlans.map((plan) => (
-                      <th
-                        key={plan.name}
-                        className={plan.recommended ? "recommended" : ""}
-                      >
-                        {plan.recommended && (
-                          <div className="recommended-badge">Most Popular</div>
-                        )}
-                        {plan.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="price-row">
-                    <td className="font-semibold">Monthly Price</td>
-                    {displayPlans.map((plan) => (
-                      <td
-                        key={`${plan.name}-monthly`}
-                        className={plan.recommended ? "recommended" : ""}
-                      >
-                        {plan.priceMonthly}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr className="price-row">
-                    <td className="font-semibold">Quarterly Price</td>
-                    {displayPlans.map((plan) => (
-                      <td
-                        key={`${plan.name}-quarterly`}
-                        className={plan.recommended ? "recommended" : ""}
-                      >
-                        {plan.priceQuarterly}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr className="price-row annual-price-row">
-                    <td className="font-semibold">Annual Price</td>
-                    {displayPlans.map((plan) => (
-                      <td
-                        key={`${plan.name}-annual`}
-                        className={plan.recommended ? "recommended" : ""}
-                      >
-                        {plan.priceAnnual}
-                      </td>
-                    ))}
-                  </tr>
-                  {allFeatures.map((feature) => (
-                    <tr key={feature}>
-                      <td>{feature}</td>
-                      {displayPlans.map((plan) => {
-                        const planFeatures = new Set(plan.features);
-                        const hasFeature = planFeatures.has(feature);
-                        return (
+            {loadingPlans ? (
+              <p className="app-loading text-center">Loading plans...</p>
+            ) : displayPlans.length === 0 ? (
+              <p className="app-muted text-center">
+                No plans are available right now. Please check back later.
+              </p>
+            ) : (
+              <>
+                <div className="pricing-table-desktop overflow-x-auto">
+                  <table className="w-full pricing-table">
+                    <thead>
+                      <tr>
+                        <th className="text-left feature-header">Features</th>
+                        {displayPlans.map((plan) => {
+                          const IconComponent = resolveIcon(plan.icon);
+                          return (
+                            <th
+                              key={plan.id}
+                              className={plan.recommended ? "recommended" : ""}
+                            >
+                              {plan.recommended && (
+                                <div className="recommended-badge">Most Popular</div>
+                              )}
+                              <div className="flex items-center justify-center gap-2 mt-2">
+                                <IconComponent className="h-5 w-5" />
+                                <span>{plan.name}</span>
+                              </div>
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="price-row">
+                        <td className="font-semibold">Monthly Price</td>
+                        {displayPlans.map((plan) => (
                           <td
-                            key={`${plan.name}-${feature}`}
+                            key={`${plan.id}-monthly`}
                             className={plan.recommended ? "recommended" : ""}
                           >
-                            {hasFeature ? (
-                              <CheckCircle className="h-6 w-6 text-green-500 mx-auto" />
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
+                            {plan.priceMonthly}
                           </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                  <tr>
-                    <td></td>
-                    {displayPlans.map((plan) => (
-                      <td
-                        key={`${plan.name}-cta`}
-                        className={plan.recommended ? "recommended" : ""}
+                        ))}
+                      </tr>
+                      <tr className="price-row">
+                        <td className="font-semibold">Quarterly Price</td>
+                        {displayPlans.map((plan) => (
+                          <td
+                            key={`${plan.id}-quarterly`}
+                            className={plan.recommended ? "recommended" : ""}
+                          >
+                            {plan.priceQuarterly}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr className="price-row annual-price-row">
+                        <td className="font-semibold">Annual Price</td>
+                        {displayPlans.map((plan) => (
+                          <td
+                            key={`${plan.id}-annual`}
+                            className={plan.recommended ? "recommended" : ""}
+                          >
+                            {plan.priceAnnual}
+                          </td>
+                        ))}
+                      </tr>
+                      {allFeatures.map((feature) => (
+                        <tr key={feature}>
+                          <td>{feature}</td>
+                          {displayPlans.map((plan) => {
+                            const planFeatures = new Set(plan.features);
+                            const hasFeature = planFeatures.has(feature);
+                            return (
+                              <td
+                                key={`${plan.id}-${feature}`}
+                                className={plan.recommended ? "recommended" : ""}
+                              >
+                                {hasFeature ? (
+                                  <CheckCircle className="h-6 w-6 text-green-500 mx-auto" />
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                      <tr>
+                        <td></td>
+                        {displayPlans.map((plan) => (
+                          <td
+                            key={`${plan.id}-cta`}
+                            className={plan.recommended ? "recommended" : ""}
+                          >
+                            <a
+                              href={plan.href || "#request-form"}
+                              onClick={() =>
+                                !plan.href ? setSelectedPlan(plan.name) : null
+                              }
+                              className="mt-4 block w-full text-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+                            >
+                              {plan.cta}
+                            </a>
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="pricing-table-mobile grid gap-6">
+                  {displayPlans.map((plan) => {
+                    const IconComponent = resolveIcon(plan.icon);
+                    return (
+                      <div
+                        key={plan.id}
+                        className={`pricing-plan-card ${plan.recommended ? "recommended" : ""}`}
                       >
+                        {plan.recommended && (
+                          <div className="recommended-badge-mobile">Most Popular</div>
+                        )}
+                        <h3 className="plan-name flex items-center justify-center gap-2">
+                          <IconComponent className="h-5 w-5" />
+                          {plan.name}
+                        </h3>
+                        <div className="plan-prices">
+                          <div className="plan-price-row">
+                            <span>Monthly:</span> {plan.priceMonthly}
+                          </div>
+                          <div className="plan-price-row">
+                            <span>Quarterly:</span> {plan.priceQuarterly}
+                          </div>
+                          <div className="plan-price-row annual">
+                            <span>Annual:</span> {plan.priceAnnual}
+                          </div>
+                        </div>
+                        <ul className="plan-features">
+                          {plan.features.map((feature, idx) => (
+                            <li key={idx} className="plan-feature-item">
+                              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
                         <a
                           href={plan.href || "#request-form"}
-                          onClick={() =>
-                            !plan.href ? setSelectedPlan(plan.name) : null
-                          }
-                          className="mt-4 block w-full text-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors"
+                          onClick={(e) => {
+                            if (!plan.href) {
+                              e.preventDefault();
+                              setSelectedPlan(plan.name);
+                              document.getElementById("request-form")?.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }}
+                          className="plan-cta-btn"
                         >
                           {plan.cta}
                         </a>
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="pricing-table-mobile grid gap-6">
-              {displayPlans.map((plan) => (
-                <div key={plan.name} className={`pricing-plan-card ${plan.recommended ? "recommended" : ""}`}>
-                  {plan.recommended && (
-                    <div className="recommended-badge-mobile">Most Popular</div>
-                  )}
-                  <h3 className="plan-name">{plan.name}</h3>
-                  <div className="plan-prices">
-                    <div className="plan-price-row">
-                      <span>Monthly:</span> {plan.priceMonthly}
-                    </div>
-                    <div className="plan-price-row">
-                      <span>Quarterly:</span> {plan.priceQuarterly}
-                    </div>
-                    <div className="plan-price-row annual">
-                      <span>Annual:</span> {plan.priceAnnual}
-                    </div>
-                  </div>
-                  <ul className="plan-features">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="plan-feature-item">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <a
-                    href={plan.href || "#request-form"}
-                    onClick={(e) => {
-                      if (!plan.href) {
-                        e.preventDefault();
-                        setSelectedPlan(plan.name);
-                        document.getElementById("request-form")?.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="plan-cta-btn"
-                  >
-                    {plan.cta}
-                  </a>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </section>
 
@@ -340,10 +383,10 @@ export default function PromoteYourBusinessPage({
                   onChange={(e) => setSelectedPlan(e.target.value)}
                   className="form-input"
                 >
-                  {plans
-                    .filter((p) => p.name !== "Free / Basic Listing")
+                  {displayPlans
+                    .filter((p) => !p.href)
                     .map((p) => (
-                      <option key={p.name} value={p.name}>
+                      <option key={p.id} value={p.name}>
                         {p.name}
                       </option>
                     ))}
@@ -672,24 +715,3 @@ export default function PromoteYourBusinessPage({
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps<{
-  plans: Plan[];
-}> = async (ctx) => {
-  try {
-    const apiBaseUrl = getApiBaseUrl();
-    const response = await axios.get(`${apiBaseUrl}/api/plans`);
-    return {
-      props: {
-        plans: response.data,
-      },
-    };
-  } catch (error) {
-    console.error("Failed to fetch plans", error);
-    return {
-      props: {
-        plans: [],
-      },
-    };
-  }
-};

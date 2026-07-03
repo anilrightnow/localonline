@@ -4,14 +4,16 @@ import AppShell from "../components/app/AppShell";
 const settingsCards = [
   {
     title: "Profile",
-    description: "Update your personal details, contact email, and profile information.",
+    description:
+      "Update your personal details, contact email, and profile information.",
     href: "/profile",
     action: "Update profile",
   },
   {
     title: "Plan & Billing",
-    description: "Upgrade your plan, review invoices, and manage subscription settings.",
-    href: "/plans",
+    description:
+      "Upgrade your plan, review invoices, and manage subscription settings.",
+    href: "/promote-your-business",
     action: "Upgrade plan",
   },
   {
@@ -52,9 +54,12 @@ export default function SettingsPage() {
         <h3 style={{ marginTop: 0 }}>Account Preferences</h3>
         <div className="app-grid">
           <div>
-            <p style={{ margin: "0 0 6px", fontWeight: 600 }}>Email Notifications</p>
+            <p style={{ margin: "0 0 6px", fontWeight: 600 }}>
+              Email Notifications
+            </p>
             <p style={{ margin: 0, color: "#64748b" }}>
-              Configure marketing and product update emails in your profile settings.
+              Configure marketing and product update emails in your profile
+              settings.
             </p>
           </div>
           <div>

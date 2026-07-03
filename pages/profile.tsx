@@ -30,14 +30,17 @@ export default function ProfilePage() {
   const router = useRouter();
   const { isChecking, isAuthenticated } = useRequireAuth();
   const initialSection = useMemo<ProfileSection>(() => {
-    const tab = typeof router.query.section === "string" ? router.query.section : "";
+    const tab =
+      typeof router.query.section === "string" ? router.query.section : "";
     if (tab === "edit-profile" || tab === "change-password") return tab;
     return "overview";
   }, [router.query.section]);
 
   const [section, setSection] = useState<ProfileSection>(initialSection);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [subscription, setSubscription] = useState<SubscriptionState | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionState | null>(
+    null,
+  );
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -185,34 +188,83 @@ export default function ProfilePage() {
   if (loading) return <div className="app-loading">Loading profile...</div>;
 
   return (
-    <AppShell title="My Profile" subtitle="Manage account information, security, and plan upgrades.">
+    <AppShell
+      title="My Profile"
+      subtitle="Manage account information, security, and plan upgrades."
+    >
       <FormMessage message={error} tone="error" />
       <FormMessage message={success} tone="success" />
 
       <div className="app-grid">
         <div className="app-card">
           <h2>Account Summary</h2>
-          <p><strong>Name:</strong> {profile?.fullName || "-"}</p>
-          <p><strong>Username:</strong> {profile?.userName || "-"}</p>
-          <p><strong>Email:</strong> {profile?.email || "-"}</p>
-          <p><strong>Mobile:</strong> {profile?.mobile || "-"}</p>
-          <p><strong>DOB:</strong> {profile?.dob ? new Date(profile.dob).toLocaleDateString() : "-"}</p>
-          <p><strong>Gender:</strong> {profile?.gender || "-"}</p>
-          <p><strong>Current Plan:</strong> {subscription?.planName || "Free"}</p>
+          <p>
+            <strong>Name:</strong> {profile?.fullName || "-"}
+          </p>
+          <p>
+            <strong>Username:</strong> {profile?.userName || "-"}
+          </p>
+          <p>
+            <strong>Email:</strong> {profile?.email || "-"}
+          </p>
+          <p>
+            <strong>Mobile:</strong> {profile?.mobile || "-"}
+          </p>
+          <p>
+            <strong>DOB:</strong>{" "}
+            {profile?.dob ? new Date(profile.dob).toLocaleDateString() : "-"}
+          </p>
+          <p>
+            <strong>Gender:</strong> {profile?.gender || "-"}
+          </p>
+          <p>
+            <strong>Current Plan:</strong> {subscription?.planName || "Free"}
+          </p>
           <div className="app-actions">
-            <button className="btn btn-ghost" type="button" onClick={() => setSection("edit-profile")}>Update Profile</button>
-            <button className="btn btn-ghost" type="button" onClick={() => setSection("change-password")}>Change Password</button>
-            <Link className="btn btn-primary" href="/plans">Upgrade Plan</Link>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setSection("edit-profile")}
+            >
+              Update Profile
+            </button>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setSection("change-password")}
+            >
+              Change Password
+            </button>
+            <Link className="btn btn-primary" href="/promote-your-business">
+              Upgrade Plan
+            </Link>
           </div>
         </div>
 
         <div className="app-card">
           <h2>Quick Links</h2>
-          <p>Manage profile and password via links only, then complete action in the selected section.</p>
+          <p>
+            Manage profile and password via links only, then complete action in
+            the selected section.
+          </p>
           <div className="app-actions">
-            <button className="btn btn-ghost" type="button" onClick={() => setSection("edit-profile")}>Open Update Profile</button>
-            <button className="btn btn-ghost" type="button" onClick={() => setSection("change-password")}>Open Change Password</button>
-            <Link className="btn btn-ghost" href="/plans">View Plan Details</Link>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setSection("edit-profile")}
+            >
+              Open Update Profile
+            </button>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setSection("change-password")}
+            >
+              Open Change Password
+            </button>
+            <Link className="btn btn-ghost" href="/promote-your-business">
+              View Plan Details
+            </Link>
           </div>
         </div>
       </div>
@@ -222,22 +274,48 @@ export default function ProfilePage() {
           <h2>Update Profile</h2>
           <form onSubmit={handleUpdateProfile}>
             <FormField label="Full Name">
-              <input className="form-input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+              <input
+                className="form-input"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
             </FormField>
             <FormField label="Username">
-              <input className="form-input" value={userName} onChange={(e) => setUserName(e.target.value)} />
+              <input
+                className="form-input"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+              />
             </FormField>
             <FormField label="Email">
-              <input className="form-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input
+                className="form-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </FormField>
             <FormField label="Mobile">
-              <input className="form-input" value={mobile} onChange={(e) => setMobile(e.target.value)} />
+              <input
+                className="form-input"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+              />
             </FormField>
             <FormField label="DOB (optional)">
-              <input className="form-input" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+              <input
+                className="form-input"
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+              />
             </FormField>
             <FormField label="Gender (optional)">
-              <select className="form-select" value={gender} onChange={(e) => setGender(e.target.value)}>
+              <select
+                className="form-select"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
                 <option value="">Select</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -246,8 +324,16 @@ export default function ProfilePage() {
               </select>
             </FormField>
             <div className="app-actions">
-              <button className="btn btn-primary" type="submit">Save Profile</button>
-              <button className="btn btn-ghost" type="button" onClick={() => setSection("overview")}>Cancel</button>
+              <button className="btn btn-primary" type="submit">
+                Save Profile
+              </button>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => setSection("overview")}
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </div>
@@ -278,8 +364,16 @@ export default function ProfilePage() {
               hasError={Boolean(error)}
             />
             <div className="app-actions">
-              <button className="btn btn-primary" type="submit">Update Password</button>
-              <button className="btn btn-ghost" type="button" onClick={() => setSection("overview")}>Cancel</button>
+              <button className="btn btn-primary" type="submit">
+                Update Password
+              </button>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => setSection("overview")}
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </div>

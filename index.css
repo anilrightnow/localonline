@@ -3716,7 +3716,6 @@ a:hover {
   height: 100%;
   object-fit: cover;
   z-index: 1;
-  pointer-events: none;
 }
 
 .pub-home-hero::after {
@@ -3725,6 +3724,7 @@ a:hover {
   inset: 0;
   background: linear-gradient(90deg, rgba(5, 31, 39, 0.3), rgba(5, 31, 39, 0.2));
   z-index: 2;
+  pointer-events: none;
 }
 
 .pub-home-hero > .pub-container {

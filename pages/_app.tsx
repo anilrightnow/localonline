@@ -6,7 +6,12 @@ import Script from "next/script";
 import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
 
+// Only load Google Ads / Analytics in production. These third-party scripts
+// communicate via postMessage and run heavy synchronous work, which triggers
+// Chrome's "[Violation] 'message' handler took …ms" long-task warning in dev.
+// Keeping them out of local development removes that noise.
 const isGoogleAdsEnabled =
+  process.env.NODE_ENV === "production" &&
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ENABLED === "true";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -65,51 +70,28 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="application-name" content="Local Online" />
         <meta name="apple-mobile-web-app-title" content="Local Online" />
         <meta name="theme-color" content="#0f766e" />
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
-          as="style"
-        />
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* Self-hosted fonts are declared in /public/fonts/fonts.css and loaded
+            via the document <head> (see _document.tsx). We intentionally do NOT
+            preload them here: this SPA hydrates after the window load event, so
+            preloaded fonts would be flagged as unused by the browser. The
+            @font-face rules are discovered during HTML parse, so they still
+            load quickly without the preload console warnings. */}
+        {/* Speed up delivery of Cloudinary-hosted business images */}
         <link
           rel="preconnect"
-          href="https://fonts.gstatic.com"
+          href="https://res.cloudinary.com"
           crossOrigin="anonymous"
         />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@9..96,800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         <style>{`
-          :root {
-            --midnight: #0A0A0C;
-            --surface: #16161A;
-            --marigold: #FFB800;
-            --emerald: #10B981;
-            --border: #27272A;
-          }
           body {
-            background-color: var(--midnight);
-            color: #E4E4E7;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
           }
           h1, h2, h3, .pub-title {
-            font-family: 'Bricolage Grotesque', sans-serif;
+            font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
             font-weight: 800;
             letter-spacing: -0.03em;
             text-transform: uppercase;
-          }
-          .pub-card, section, .section-card-inner {
-            background-color: var(--surface) !important;
-            border-radius: 16px !important;
           }
         `}</style>
         {isGoogleAdsEnabled && (

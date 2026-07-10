@@ -1171,8 +1171,13 @@ export default function SeoPage({
         />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:image" content={socialImage} />
+        <meta property="og:site_name" content="LocalOnline" />
+        <meta property="og:locale" content="en_IN" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={socialImage} />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -1489,6 +1489,24 @@ p.lead {
   flex-wrap: wrap;
 }
 
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 12px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-remember input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--teal-700, #0f766e);
+  cursor: pointer;
+}
+
 .form-message {
   margin-top: 12px;
   border-radius: 12px;

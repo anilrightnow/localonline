@@ -16,13 +16,16 @@ export function getAuthHeader(): { Authorization?: string } {
   return { Authorization: `Bearer ${token}` };
 }
 
-export function setAuthTokenCookie(token: string) {
+export function setAuthTokenCookie(token: string, persistent = false) {
   if (typeof document === "undefined") return;
   const value = encodeURIComponent(token);
   const base = "path=/; SameSite=Lax";
   const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `access_token=${value}; Max-Age=1800; ${base}${secure}`;
-  document.cookie = `token=${value}; Max-Age=1800; ${base}${secure}`;
+  // "Remember on this device" keeps the session for ~30 days; otherwise a
+  // short 30-minute session that ends when the browser is closed.
+  const maxAge = persistent ? 60 * 60 * 24 * 30 : 1800;
+  document.cookie = `access_token=${value}; Max-Age=${maxAge}; ${base}${secure}`;
+  document.cookie = `token=${value}; Max-Age=${maxAge}; ${base}${secure}`;
 }
 
 export function clearAuthTokenCookie() {

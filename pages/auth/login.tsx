@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
@@ -16,7 +16,22 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
+  const [remember, setRemember] = useState(true);
   const router = useRouter();
+
+  // Prefill the remembered email (Gmail-style) so returning users only
+  // need to type their password. Stored locally on this device only.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("rememberedEmail");
+      if (saved) {
+        setEmail(saved);
+        setRemember(true);
+      }
+    } catch {
+      // localStorage may be unavailable (private mode); ignore.
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +43,18 @@ const LoginPage = () => {
         email,
         password,
       });
-      setAuthTokenCookie(response.data.access_token);
+      setAuthTokenCookie(response.data.access_token, remember);
+
+      try {
+        if (remember && email) {
+          localStorage.setItem("rememberedEmail", email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
+      } catch {
+        // Ignore storage errors (e.g. private mode).
+      }
+
       const returnUrl =
         typeof router.query.returnUrl === "string"
           ? router.query.returnUrl
@@ -93,6 +119,14 @@ const LoginPage = () => {
             helpText="Use the password you created during registration."
             hasError={Boolean(error)}
           />
+          <label className="auth-remember">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            <span>Remember email on this device</span>
+          </label>
           <div className="auth-actions">
             <button className="btn btn-primary" type="submit">
               Login

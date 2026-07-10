@@ -19,13 +19,14 @@ import {
    FileText,
    Gavel,
    Import,
+   Image,
    LayoutDashboard,
    Megaphone,
    Settings,
    ShieldCheck,
    UserCog,
    Users,
- } from "lucide-react";
+  } from "lucide-react";
 
 export type RoleRequirement = "Admin" | "SuperAdmin";
 
@@ -67,6 +68,7 @@ const ADMIN_NAV: NavItem[] = [
    { href: "/admin/promotions", label: "Promotions", icon: Megaphone },
    { href: "/admin/ad-requests", label: "Ad Requests", icon: ClipboardCheck },
    { href: "/admin/listing-updates", label: "Listing Updates", icon: FileText },
+   { href: "/admin/business-images", label: "Business Images", icon: Image },
    { href: "/admin/scraped-businesses", label: "Scraped Businesses", icon: Database },
    { href: "/admin/moderation", label: "Moderation", icon: Gavel },
    { href: "/admin/users", label: "Users", icon: Users },

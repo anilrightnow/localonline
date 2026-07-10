@@ -12,9 +12,7 @@ import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import FormMessage from "../../components/shared/FormMessage";
 import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { JsonEditor } from "json-edit-react";
-import BusinessImageUploader, {
-  type MediaItem,
-} from "../../components/shared/BusinessImageUploader";
+import BusinessImageUploader, { type MediaItem } from "../../components/shared/BusinessImageUploader";
 
 type ClaimedBusiness = {
   businessToken: string;
@@ -89,11 +87,6 @@ export default function OwnerListingPage() {
   const [days, setDays] = useState(30);
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
 
-  // Update request tracking
-  const [updateRequests, setUpdateRequests] = useState<any[]>([]);
-  const [updateRequestLogs, setUpdateRequestLogs] = useState<any[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-
   // Form Fields
   const [name, setName] = useState("");
   const [nameHindi, setNameHindi] = useState("");
@@ -122,16 +115,6 @@ export default function OwnerListingPage() {
   const [reviewJson, setReviewJson] = useState("{}");
   const [mediaJson, setMediaJson] = useState("[]");
   const [menuJson, setMenuJson] = useState("[]");
-
-  // Track whether the owner actually edited a tab, and whether the tab had
-  // real data when the business was loaded. Used so that helpful scaffolds are
-  // never persisted until the owner really changes something in that tab.
-  const [aboutTouched, setAboutTouched] = useState(false);
-  const [businessHoursTouched, setBusinessHoursTouched] = useState(false);
-  const [menuTouched, setMenuTouched] = useState(false);
-  const [aboutHadData, setAboutHadData] = useState(false);
-  const [businessHoursHadData, setBusinessHoursHadData] = useState(false);
-  const [menuHadData, setMenuHadData] = useState(false);
   const [canonicalPath, setCanonicalPath] = useState("");
   const [fullJson, setFullJson] = useState("{}");
   const [isVerified, setIsVerified] = useState(false);
@@ -293,73 +276,12 @@ export default function OwnerListingPage() {
       setMediaJson(stringifySafe(b.mediaJson, "[]"));
       setMenuJson(stringifySafe(b.menuJson, "[]"));
       setFullJson(stringifySafe(b.fullJson, "{}"));
-
-      setAboutTouched(false);
-      setBusinessHoursTouched(false);
-      setMenuTouched(false);
-      setAboutHadData(isJsonContent(b.aboutJson));
-      setBusinessHoursHadData(isJsonContent(b.businessHoursJson));
-      setMenuHadData(isJsonContent(b.menuJson));
-
-      if (Array.isArray(b.mediaJson)) {
-        setGalleryMedia(
-          b.mediaJson.map((item: any) => ({
-            PublicId: item.publicId || item.PublicId,
-            LargeUrl: item.LargeUrl || "",
-            ThumbUrl: item.ThumbUrl || item.LargeUrl || "",
-          })),
-        );
-      } else if (typeof b.mediaJson === "string") {
-        try {
-          const parsed = JSON.parse(b.mediaJson);
-          if (Array.isArray(parsed)) {
-            setGalleryMedia(
-              parsed.map((item: any) => ({
-                PublicId: item.publicId || item.PublicId,
-                LargeUrl: item.LargeUrl || "",
-                ThumbUrl: item.ThumbUrl || item.LargeUrl || "",
-              })),
-            );
-          } else {
-            setGalleryMedia([]);
-          }
-        } catch {
-          setGalleryMedia([]);
-        }
-      } else {
-        setGalleryMedia([]);
-      }
-
       setIsVerified(Boolean(b.isVerified));
       setActiveTab("about");
       setMessage("Business loaded successfully.");
       void loadAnalytics(businessToken, days);
-      void loadUpdateRequests(businessToken);
     } catch (error) {
       setMessage(getApiErrorMessage(error, "Failed to load business."));
-    }
-  }
-
-  async function loadUpdateRequests(businessToken: string) {
-    setLoadingRequests(true);
-    try {
-      const token = getAuthToken();
-      const response = await axios.get<{ requests: any[]; logs: any[] }>(
-        apiUrl(
-          `/api/owner-listings/update-requests?businessToken=${encodeURIComponent(
-            businessToken,
-          )}`,
-        ),
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-      );
-      setUpdateRequests(response.data?.requests ?? []);
-      setUpdateRequestLogs(response.data?.logs ?? []);
-    } catch (error) {
-      console.error("Failed to load update requests:", error);
-      setUpdateRequests([]);
-      setUpdateRequestLogs([]);
-    } finally {
-      setLoadingRequests(false);
     }
   }
 
@@ -396,21 +318,11 @@ export default function OwnerListingPage() {
           categoryIds: selectedCategories.map((x) => x.id),
           isVerified,
           actionsJson: parseJsonOrNull(actionsJson),
-          // Only send a tab's data if the owner actually edited it, or it
-          // already had real content. This keeps helpful scaffolds from being
-          // persisted until the owner really changes something.
-          aboutJson:
-            aboutTouched || aboutHadData ? parseJsonOrNull(aboutJson) : undefined,
-          businessHoursJson:
-            businessHoursTouched || businessHoursHadData
-              ? parseJsonOrNull(businessHoursJson)
-              : undefined,
+          aboutJson: parseJsonOrNull(aboutJson),
+          businessHoursJson: parseJsonOrNull(businessHoursJson),
           reviewJson: parseJsonOrNull(reviewJson),
-          mediaJson: galleryMedia.length
-            ? galleryMedia
-            : parseJsonOrNull(mediaJson),
-          menuJson:
-            menuTouched || menuHadData ? parseJsonOrNull(menuJson) : undefined,
+          mediaJson: galleryMedia.length ? galleryMedia : parseJsonOrNull(mediaJson),
+          menuJson: parseJsonOrNull(menuJson),
           fullJson: parseJsonOrNull(fullJson),
         },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
@@ -486,91 +398,7 @@ export default function OwnerListingPage() {
     }
   }
 
-  const canEditGallery =
-    isAdmin || isOwner || planName.toLowerCase() === "popular";
-
-  // Returns true if the JSON string holds meaningful (non-empty) content.
-  function isJsonContent(value: unknown): boolean {
-    if (value === undefined || value === null) return false;
-    const raw = typeof value === "string" ? (value as string).trim() : value;
-    if (!raw) return false;
-    try {
-      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-      if (Array.isArray(parsed)) return parsed.length > 0;
-      if (parsed && typeof parsed === "object")
-        return Object.keys(parsed).length > 0;
-      return false;
-    } catch {
-      return false;
-    }
-  }
-
-  // Build a friendly starting scaffold from the business's existing data so an
-  // empty tab is easy to understand and fill in. The scaffold is only shown in
-  // the editor; it is never persisted unless the owner edits that tab.
-  function buildScaffold(tabKey: string): unknown {
-    if (tabKey === "about") {
-      const rows: Array<{ Key: string; Value: string[] }> = [
-        {
-          Key: "Overview",
-          Value: [
-            description?.trim() ||
-              `Write a short introduction about ${
-                name || "your business"
-              }.`,
-          ],
-        },
-      ];
-      if (address?.trim())
-        rows.push({ Key: "Address", Value: [address.trim()] });
-      if (phone?.trim()) rows.push({ Key: "Phone", Value: [phone.trim()] });
-      if (website?.trim())
-        rows.push({ Key: "Website", Value: [website.trim()] });
-      rows.push({
-        Key: "Specialties",
-        Value: ["Add your main services or products here."],
-      });
-      return rows;
-    }
-
-    if (tabKey === "businessHours") {
-      const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-      const weekend = ["Saturday", "Sunday"];
-      return [
-        {
-          Category: "Monday to Friday",
-          Hours: weekdays.map((day) => ({
-            Day: day,
-            Time: "9:00 AM - 9:00 PM",
-          })),
-        },
-        {
-          Category: "Saturday & Sunday",
-          Hours: weekend.map((day) => ({
-            Day: day,
-            Time: "10:00 AM - 8:00 PM",
-          })),
-        },
-      ];
-    }
-
-    if (tabKey === "menu") {
-      return [
-        {
-          Category: "Popular",
-          Items: [
-            {
-              Name: "Signature Dish",
-              Price: 199,
-              Description: "Describe your most popular item.",
-            },
-          ],
-        },
-      ];
-    }
-
-    return null;
-  }
+  const canEditGallery = isAdmin || planName.toLowerCase() === "popular";
 
   // Generate full JSON from all form data
   const generateFullJson = () => {
@@ -653,6 +481,17 @@ export default function OwnerListingPage() {
       value: businessHoursJson,
       onChange: setBusinessHoursJson,
       rootType: "array" as const,
+    },
+    {
+      key: "media",
+      label: "Media",
+      value: mediaJson,
+      onChange: setMediaJson,
+      rootType: "array" as const,
+      disabled: !canEditGallery,
+      helperText: !canEditGallery
+        ? "Gallery edits require the Popular plan."
+        : undefined,
     },
     {
       key: "menu",
@@ -1058,147 +897,130 @@ export default function OwnerListingPage() {
                   onChange={(e) => setLatitude(e.target.value)}
                 />
               </div>
-              <div className="form-row">
-                <label>Longitude</label>
-                <input
-                  className="form-input"
-                  type="text"
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                />
-              </div>
+            <div className="form-row">
+              <label>Longitude</label>
+              <input
+                className="form-input"
+                type="text"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+              />
+            </div>
 
-              <div className="form-row" style={{ width: "100%", gridColumn: "1 / -1" }}>
-                <label>Business Images</label>
-                <BusinessImageUploader
-                  businessToken={editingBusiness.businessToken}
-                  planName={planName}
-                  imageLimit={imageLimit || 2}
-                  canEdit={canEditGallery}
-                  isAdmin={isAdmin}
-                  initialMedia={galleryMedia}
-                  onMediaChange={setGalleryMedia}
-                />
+            <div className="form-row" style={{ width: "100%" }}>
+              <label>Business Images</label>
+              <BusinessImageUploader
+                businessToken={editingBusiness.businessToken}
+                planName={planName}
+                imageLimit={imageLimit || 2}
+                canEdit={canEditGallery}
+                isAdmin={isAdmin}
+                initialMedia={galleryMedia}
+                onMediaChange={setGalleryMedia}
+              />
+              <div
+                style={{
+                  border: "1px solid #d9e2ec",
+                  borderRadius: 10,
+                  padding: 12,
+                  width: "100%",
+                  height: "600px",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div className="app-actions" style={{ marginBottom: 12 }}>
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.key}
+                      className={`btn ${
+                        activeTab === tab.key ? "btn-primary" : "btn-ghost"
+                      }`}
+                      type="button"
+                      onClick={() => setActiveTab(tab.key)}
+                      disabled={tab.disabled}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
                 <div
                   style={{
-                    border: "1px solid #d9e2ec",
-                    borderRadius: 10,
-                    padding: 12,
-                    width: "100%",
-                    height: "600px",
-                    display: "flex",
-                    flexDirection: "column",
+                    flex: 1,
+                    overflow: "auto",
+                    minHeight: "400px",
+                    maxHeight: "600px",
+                    height: "100%",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "6px",
+                    padding: "12px",
+                    backgroundColor: "#fafafa",
                   }}
                 >
-                  <div className="app-actions" style={{ marginBottom: 12 }}>
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab.key}
-                        className={`btn ${
-                          activeTab === tab.key ? "btn-primary" : "btn-ghost"
-                        }`}
-                        type="button"
-                        onClick={() => setActiveTab(tab.key)}
-                        disabled={tab.disabled}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div
-                    style={{
-                      flex: 1,
-                      overflow: "auto",
-                      minHeight: "400px",
-                      maxHeight: "600px",
-                      height: "100%",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "6px",
-                      padding: "12px",
-                      backgroundColor: "#fafafa",
-                    }}
-                  >
-                    {(() => {
-                      const tab = tabs.find((t) => t.key === activeTab);
-                      if (!tab) return null;
-                      let parsed;
-                      try {
-                        const rawValue = tab.value;
-                        if (typeof rawValue === "string") {
-                          const jsonStr =
-                            rawValue.trim() ||
-                            (tab.rootType === "array" ? "[]" : "{}");
-                          parsed = JSON.parse(jsonStr);
+                  {(() => {
+                    const tab = tabs.find((t) => t.key === activeTab);
+                    if (!tab) return null;
+                    let parsed;
+                    try {
+                      const rawValue = tab.value;
+                      if (typeof rawValue === "string") {
+                        const jsonStr =
+                          rawValue.trim() ||
+                          (tab.rootType === "array" ? "[]" : "{}");
+                        parsed = JSON.parse(jsonStr);
 
-                          // Handle double-encoded JSON strings
-                          if (typeof parsed === "string" && parsed !== "null") {
-                            parsed = JSON.parse(parsed);
-                          }
-                        } else if (rawValue && typeof rawValue === "object") {
-                          parsed = rawValue;
-                        } else {
-                          parsed = tab.rootType === "array" ? [] : {};
+                        // Handle double-encoded JSON strings
+                        if (typeof parsed === "string" && parsed !== "null") {
+                          parsed = JSON.parse(parsed);
                         }
-
-                        // Fallback check to prevent JsonEditor from crashing on null/non-array data
-                        if (
-                          tab.rootType === "array" &&
-                          !Array.isArray(parsed)
-                        ) {
-                          parsed = [];
-                        } else if (
-                          tab.rootType === "object" &&
-                          (Array.isArray(parsed) || !parsed)
-                        ) {
-                          parsed = {};
-                        }
-
-                        // Show a friendly scaffold for empty tabs so the owner
-                        // has an easy starting point. The scaffold is only
-                        // displayed; it is not written back unless edited.
-                        const tabHasContent = tab.rootType === "array"
-                          ? Array.isArray(parsed) && parsed.length > 0
-                          : parsed && typeof parsed === "object" &&
-                            Object.keys(parsed).length > 0;
-                        if (!tabHasContent) {
-                          const scaffold = buildScaffold(tab.key);
-                          if (scaffold !== null) parsed = scaffold;
-                        }
-                      } catch (e) {
-                        console.error("JSON parse error:", e);
-                        return (
-                          <div className="form-alert is-error">
-                            <AlertCircle size={18} />
-                            <span>
-                              Invalid JSON format in {tab.label} data.
-                            </span>
-                          </div>
-                        );
+                      } else if (rawValue && typeof rawValue === "object") {
+                        parsed = rawValue;
+                      } else {
+                        parsed = tab.rootType === "array" ? [] : {};
                       }
+
+                      // Fallback check to prevent JsonEditor from crashing on null/non-array data
+                      if (tab.rootType === "array" && !Array.isArray(parsed)) {
+                        parsed = [];
+                      } else if (
+                        tab.rootType === "object" &&
+                        (Array.isArray(parsed) || !parsed)
+                      ) {
+                        parsed = {};
+                      }
+                    } catch (e) {
+                      console.error("JSON parse error:", e);
                       return (
-                        <>
-                          <JsonEditor
-                            key={`json-editor-${activeTab}`}
-                            className="full-width-json-editor"
-                            minWidth="100%"
-                            maxWidth="100%"
-                            rootName={tab.key}
-                            data={parsed}
-                            onUpdate={(data) => {
-                              tab.onChange(JSON.stringify(data, null, 2));
-                              if (tab.key === "about") setAboutTouched(true);
-                              else if (tab.key === "businessHours")
-                                setBusinessHoursTouched(true);
-                              else if (tab.key === "menu") setMenuTouched(true);
-                            }}
-                          />
-                          {tab.helperText && (
-                            <p className="app-muted">{tab.helperText}</p>
-                          )}
-                        </>
+                        <div className="form-alert is-error">
+                          <AlertCircle size={18} />
+                          <span>Invalid JSON format in {tab.label} data.</span>
+                        </div>
                       );
-                    })()}
-                  </div>
+                    }
+                    return (
+                      <>
+                        <JsonEditor
+                          key={`json-editor-${activeTab}`}
+                          className="full-width-json-editor"
+                          minWidth="100%"
+                          maxWidth="100%"
+                          rootName={tab.key}
+                          data={parsed}
+                          onUpdate={(data) => {
+                            console.log("JsonEditor updated:", {
+                              tab: tab.key,
+                              data,
+                              stringified: JSON.stringify(data, null, 2),
+                            });
+                            tab.onChange(JSON.stringify(data, null, 2));
+                          }}
+                        />
+                        {tab.helperText && (
+                          <p className="app-muted">{tab.helperText}</p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -1235,110 +1057,6 @@ export default function OwnerListingPage() {
               </button>
             </div>
           </form>
-
-          <div className="app-card" style={{ marginTop: "24px" }}>
-            <h3>Your Update Requests</h3>
-            <p className="app-muted" style={{ marginBottom: "12px" }}>
-              Track the status of changes you've submitted for admin review.
-            </p>
-            {loadingRequests ? (
-              <p>Loading requests...</p>
-            ) : updateRequests.length === 0 ? (
-              <p className="app-muted">No update requests submitted yet.</p>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {updateRequests.map((req: any) => {
-                  const reqLogs = updateRequestLogs.filter(
-                    (l: any) => l.RequestId === req.Id,
-                  );
-                  return (
-                    <div
-                      key={req.Id}
-                      style={{
-                        border: "1px solid #d9e2ec",
-                        borderRadius: 8,
-                        padding: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 12,
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <div>
-                          <strong>{req.BusinessName || "Business"}</strong>
-                          <span
-                            className="app-muted"
-                            style={{ marginLeft: 8, fontSize: "0.85em" }}
-                          >
-                            {new Date(req.CreatedAt).toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <span
-                          style={{
-                            fontWeight: 600,
-                            fontSize: "0.8em",
-                            padding: "4px 10px",
-                            borderRadius: 12,
-                            backgroundColor:
-                              req.Status === "Approved"
-                                ? "#dcf8c6"
-                                : req.Status === "Rejected"
-                                  ? "#f8d7da"
-                                  : "#fff3cd",
-                            color:
-                              req.Status === "Approved"
-                                ? "#155724"
-                                : req.Status === "Rejected"
-                                  ? "#721c24"
-                                  : "#856404",
-                          }}
-                        >
-                          {req.Status}
-                        </span>
-                      </div>
-                      {req.Status === "Rejected" && req.RejectionReason && (
-                        <p
-                          style={{
-                            margin: "8px 0 0",
-                            color: "#721c24",
-                            fontSize: "0.9em",
-                          }}
-                        >
-                          Reason: {req.RejectionReason}
-                        </p>
-                      )}
-                      {reqLogs.length > 0 && (
-                        <ul
-                          style={{
-                            margin: "10px 0 0",
-                            paddingLeft: 18,
-                            fontSize: "0.85em",
-                            color: "#555",
-                          }}
-                        >
-                          {reqLogs.map((log: any) => (
-                            <li key={log.Id}>
-                              <strong>{log.Action}</strong>
-                              {log.Note ? `: ${log.Note}` : ""}
-                              <span className="app-muted">
-                                {" "}
-                                ({new Date(log.CreatedAt).toLocaleString("en-IN")})
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
 
           <div className="app-card" style={{ marginTop: "24px" }}>
             <h3>Business Analytics</h3>

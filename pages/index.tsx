@@ -23,10 +23,13 @@ type Props = {
 
 const fallbackData: HomeApiResponse = {
   seo: {
-    title: "LocalOnline - Online Market for Local Businesses",
+    title:
+      "Local Businesses in Gaur City, Noida Extension & Greater Noida West | LocalOnline",
     h1: "Discover Local Businesses on LocalOnline",
     description:
-      "LocalOnline helps you find and compare businesses by city, area, category, and place.",
+      "Discover verified local businesses, services and shops across Gautam Buddha Nagar and Ghaziabad — Gaur City, Noida Extension, Greater Noida West, Crossing Republik and Shahberi.",
+    keywords:
+      "Gaur City, Noida Extension, Greater Noida West, Crossing Republik, Shahberi, Gautam Buddha Nagar, Ghaziabad, local businesses, near me",
     canonicalPath: "/",
   },
   topCities: [],
@@ -57,6 +60,9 @@ export default function HomePage({
       <Head>
         <title>{data.seo.title}</title>
         <meta name="description" content={data.seo.description} />
+        {data.seo.keywords ? (
+          <meta name="keywords" content={data.seo.keywords} />
+        ) : null}
         <link rel="canonical" href={data.seo.canonicalPath} />
         <meta property="og:title" content={data.seo.title} />
         <meta property="og:description" content={data.seo.description} />

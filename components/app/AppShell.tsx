@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
+import Head from "next/head";
 import {
   clearAuthTokenCookie,
   getAuthToken,
@@ -9,6 +10,7 @@ import { apiFetch } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import TopProgress from "../shared/TopProgress";
 import AdminLayout, { AdminNavItem } from "../../AdminLayout";
+import { appPageTitle } from "../../lib/appTitle";
 import {
    BadgeDollarSign,
    BarChart3,
@@ -156,9 +158,12 @@ export default function AppShell({
     window.location.href = router.asPath || "/";
   }
 
-  if (isChecking || !isAuthenticated) {
+   if (isChecking || !isAuthenticated) {
     return (
       <>
+        <Head>
+          <title>{appPageTitle()}</title>
+        </Head>
         <TopProgress />
         <div className="app-loading">Loading workspace...</div>
       </>

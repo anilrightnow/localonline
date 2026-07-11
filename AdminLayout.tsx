@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { appPageTitle } from "./lib/appTitle";
 import {
   Menu,
   Bell,
@@ -62,8 +64,13 @@ export default function AdminLayout({
       ? `Welcome back! Here's what's happening with your workspace today.`
       : `Manage your ${currentPage.toLowerCase()} and system configurations.`);
 
+  const roleClass = `role-${userRole?.toLowerCase() ?? "user"}`;
+
   return (
     <div className="admin-shell">
+      <Head>
+        <title>{appPageTitle(title || currentPage)}</title>
+      </Head>
       <aside
         className={`admin-sidebar ${isSidebarOpen ? "is-open" : "is-collapsed"}`}
       >
@@ -137,6 +144,9 @@ export default function AdminLayout({
               <span className="admin-breadcrumbs-sep">/</span>
               <span className="admin-breadcrumbs-current">{currentPage}</span>
             </div>
+            <span className={`role-badge admin-role-badge ${roleClass}`}>
+              {userRole}
+            </span>
           </div>
 
           <div className="admin-topbar-right">

@@ -1157,6 +1157,12 @@ p.lead {
   font-weight: 600;
 }
 
+.admin-role-badge {
+  margin-left: 4px;
+  padding: 3px 9px;
+  font-size: 0.7rem;
+}
+
 .admin-icon-btn {
   position: relative;
   width: 38px;

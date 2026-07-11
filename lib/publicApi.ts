@@ -32,6 +32,7 @@ export type HomeApiResponse = {
     title: string;
     h1: string;
     description: string;
+    keywords?: string;
     canonicalPath: string;
   };
   topCities: RelatedLink[];

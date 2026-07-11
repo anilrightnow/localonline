@@ -42,10 +42,24 @@ export default function HowItWorksPage() {
                 <h3>1. Smart Search</h3>
               </div>
               <p className="pub-muted">
-                Start by selecting your city. Use the search bar to find
-                anything from "Best South Indian Food" to "Reliable
-                Electrician". Our search is optimized to understand societies
-                like Gaur City, Mahagun Mascot, and specific local plazas.
+                Start by selecting your city or allowing location access to
+                discover businesses near you. Use the powerful search bar to
+                find local shops, restaurants, professionals, and
+                services—whether you're looking for the **best South Indian
+                restaurant**, a **trusted electrician**, a **nearby pharmacy**,
+                a **car repair shop**, or a **fitness center**. Search using a
+                business name, category, product, service, locality,
+                neighborhood, society, landmark, marketplace, or city. Our
+                intelligent search helps you quickly find the most relevant
+                businesses based on your preferences and location. Browse
+                verified business listings complete with contact details,
+                operating hours, photos, ratings, reviews, directions, and
+                available services. Compare multiple businesses, explore their
+                profiles, and connect directly through Call, WhatsApp, Email, or
+                their website—all from a single platform. Whether you're
+                exploring a new neighborhood or searching for trusted businesses
+                in your own area, LocalOnline makes discovering local businesses
+                fast, simple, and reliable.
               </p>
             </div>
 
@@ -57,10 +71,25 @@ export default function HowItWorksPage() {
                 <h3>2. Hyper-Local Results</h3>
               </div>
               <p className="pub-muted">
-                Unlike global search engines, we prioritize businesses located
-                within your immediate vicinity. You can see how close a shop is
-                to your society gates or local marketplace, ensuring
-                convenience.
+                Unlike generic search engines, LocalOnline is built to help you
+                discover businesses that are truly relevant to your location.
+                Instead of showing results from across the city or country, we
+                prioritize nearby shops, services, restaurants, and
+                professionals that are easiest for you to reach. Search by
+                business name, category, locality, neighborhood, society,
+                landmark, marketplace, or city to find exactly what you're
+                looking for. Whether you need a trusted electrician, a family
+                restaurant, a nearby pharmacy, a salon, or a home service
+                provider, LocalOnline helps you connect with verified local
+                businesses in minutes. Every listing is designed to provide
+                useful information, including business details, contact
+                information, operating hours, photos, customer reviews, and
+                directions, so you can make informed decisions with confidence.
+                Our location-focused search saves time, reduces unnecessary
+                travel, and helps you discover reliable businesses right where
+                you need them. With LocalOnline, finding the best local
+                businesses isn't just faster—it's smarter, more accurate, and
+                tailored to your community.
               </p>
             </div>
 
@@ -72,9 +101,20 @@ export default function HowItWorksPage() {
                 <h3>3. Detailed Profiles</h3>
               </div>
               <p className="pub-muted">
-                Click on a business to see verified contact numbers, operating
-                hours, service lists, and even food menus. Read authentic
-                reviews from neighbors who have actually used the service.
+                very business on LocalOnline has a dedicated profile designed to
+                help you make informed decisions. View verified contact details,
+                business hours, complete service offerings, product catalogs,
+                menus (where applicable), pricing information, photos, website
+                and social media links, and accurate location details—all in one
+                place. Explore genuine customer reviews and ratings to learn
+                from real experiences before you choose. Many listings also
+                include amenities, payment options, business highlights, and
+                frequently asked questions, giving you a complete picture of
+                what each business offers. Whether you're searching for a
+                restaurant, healthcare provider, home service, retailer, or
+                professional service, detailed business profiles make it easy to
+                compare options, connect directly, and confidently choose the
+                right local business for your needs.
               </p>
             </div>
 
@@ -86,9 +126,20 @@ export default function HowItWorksPage() {
                 <h3>4. Connect Directly</h3>
               </div>
               <p className="pub-muted">
-                Found what you need? Use our one-tap buttons to Call or WhatsApp
-                the business owner directly. No middlemen, no hidden fees—just
-                direct local commerce at your fingertips.
+                Found the right business? Get in touch instantly using
+                convenient one-tap actions like Call, WhatsApp, Email, or Visit
+                Website (where available). Connect directly with business owners
+                or service providers to ask questions, request quotes, check
+                availability, book appointments, or place orders—without
+                unnecessary intermediaries. LocalOnline makes communication
+                simple, fast, and transparent. There are no middlemen, no hidden
+                charges, and no complicated booking process. Whether you're
+                looking for a nearby restaurant, home service, healthcare
+                provider, retailer, or professional service, you can reach
+                businesses directly and receive personalized assistance. With
+                direct communication and accurate business information,
+                LocalOnline helps you build trusted connections with local
+                businesses while supporting your community's growth.
               </p>
             </div>
           </div>

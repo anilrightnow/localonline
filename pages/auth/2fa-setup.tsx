@@ -56,7 +56,7 @@ const TwoFactorSetupPage = () => {
         }
       );
       setMessage("TOTP verified successfully!");
-      setTimeout(() => router.push("/profile"), 2000);
+      setTimeout(() => router.push("/settings?section=profile"), 2000);
     } catch (error) {
       setMessage(getApiErrorMessage(error, "Failed to verify TOTP token"));
     }
@@ -131,7 +131,7 @@ const TwoFactorSetupPage = () => {
         </div>
       )}
       <div className="auth-links">
-        <Link className="btn btn-ghost" href="/profile">
+        <Link className="btn btn-ghost" href="/settings?section=profile">
           Back to profile
         </Link>
       </div>

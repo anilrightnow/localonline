@@ -15,6 +15,7 @@ import {
   PlusCircle,
   ArrowUp,
   MessageCircle,
+  LayoutDashboard,
 } from "lucide-react";
 
 type SiteShellProps = {
@@ -133,8 +134,11 @@ export default function SiteShell({ children }: SiteShellProps) {
             </Link>
             {isClient && isLoggedIn ? (
               <>
+                <Link href="/dashboard" className="pub-nav-btn">
+                  <LayoutDashboard size={16} /> Dashboard
+                </Link>
                 {session.email === "user@test.local" ? (
-                  <Link href="/profile">
+                  <Link href="/settings?section=profile">
                     <User size={16} /> Account
                   </Link>
                 ) : null}

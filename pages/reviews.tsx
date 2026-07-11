@@ -4,9 +4,10 @@ import axios from "axios";
 import { useRequireAuth } from "../lib/auth";
 import { getApiErrorMessage } from "../lib/apiError";
 import { getAuthToken } from "../lib/auth";
-import { apiUrl } from "../lib/apiClient";
+import { apiUrl, apiFetch } from "../lib/apiClient";
 import AppShell from "../components/app/AppShell";
 import FormMessage from "../components/shared/FormMessage";
+import { Mail } from "lucide-react";
 
 type PublicReview = {
   id: string;
@@ -68,6 +69,9 @@ export default function ReviewsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [emailConfirmed, setEmailConfirmed] = useState<boolean | null>(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   async function loadBusinessName(token: string) {
     if (!token) {
@@ -179,6 +183,48 @@ export default function ReviewsPage() {
   }, [isAuthenticated, statusFilter, sort, pageSize]);
 
   useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+        const response = await apiFetch("/api/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const json = (await response.json()) as any;
+          if (mounted) setEmailConfirmed(Boolean(json.emailConfirmed));
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isAuthenticated]);
+
+  async function handleResendVerification() {
+    setResendingVerification(true);
+    setResendMessage(null);
+    try {
+      const token = getAuthToken();
+      const session = JSON.parse(localStorage.getItem("lo_session") || "{}");
+      const email = session?.email;
+      if (!token || !email) return;
+      const response = await apiFetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setResendMessage("Verification email sent. Please check your inbox.");
+    } catch (err) {
+      setResendMessage(getApiErrorMessage(err, "Could not resend verification email."));
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
+  useEffect(() => {
     setBusinessToken(businessTokenFromQuery || "");
     void loadBusinessName(businessTokenFromQuery || "");
     if (businessTokenFromQuery) {
@@ -198,6 +244,31 @@ export default function ReviewsPage() {
       subtitle="Submit reviews and manage your moderation status with filters and paging."
     >
       {message ? <FormMessage message={message} tone="success" /> : null}
+
+      {emailConfirmed === false && (
+        <div className="app-card reviews-verify-banner">
+          <Mail size={20} />
+          <div>
+            <p className="reviews-verify-title">Verify your email address</p>
+            <p className="reviews-verify-sub">
+              Please confirm your email to unlock all features. Check your inbox for the verification link.
+            </p>
+            {resendMessage && (
+              <p className={`app-note ${resendMessage.toLowerCase().includes("sent") ? "is-info" : "is-warn"}`}>
+                {resendMessage}
+              </p>
+            )}
+          </div>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendingVerification}
+          >
+            {resendingVerification ? "Sending..." : "Resend email"}
+          </button>
+        </div>
+      )}
 
       <div className="app-card">
         <h2>My Reviews</h2>

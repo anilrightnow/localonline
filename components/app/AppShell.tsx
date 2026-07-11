@@ -12,6 +12,7 @@ import AdminLayout, { AdminNavItem } from "../../AdminLayout";
 import {
    BadgeDollarSign,
    BarChart3,
+   Bell,
    Building2,
    CalendarDays,
    ClipboardCheck,
@@ -20,10 +21,12 @@ import {
    Gavel,
    Import,
    Image,
+   KeyRound,
    LayoutDashboard,
    Megaphone,
    Settings,
    ShieldCheck,
+   User as UserIcon,
    UserCog,
    Users,
   } from "lucide-react";
@@ -50,15 +53,11 @@ const USER_NAV: NavItem[] = [
 ];
 const OWNER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/claims", label: "Claims", icon: ClipboardCheck },
-  //{ href: "/reviews", label: "Reviews", icon: FileText },
-  { href: "/owner/listing", label: "Owner Listing", icon: Building2 },
-  //{ href: "/community/events", label: "Events", icon: CalendarDays },
-  //{ href: "/community/societies", label: "Societies", icon: Users },
+  { href: "/owner/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 const ADMIN_NAV: NavItem[] = [
-   { href: "/admin/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
+   { href: "/dashboard", label: "Admin Dashboard", icon: LayoutDashboard },
    { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
    {
      href: "/admin/subscriptions",
@@ -116,6 +115,34 @@ export default function AppShell({
   if (isAdmin) nav = [...ADMIN_NAV];
   if (isSuperAdmin) nav = [...ADMIN_NAV, ...SUPERADMIN_NAV];
 
+  // Always expand "Settings" into its sub-sections so the left menu is
+  // identical on every page (one menu for all roles).
+  const settingsNav: NavItem[] = [
+    { href: "/settings?section=profile", label: "Profile", icon: UserIcon },
+    { href: "/settings?section=security", label: "Security", icon: ShieldCheck },
+    {
+      href: "/settings?section=notifications",
+      label: "Notifications",
+      icon: Bell,
+    },
+    {
+      href: "/settings?section=billing",
+      label: "Plan & Billing",
+      icon: BadgeDollarSign,
+    },
+    ...(isOwner
+      ? [{ href: "/settings?section=business", label: "My Business", icon: Building2 }]
+      : []),
+    ...(isAdmin
+      ? [{ href: "/settings?section=admin", label: "Admin Console", icon: UserCog }]
+      : []),
+    ...(isSuperAdmin
+      ? [{ href: "/settings?section=platform", label: "Platform Settings", icon: Settings }]
+      : []),
+    { href: "/settings?section=account", label: "Account", icon: KeyRound },
+  ];
+  nav = [...nav.filter((n) => n.href !== "/settings"), ...settingsNav];
+
   const roleDenied = requiredRole ? !hasRole(session, requiredRole) : false;
 
   async function onLogout() {
@@ -155,7 +182,7 @@ export default function AppShell({
               <button
                 className="btn btn-primary"
                 type="button"
-                onClick={() => router.push("/profile")}
+                onClick={() => router.push("/settings?section=profile")}
               >
                 Go to profile
               </button>

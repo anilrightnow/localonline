@@ -3,9 +3,11 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import { getAuthToken, useRequireAuth } from "../lib/auth";
 import { getApiErrorMessage } from "../lib/apiError";
-import { apiUrl } from "../lib/apiClient";
+import { apiUrl, apiFetch } from "../lib/apiClient";
+import { getUserSessionFromToken } from "../lib/session";
 import AppShell from "../components/app/AppShell";
 import FormMessage from "../components/shared/FormMessage";
+import { Mail } from "lucide-react";
 
 type ClaimItem = {
   id: string;
@@ -51,6 +53,9 @@ export default function ClaimsPage() {
   >([]);
   const [message, setMessage] = useState("");
   const [claims, setClaims] = useState<ClaimItem[]>([]);
+  const [emailConfirmed, setEmailConfirmed] = useState<boolean | null>(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   async function loadBusinessName(token: string) {
     if (!token) {
@@ -166,6 +171,48 @@ export default function ClaimsPage() {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+        const response = await apiFetch("/api/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const json = (await response.json()) as any;
+          if (mounted) setEmailConfirmed(Boolean(json.emailConfirmed));
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isAuthenticated]);
+
+  async function handleResendVerification() {
+    setResendingVerification(true);
+    setResendMessage(null);
+    try {
+      const token = getAuthToken();
+      const session = getUserSessionFromToken(token);
+      const email = session?.email;
+      if (!token || !email) return;
+      const response = await apiFetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setResendMessage("Verification email sent. Please check your inbox.");
+    } catch (err) {
+      setResendMessage(getApiErrorMessage(err, "Could not resend verification email."));
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
   if (isChecking || !isAuthenticated) {
     return <div className="app-loading">Redirecting to login...</div>;
   }
@@ -184,6 +231,32 @@ export default function ClaimsPage() {
       subtitle="Request ownership of business listings and verify by email token."
     >
       {message ? <FormMessage message={message} tone="success" /> : null}
+
+      {emailConfirmed === false && (
+        <div className="app-card claims-verify-banner">
+          <Mail size={20} />
+          <div>
+            <p className="claims-verify-title">Verify your email address</p>
+            <p className="claims-verify-sub">
+              Please confirm your email to unlock all features. Check your inbox for the verification link.
+            </p>
+            {resendMessage && (
+              <p className={`app-note ${resendMessage.toLowerCase().includes("sent") ? "is-info" : "is-warn"}`}>
+                {resendMessage}
+              </p>
+            )}
+          </div>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendingVerification}
+          >
+            {resendingVerification ? "Sending..." : "Resend email"}
+          </button>
+        </div>
+      )}
+
       <div className="app-grid">
         <div className="app-card">
           <h2>Request Claim</h2>

@@ -17,7 +17,7 @@ import {
 
 // Define navigation items for the admin layout
 const adminNavItems = [
-  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Monetization", href: "/admin/monetization", icon: DollarSign },
   { label: "Listings", href: "/admin/listings", icon: List },
   { label: "Reviews", href: "/admin/reviews", icon: MessageSquare },

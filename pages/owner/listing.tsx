@@ -10,7 +10,7 @@ import { getApiErrorMessage } from "../../lib/apiError";
 import { apiUrl } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import FormMessage from "../../components/shared/FormMessage";
-import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
+import { AlertCircle, CheckCircle2, ExternalLink, Mail } from "lucide-react";
 import { JsonEditor } from "json-edit-react";
 import BusinessImageUploader, {
   type MediaItem,
@@ -79,6 +79,11 @@ export default function OwnerListingPage() {
   >("All");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Email verification
+  const [emailConfirmed, setEmailConfirmed] = useState<boolean | null>(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   // Edit Form State
   const [editingBusiness, setEditingBusiness] =
@@ -701,6 +706,20 @@ export default function OwnerListingPage() {
   useEffect(() => {
     void loadClaimedBusinesses();
     void loadMasterData();
+    (async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+        const response = await axios.get(apiUrl("/api/user/profile"), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data) {
+          setEmailConfirmed(Boolean(response.data.emailConfirmed));
+        }
+      } catch {
+        setEmailConfirmed(null);
+      }
+    })();
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -721,6 +740,24 @@ export default function OwnerListingPage() {
     return <div className="app-loading">Redirecting to login...</div>;
   }
 
+  async function handleResendVerification() {
+    setResendingVerification(true);
+    setResendMessage(null);
+    try {
+      const token = getAuthToken();
+      const email = session.email;
+      if (!token || !email) return;
+      const response = await axios.post(apiUrl("/api/auth/resend-verification"), { email }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setResendMessage("Verification email sent. Please check your inbox.");
+    } catch (err) {
+      setResendMessage(getApiErrorMessage(err, "Could not resend verification email."));
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
   return (
     <AppShell
       title="My Business Listings"
@@ -736,6 +773,31 @@ export default function OwnerListingPage() {
             <CheckCircle2 size={18} />
           )}
           <span>{message}</span>
+        </div>
+      )}
+
+      {emailConfirmed === false && (
+        <div className="app-card owner-verify-banner">
+          <Mail size={20} />
+          <div>
+            <p className="owner-verify-title">Verify your email address</p>
+            <p className="owner-verify-sub">
+              Please confirm your email to unlock all features. Check your inbox for the verification link.
+            </p>
+            {resendMessage && (
+              <p className={`app-note ${resendMessage.toLowerCase().includes("sent") ? "is-info" : "is-warn"}`}>
+                {resendMessage}
+              </p>
+            )}
+          </div>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={handleResendVerification}
+            disabled={resendingVerification}
+          >
+            {resendingVerification ? "Sending..." : "Resend email"}
+          </button>
         </div>
       )}
 

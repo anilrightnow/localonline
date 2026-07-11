@@ -154,8 +154,8 @@ export default function HomePage({
                 </div>
                 <h3>Smart Search</h3>
                 <p>
-                  Find services by society, plaza, or category. Tailored for the
-                  Noida Extension ecosystem.
+                  Search local businesses, shops, and services by city, area,
+                  society, marketplace, or business category.
                 </p>
               </div>
 

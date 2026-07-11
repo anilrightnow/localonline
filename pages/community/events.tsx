@@ -3,9 +3,11 @@ import axios from "axios";
 import { useRequireAuth } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { getAuthToken } from "../../lib/auth";
-import { apiUrl } from "../../lib/apiClient";
+import { apiUrl, apiFetch } from "../../lib/apiClient";
+import { getUserSessionFromToken } from "../../lib/session";
 import AppShell from "../../components/app/AppShell";
 import FormMessage from "../../components/shared/FormMessage";
+import { Mail } from "lucide-react";
 
 type EventRow = {
   id: string;

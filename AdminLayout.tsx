@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import {
@@ -36,6 +36,11 @@ export default function AdminLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const router = useRouter();
   const pathname = router.pathname;
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
 
   const currentPage = useMemo(() => {
     if (title) return title;
@@ -77,7 +82,13 @@ export default function AdminLayout({
 
         <nav className="admin-nav">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const baseHref = item.href.split("?")[0];
+            const sectionParam = new URLSearchParams(
+              item.href.split("?")[1] || "",
+            ).get("section");
+            const isActive =
+              baseHref === pathname &&
+              (sectionParam ? router.query.section === sectionParam : true);
             return (
               <Link
                 key={item.label}
@@ -140,8 +151,13 @@ export default function AdminLayout({
 
             <div className="admin-divider" />
 
-            <div className="admin-account">
-              <button className="admin-account-btn" type="button">
+            <div className={`admin-account ${accountOpen ? "is-open" : ""}`}>
+              <button
+                className="admin-account-btn"
+                type="button"
+                onClick={() => setAccountOpen((v) => !v)}
+                aria-expanded={accountOpen}
+              >
                 <span className="admin-account-label">Account</span>
                 <span className="admin-account-avatar-wrap">
                   <UserIcon size={16} />
@@ -150,7 +166,7 @@ export default function AdminLayout({
               </button>
 
               <div className="admin-menu">
-                <Link href="/profile" className="admin-menu-link">
+                <Link href="/settings?section=profile" className="admin-menu-link">
                   <UserIcon size={16} /> My Profile
                 </Link>
                 <Link href="/settings" className="admin-menu-link">

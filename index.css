@@ -923,6 +923,202 @@ p.lead {
   margin-top: 0;
 }
 
+/* ── Structured Data Editor (About / Business Hours / Menu) ── */
+.sde {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sde-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.sde-sm {
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+/* Tree view */
+.sde-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sde-node {
+  margin-bottom: 2px;
+}
+.sde-node-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #e3eefb;
+  border-left: 4px solid #2f6fb3;
+  font-size: 0.95rem;
+}
+.sde-caret {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 2px 4px;
+  color: #2c3e50;
+}
+.sde-cat-input {
+  font-weight: 700;
+  max-width: 280px;
+  flex: 1;
+  min-width: 120px;
+}
+.sde-cat-name {
+  flex: 1;
+  font-weight: 700;
+}
+.sde-count {
+  font-size: 0.76rem;
+  color: #5b6b80;
+  background: #fff;
+  border: 1px solid #d4e0ef;
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+.sde-spacer {
+  flex: 1;
+}
+.sde-children {
+  position: relative;
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 2px solid #9cc0e6;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.sde-leaf {
+  display: flex;
+}
+/* horizontal connector from the parent line to each label (only under a parent) */
+.sde-children .sde-leaf::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 17px;
+  width: 18px;
+  height: 2px;
+  background: #9cc0e6;
+}
+.sde-leaf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* horizontal connector from the parent line to each label */
+.sde-leaf::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 17px;
+  width: 18px;
+  height: 2px;
+  background: #9cc0e6;
+}
+.sde-leaf-main {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  flex: 1;
+}
+.sde-label {
+  flex: 0 0 220px;
+  max-width: 220px;
+  font-weight: 600;
+}
+.sde-values {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin-left: 4px;
+  padding-left: 14px;
+  border-left: 2px dashed #cdd9e5;
+}
+.sde-value-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.sde-value {
+  flex: 1;
+  min-width: 0;
+}
+.sde-add-value {
+  align-self: flex-start;
+}
+/* "Add item" aligned under the Label column, compact, reads as "add new Label" */
+.sde-add-item {
+  align-self: flex-start;
+  margin-left: 0;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  border-style: dashed;
+}
+.sde-actions {
+  display: flex;
+  gap: 8px;
+}
+.sde-empty {
+  color: #8898aa;
+  font-size: 0.9em;
+  padding: 6px 2px;
+}
+.sde-icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #c0392b;
+}
+.sde-icon-btn:hover {
+  background: #fdeaea;
+}
+
+body.theme-dark .sde-node-head {
+  background: #243149;
+  border-left-color: #4a90d9;
+}
+body.theme-dark .sde-children {
+  border-color: #3a567d;
+}
+body.theme-dark .sde-leaf::before {
+  background: #3a567d;
+}
+body.theme-dark .sde-values {
+  border-color: #34435e;
+}
+body.theme-dark .sde-caret {
+  color: #cdd9e5;
+}
+body.theme-dark .sde-count {
+  color: #9fb0c8;
+  background: #1b2230;
+  border-color: #34435e;
+}
+body.theme-dark .sde-icon-btn:hover {
+  background: #3a2230;
+}
+
 .app-grid {
   display: grid;
   gap: 12px;

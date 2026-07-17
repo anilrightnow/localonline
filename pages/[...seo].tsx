@@ -765,46 +765,6 @@ export default function SeoPage({
     ...(hasMenuItems ? [{ id: "menu" as DetailTab, label: "Menu" }] : []),
     { id: "gallery", label: "Photos" },
   ];
-  const generatedNarrative = useMemo(() => {
-    if (!businessData) return "";
-    const aboutKeys = aboutItems
-      .map((item) => (item.Key ?? item.key ?? "").toString().trim())
-      .filter(Boolean);
-    const firstHoursGroup = hoursGroups.find(
-      (group) => (group.Hours ?? group.hours ?? []).length > 0,
-    );
-    const firstHours = firstHoursGroup
-      ? (firstHoursGroup.Hours ?? firstHoursGroup.hours ?? [])
-      : [];
-    const hoursSummary = firstHours
-      .slice(0, 3)
-      .map(
-        (row) =>
-          `${((row as any).Day ?? row.day ?? "Day") as string} ${((row as any).Time ?? row.time ?? "N/A") as string}`,
-      )
-      .join("; ");
-
-    return buildBusinessNarrative({
-      name: businessData.detail.name,
-      city: effectiveCityName,
-      area: effectiveAreaName,
-      address: businessData.detail.address,
-      rating: businessData.detail.rating,
-      reviews: businessData.detail.totalReviews,
-      hasPhone: Boolean(businessData.detail.phone),
-      hasWebsite: Boolean(toExternalUrl(businessData.detail.website)),
-      aboutKeys,
-      hoursSummary: hoursSummary || undefined,
-      serviceHints: businessData.ownerProfile?.services ?? [],
-      promotionsCount: businessData.activePromotions?.length ?? 0,
-    });
-  }, [
-    aboutItems,
-    businessData,
-    effectiveAreaName,
-    effectiveCityName,
-    hoursGroups,
-  ]);
   const breadcrumbs = buildBreadcrumbs(parsed, {
     citySlug: effectiveCitySlug,
     areaSlug: effectiveAreaSlug,
@@ -1331,7 +1291,7 @@ export default function SeoPage({
                     </p>
                   ) : null}
 
-                  {generatedNarrative ? (
+                  {businessData.detail.description ? (
                     <div className="pub-hours-block">
                       <h3>
                         {businessData?.detail?.name
@@ -1339,7 +1299,7 @@ export default function SeoPage({
                           : "Business"}{" "}
                         Overview
                       </h3>
-                      <p className="pub-muted">{generatedNarrative}</p>
+                      <p className="pub-muted">{businessData.detail.description}</p>
                     </div>
                   ) : null}
                   {businessData.ownerProfile?.about ? (

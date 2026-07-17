@@ -6,6 +6,9 @@ import { AlertCircle, CheckCircle2, Trash2, Upload, X } from "lucide-react";
 
 export type MediaItem = {
   LargeUrl: string;
+  largeUrl?: string;
+  ThumbUrl?: string;
+  thumbUrl?: string;
   PublicId?: string;
   publicId?: string;
 };
@@ -63,11 +66,22 @@ export default function BusinessImageUploader({
 
   useEffect(() => {
     const normalized = normalize(initialMedia);
-    setMedia(normalized);
-    if (normalized.length) {
-      onMediaChange(normalized);
+    const prev = mediaRef.current;
+    const same =
+      prev.length === normalized.length &&
+      normalized.every(
+        (m, i) =>
+          (prev[i]?.PublicId || prev[i]?.publicId) ===
+          (m.PublicId || m.publicId),
+      );
+    // Only re-sync when the incoming media actually differs. We must NOT
+    // call onMediaChange here: that would update the parent's galleryMedia,
+    // which flows back as `initialMedia` and re-triggers this effect,
+    // causing a "Maximum update depth" render loop.
+    if (!same) {
+      setMedia(normalized);
+      initialMediaRef.current = initialMedia;
     }
-    initialMediaRef.current = initialMedia;
   }, [initialMedia]);
 
   useEffect(() => {
@@ -91,18 +105,37 @@ export default function BusinessImageUploader({
         const raw = Array.isArray(res.data?.mediaJson)
           ? res.data.mediaJson
           : [];
-        const items = raw.map((m: any) => ({
+        let items = raw.map((m: any) => ({
           PublicId: m.PublicId || m.publicId,
-          LargeUrl: m.LargeUrl || "",
+          LargeUrl: m.LargeUrl || m.largeUrl || m.thumbUrl || m.ThumbUrl || "",
         }));
-        const normalized = normalize(items);
-        setMedia(normalized);
+
+        // If the API returned no images, fall back to the existing images
+        // passed in via initialMedia so previously saved images still load.
+        let normalized = normalize(items);
+        if (normalized.length === 0) {
+          const fallback = normalize(initialMediaRef.current || []);
+          if (fallback.length) {
+            normalized = fallback;
+            items = fallback;
+            setMedia(fallback);
+          }
+        } else {
+          setMedia(normalized);
+        }
+
         if (normalized.length) {
           onMediaChangeRef.current(normalized);
         }
       } catch {
         if (!cancelled) {
-          setLoadError("Failed to load business images.");
+          const fallback = normalize(initialMediaRef.current || []);
+          if (fallback.length) {
+            setMedia(fallback);
+            onMediaChangeRef.current(fallback);
+          } else {
+            setLoadError("Failed to load business images.");
+          }
         }
       } finally {
         if (!cancelled) {
@@ -340,7 +373,7 @@ export default function BusinessImageUploader({
                 }}
               >
                 <img
-                  src={item.LargeUrl}
+                  src={item.LargeUrl || item.largeUrl || item.ThumbUrl || item.thumbUrl || ""}
                   alt={`Business image ${idx + 1}`}
                   onError={() => {
                     setBrokenImages((prev) => {

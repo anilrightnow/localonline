@@ -4,6 +4,8 @@ import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
 import { apiFetch } from "../../lib/apiClient";
 import FormMessage from "../../components/shared/FormMessage";
+import StructuredDataView from "../../components/shared/StructuredDataView";
+import { normalize, EditorMode } from "../../components/shared/structuredDataModel";
 
 type ListingUpdate = {
   Id: string;
@@ -297,8 +299,14 @@ export default function ListingUpdatesPage() {
                     {expandedId === item.Id ? (
                       <tr key={`${item.Id}-details`}>
                         <td colSpan={5}>
-                          <div className="app-card" style={{ margin: 0 }}>
-                            <strong>Requested details (JSON)</strong>
+                           <div className="app-card" style={{ margin: 0 }}>
+                             <strong>Requested details (structured)</strong>
+                             <div style={{ marginTop: 8 }}>
+                               <StructuredDataChanges payload={payload} />
+                             </div>
+                             <strong style={{ display: "block", marginTop: 16 }}>
+                               Requested details (JSON)
+                             </strong>
                             <pre
                               className="pub-json"
                               style={{
@@ -413,5 +421,30 @@ export default function ListingUpdatesPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+function StructuredDataChanges({ payload }: { payload: any }) {
+  const fields: Array<{ mode: EditorMode; json: unknown; title: string }> = [
+    { mode: "about", json: payload?.aboutJson, title: "About" },
+    { mode: "businessHours", json: payload?.businessHoursJson, title: "Business Hours" },
+    { mode: "menu", json: payload?.menuJson, title: "Menu" },
+  ];
+  const active = fields.filter((f) => {
+    const model = normalize(f.json, f.mode);
+    return model.categories.some((c) => c.items.length > 0);
+  });
+  if (active.length === 0) return <p className="app-muted">No About/Hours/Menu changes in this request.</p>;
+  return (
+    <>
+      {active.map((f) => (
+        <div key={f.mode} style={{ marginTop: 12 }}>
+          <div className="app-muted" style={{ fontWeight: 600, marginBottom: 4 }}>
+            {f.title}
+          </div>
+          <StructuredDataView mode={f.mode} model={normalize(f.json, f.mode)} />
+        </div>
+      ))}
+    </>
   );
 }

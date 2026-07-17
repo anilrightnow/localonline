@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Script from "next/script";
 import "../index.css";
 import { trackAnalyticsEvent } from "../lib/analytics";
+import "../lib/authRefresh";
 
 // Only load Google Ads / Analytics in production. These third-party scripts
 // communicate via postMessage and run heavy synchronous work, which triggers

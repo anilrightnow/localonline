@@ -11,7 +11,7 @@ import { apiUrl } from "../../lib/apiClient";
 import { getUserSessionFromToken, hasRole } from "../../lib/session";
 import FormMessage from "../../components/shared/FormMessage";
 import { AlertCircle, CheckCircle2, ExternalLink, Mail } from "lucide-react";
-import { JsonEditor } from "json-edit-react";
+import StructuredDataEditor from "../../components/shared/StructuredDataEditor";
 import BusinessImageUploader, {
   type MediaItem,
 } from "../../components/shared/BusinessImageUploader";
@@ -56,6 +56,8 @@ type BusinessDetail = {
   categoryIds?: number[];
   planName?: string | null;
   imageLimit?: number | null;
+  cid?: string | null;
+  scrapedAt?: string | null;
 };
 
 type MasterOption = { id: number; name: string; slug?: string | null };
@@ -119,8 +121,6 @@ export default function OwnerListingPage() {
   );
   const [initialAreaIds, setInitialAreaIds] = useState<number[]>([]);
   const [initialCategoryIds, setInitialCategoryIds] = useState<number[]>([]);
-  const [areaSelectValue, setAreaSelectValue] = useState("");
-  const [categorySelectValue, setCategorySelectValue] = useState("");
   const [actionsJson, setActionsJson] = useState("{}");
   const [aboutJson, setAboutJson] = useState("[]");
   const [businessHoursJson, setBusinessHoursJson] = useState("[]");
@@ -134,14 +134,20 @@ export default function OwnerListingPage() {
   const [aboutTouched, setAboutTouched] = useState(false);
   const [businessHoursTouched, setBusinessHoursTouched] = useState(false);
   const [menuTouched, setMenuTouched] = useState(false);
+  const [descriptionTouched, setDescriptionTouched] = useState(false);
   const [aboutHadData, setAboutHadData] = useState(false);
   const [businessHoursHadData, setBusinessHoursHadData] = useState(false);
   const [menuHadData, setMenuHadData] = useState(false);
   const [canonicalPath, setCanonicalPath] = useState("");
   const [fullJson, setFullJson] = useState("{}");
   const [isVerified, setIsVerified] = useState(false);
-  const [activeTab, setActiveTab] = useState("about");
+  const [activeTab, setActiveTab] = useState("description");
   const [galleryMedia, setGalleryMedia] = useState<MediaItem[]>([]);
+
+  const MENU_CATEGORY_IDS = [1, 14, 15, 16, 77, 78, 79, 80, 81, 82];
+  const showMenuFields = selectedCategories.some((c) =>
+    MENU_CATEGORY_IDS.includes(c.id),
+  );
 
   // Master Data
   const [cities, setCities] = useState<MasterOption[]>([]);
@@ -257,10 +263,12 @@ export default function OwnerListingPage() {
             apiUrl(`/api/master/areas?ids=${selectedAreaIds.join(",")}`),
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
-          setSelectedAreas(areaResp.data ?? []);
+          setSelectedAreas((areaResp.data ?? []).slice(0, 1));
         } catch (err) {
           console.error("Failed to load selected areas:", err);
-          setSelectedAreas(areas.filter((a) => selectedAreaIds.includes(a.id)));
+          setSelectedAreas(
+            areas.filter((a) => selectedAreaIds.includes(a.id)).slice(0, 1),
+          );
         }
       } else {
         setSelectedAreas([]);
@@ -274,11 +282,11 @@ export default function OwnerListingPage() {
             ),
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
-          setSelectedCategories(categoryResp.data ?? []);
+          setSelectedCategories((categoryResp.data ?? []).slice(0, 1));
         } catch (err) {
           console.error("Failed to load selected categories:", err);
           setSelectedCategories(
-            categories.filter((c) => selectedCategoryIds.includes(c.id)),
+            categories.filter((c) => selectedCategoryIds.includes(c.id)).slice(0, 1),
           );
         }
       } else {
@@ -302,6 +310,7 @@ export default function OwnerListingPage() {
       setAboutTouched(false);
       setBusinessHoursTouched(false);
       setMenuTouched(false);
+      setDescriptionTouched(false);
       setAboutHadData(isJsonContent(b.aboutJson));
       setBusinessHoursHadData(isJsonContent(b.businessHoursJson));
       setMenuHadData(isJsonContent(b.menuJson));
@@ -336,7 +345,7 @@ export default function OwnerListingPage() {
       }
 
       setIsVerified(Boolean(b.isVerified));
-      setActiveTab("about");
+      setActiveTab("description");
       setMessage("Business loaded successfully.");
       void loadAnalytics(businessToken, days);
       void loadUpdateRequests(businessToken);
@@ -405,7 +414,9 @@ export default function OwnerListingPage() {
           // already had real content. This keeps helpful scaffolds from being
           // persisted until the owner really changes something.
           aboutJson:
-            aboutTouched || aboutHadData ? parseJsonOrNull(aboutJson) : undefined,
+            aboutTouched || aboutHadData
+              ? parseJsonOrNull(aboutJson)
+              : undefined,
           businessHoursJson:
             businessHoursTouched || businessHoursHadData
               ? parseJsonOrNull(businessHoursJson)
@@ -510,73 +521,6 @@ export default function OwnerListingPage() {
     }
   }
 
-  // Build a friendly starting scaffold from the business's existing data so an
-  // empty tab is easy to understand and fill in. The scaffold is only shown in
-  // the editor; it is never persisted unless the owner edits that tab.
-  function buildScaffold(tabKey: string): unknown {
-    if (tabKey === "about") {
-      const rows: Array<{ Key: string; Value: string[] }> = [
-        {
-          Key: "Overview",
-          Value: [
-            description?.trim() ||
-              `Write a short introduction about ${
-                name || "your business"
-              }.`,
-          ],
-        },
-      ];
-      if (address?.trim())
-        rows.push({ Key: "Address", Value: [address.trim()] });
-      if (phone?.trim()) rows.push({ Key: "Phone", Value: [phone.trim()] });
-      if (website?.trim())
-        rows.push({ Key: "Website", Value: [website.trim()] });
-      rows.push({
-        Key: "Specialties",
-        Value: ["Add your main services or products here."],
-      });
-      return rows;
-    }
-
-    if (tabKey === "businessHours") {
-      const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-      const weekend = ["Saturday", "Sunday"];
-      return [
-        {
-          Category: "Monday to Friday",
-          Hours: weekdays.map((day) => ({
-            Day: day,
-            Time: "9:00 AM - 9:00 PM",
-          })),
-        },
-        {
-          Category: "Saturday & Sunday",
-          Hours: weekend.map((day) => ({
-            Day: day,
-            Time: "10:00 AM - 8:00 PM",
-          })),
-        },
-      ];
-    }
-
-    if (tabKey === "menu") {
-      return [
-        {
-          Category: "Popular",
-          Items: [
-            {
-              Name: "Signature Dish",
-              Price: 199,
-              Description: "Describe your most popular item.",
-            },
-          ],
-        },
-      ];
-    }
-
-    return null;
-  }
-
   // Generate full JSON from all form data
   const generateFullJson = () => {
     const fullData = {
@@ -635,37 +579,58 @@ export default function OwnerListingPage() {
   ]);
 
   type TabDefinition = {
-    key: string;
+    key: "description" | "about" | "businessHours" | "menu";
     label: string;
     value: unknown;
     onChange: (value: string) => void;
-    rootType: "array" | "object";
     disabled?: boolean;
-    helperText?: string;
   };
 
+  function handleTabChange(key: TabDefinition["key"], value: string) {
+    if (key === "description") {
+      setDescription(value);
+      setDescriptionTouched(true);
+    } else if (key === "about") {
+      setAboutJson(value);
+      setAboutTouched(true);
+    } else if (key === "businessHours") {
+      setBusinessHoursJson(value);
+      setBusinessHoursTouched(true);
+    } else {
+      setMenuJson(value);
+      setMenuTouched(true);
+    }
+  }
+
   const tabs: TabDefinition[] = [
+    {
+      key: "description",
+      label: "Description",
+      value: description,
+      onChange: (v: string) => handleTabChange("description", v),
+    },
     {
       key: "about",
       label: "About",
       value: aboutJson,
-      onChange: setAboutJson,
-      rootType: "array",
+      onChange: (v) => handleTabChange("about", v),
     },
     {
       key: "businessHours",
       label: "Business Hours",
       value: businessHoursJson,
-      onChange: setBusinessHoursJson,
-      rootType: "array" as const,
+      onChange: (v) => handleTabChange("businessHours", v),
     },
-    {
-      key: "menu",
-      label: "Menu",
-      value: menuJson,
-      onChange: setMenuJson,
-      rootType: "array" as const,
-    },
+    ...(showMenuFields
+      ? [
+          {
+            key: "menu" as TabDefinition["key"],
+            label: "Menu",
+            value: menuJson,
+            onChange: (v: string) => handleTabChange("menu", v),
+          },
+        ]
+      : []),
   ];
 
   const filteredBusinesses =
@@ -724,14 +689,16 @@ export default function OwnerListingPage() {
 
   useEffect(() => {
     if (initialAreaIds.length > 0 && areas.length > 0) {
-      setSelectedAreas(areas.filter((a) => initialAreaIds.includes(a.id)));
+      setSelectedAreas(
+        areas.filter((a) => initialAreaIds.includes(a.id)).slice(0, 1),
+      );
     }
   }, [areas, initialAreaIds]);
 
   useEffect(() => {
     if (initialCategoryIds.length > 0 && categories.length > 0) {
       setSelectedCategories(
-        categories.filter((c) => initialCategoryIds.includes(c.id)),
+        categories.filter((c) => initialCategoryIds.includes(c.id)).slice(0, 1),
       );
     }
   }, [categories, initialCategoryIds]);
@@ -747,12 +714,18 @@ export default function OwnerListingPage() {
       const token = getAuthToken();
       const email = session.email;
       if (!token || !email) return;
-      const response = await axios.post(apiUrl("/api/auth/resend-verification"), { email }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        apiUrl("/api/auth/resend-verification"),
+        { email },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setResendMessage("Verification email sent. Please check your inbox.");
     } catch (err) {
-      setResendMessage(getApiErrorMessage(err, "Could not resend verification email."));
+      setResendMessage(
+        getApiErrorMessage(err, "Could not resend verification email."),
+      );
     } finally {
       setResendingVerification(false);
     }
@@ -782,10 +755,13 @@ export default function OwnerListingPage() {
           <div>
             <p className="owner-verify-title">Verify your email address</p>
             <p className="owner-verify-sub">
-              Please confirm your email to unlock all features. Check your inbox for the verification link.
+              Please confirm your email to unlock all features. Check your inbox
+              for the verification link.
             </p>
             {resendMessage && (
-              <p className={`app-note ${resendMessage.toLowerCase().includes("sent") ? "is-info" : "is-warn"}`}>
+              <p
+                className={`app-note ${resendMessage.toLowerCase().includes("sent") ? "is-info" : "is-warn"}`}
+              >
                 {resendMessage}
               </p>
             )}
@@ -1027,7 +1003,7 @@ export default function OwnerListingPage() {
 
           <form onSubmit={saveBusiness}>
             <div className="app-grid">
-              <div className="form-row">
+              <div className="form-row" style={{ gridColumn: "1 / -1" }}>
                 <label>Name *</label>
                 <input
                   className="form-input"
@@ -1036,7 +1012,7 @@ export default function OwnerListingPage() {
                   required
                 />
               </div>
-              <div className="form-row">
+              <div className="form-row" style={{ gridColumn: "1 / -1" }}>
                 <label>Name Hindi</label>
                 <input
                   className="form-input"
@@ -1045,13 +1021,32 @@ export default function OwnerListingPage() {
                 />
               </div>
               <div className="form-row">
-                <label>Address</label>
-                <input
-                  className="form-input"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
+                <label>Categories</label>
+                <select
+                  className="form-select"
+                  value={
+                    selectedCategories[0]?.id
+                      ? String(selectedCategories[0].id)
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    setSelectedCategories(
+                      id
+                        ? categories.filter((c) => c.id === id)
+                        : [],
+                    );
+                  }}
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={String(cat.id)}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+
               <div className="form-row">
                 <label>Phone</label>
                 <input
@@ -1060,57 +1055,16 @@ export default function OwnerListingPage() {
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
-              <div className="form-row">
-                <label>Website</label>
-                <input
-                  className="form-input"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label>Website Link</label>
-                <input
-                  className="form-input"
-                  value={websiteLink}
-                  onChange={(e) => setWebsiteLink(e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label>Menu Link</label>
-                <input
-                  className="form-input"
-                  value={menuLink}
-                  onChange={(e) => setMenuLink(e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label>Description</label>
-                <input
-                  className="form-input"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label>Avg Rating</label>
-                <input
-                  className="form-input"
-                  type="number"
-                  step="0.1"
-                  value={avgRating}
-                  onChange={(e) => setAvgRating(e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label>Total Reviews</label>
-                <input
-                  className="form-input"
-                  type="number"
-                  value={totalReviews}
-                  onChange={(e) => setTotalReviews(e.target.value)}
-                />
-              </div>
+              {showMenuFields && (
+                <div className="form-row">
+                  <label>Menu Link</label>
+                  <input
+                    className="form-input"
+                    value={menuLink}
+                    onChange={(e) => setMenuLink(e.target.value)}
+                  />
+                </div>
+              )}
               <div className="form-row">
                 <label>Latitude</label>
                 <input
@@ -1130,7 +1084,59 @@ export default function OwnerListingPage() {
                 />
               </div>
 
-              <div className="form-row" style={{ width: "100%", gridColumn: "1 / -1" }}>
+              <div className="form-row">
+                <label>Website</label>
+                <input
+                  className="form-input"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
+              </div>
+              <div className="form-row">
+                <label>Website Link</label>
+                <input
+                  className="form-input"
+                  value={websiteLink}
+                  onChange={(e) => setWebsiteLink(e.target.value)}
+                />
+              </div>
+              <div className="form-row">
+                <label>Areas</label>
+                <select
+                  className="form-select"
+                  value={
+                    selectedAreas[0]?.id ? String(selectedAreas[0].id) : ""
+                  }
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    setSelectedAreas(
+                      id ? areas.filter((a) => a.id === id) : [],
+                    );
+                  }}
+                >
+                  <option value="">Select an area</option>
+                  {areas.map((area) => (
+                    <option key={area.id} value={String(area.id)}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-row" style={{ gridColumn: "1 / -1" }}>
+                <label>Address</label>
+                <textarea
+                  className="form-textarea"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div
+                className="form-row"
+                style={{ width: "100%", gridColumn: "1 / -1" }}
+              >
                 <label>Business Images</label>
                 <BusinessImageUploader
                   businessToken={editingBusiness.businessToken}
@@ -1180,86 +1186,32 @@ export default function OwnerListingPage() {
                       backgroundColor: "#fafafa",
                     }}
                   >
-                    {(() => {
-                      const tab = tabs.find((t) => t.key === activeTab);
-                      if (!tab) return null;
-                      let parsed;
-                      try {
-                        const rawValue = tab.value;
-                        if (typeof rawValue === "string") {
-                          const jsonStr =
-                            rawValue.trim() ||
-                            (tab.rootType === "array" ? "[]" : "{}");
-                          parsed = JSON.parse(jsonStr);
-
-                          // Handle double-encoded JSON strings
-                          if (typeof parsed === "string" && parsed !== "null") {
-                            parsed = JSON.parse(parsed);
-                          }
-                        } else if (rawValue && typeof rawValue === "object") {
-                          parsed = rawValue;
-                        } else {
-                          parsed = tab.rootType === "array" ? [] : {};
-                        }
-
-                        // Fallback check to prevent JsonEditor from crashing on null/non-array data
-                        if (
-                          tab.rootType === "array" &&
-                          !Array.isArray(parsed)
-                        ) {
-                          parsed = [];
-                        } else if (
-                          tab.rootType === "object" &&
-                          (Array.isArray(parsed) || !parsed)
-                        ) {
-                          parsed = {};
-                        }
-
-                        // Show a friendly scaffold for empty tabs so the owner
-                        // has an easy starting point. The scaffold is only
-                        // displayed; it is not written back unless edited.
-                        const tabHasContent = tab.rootType === "array"
-                          ? Array.isArray(parsed) && parsed.length > 0
-                          : parsed && typeof parsed === "object" &&
-                            Object.keys(parsed).length > 0;
-                        if (!tabHasContent) {
-                          const scaffold = buildScaffold(tab.key);
-                          if (scaffold !== null) parsed = scaffold;
-                        }
-                      } catch (e) {
-                        console.error("JSON parse error:", e);
+                    {activeTab === "description" ? (
+                      <textarea
+                        className="form-textarea"
+                        value={description}
+                        onChange={(e) => {
+                          setDescription(e.target.value);
+                          setDescriptionTouched(true);
+                        }}
+                        placeholder="Enter business description..."
+                        style={{ width: "100%", minHeight: "400px" }}
+                      />
+                    ) : (
+                      (() => {
+                        const tab = tabs.find((t) => t.key === activeTab);
+                        if (!tab) return null;
                         return (
-                          <div className="form-alert is-error">
-                            <AlertCircle size={18} />
-                            <span>
-                              Invalid JSON format in {tab.label} data.
-                            </span>
-                          </div>
-                        );
-                      }
-                      return (
-                        <>
-                          <JsonEditor
-                            key={`json-editor-${activeTab}`}
-                            className="full-width-json-editor"
-                            minWidth="100%"
-                            maxWidth="100%"
-                            rootName={tab.key}
-                            data={parsed}
-                            onUpdate={(data) => {
-                              tab.onChange(JSON.stringify(data, null, 2));
-                              if (tab.key === "about") setAboutTouched(true);
-                              else if (tab.key === "businessHours")
-                                setBusinessHoursTouched(true);
-                              else if (tab.key === "menu") setMenuTouched(true);
-                            }}
+                          <StructuredDataEditor
+                            key={`sde-${activeTab}`}
+                            mode={tab.key as "about" | "businessHours" | "menu"}
+                            value={tab.value}
+                            onChange={tab.onChange}
+                            suggestionsEnabled
                           />
-                          {tab.helperText && (
-                            <p className="app-muted">{tab.helperText}</p>
-                          )}
-                        </>
-                      );
-                    })()}
+                        );
+                      })()
+                    )}
                   </div>
                 </div>
               </div>
@@ -1308,7 +1260,9 @@ export default function OwnerListingPage() {
             ) : updateRequests.length === 0 ? (
               <p className="app-muted">No update requests submitted yet.</p>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
                 {updateRequests.map((req: any) => {
                   const reqLogs = updateRequestLogs.filter(
                     (l: any) => l.RequestId === req.Id,
@@ -1389,7 +1343,11 @@ export default function OwnerListingPage() {
                               {log.Note ? `: ${log.Note}` : ""}
                               <span className="app-muted">
                                 {" "}
-                                ({new Date(log.CreatedAt).toLocaleString("en-IN")})
+                                (
+                                {new Date(log.CreatedAt).toLocaleString(
+                                  "en-IN",
+                                )}
+                                )
                               </span>
                             </li>
                           ))}

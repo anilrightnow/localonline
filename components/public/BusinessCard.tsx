@@ -75,6 +75,7 @@ export default function BusinessCard({
     city: fallbackCity,
     businessName: business.name,
   });
+  const detailHref = business.canonicalPath || (business.businessToken ? `/b-${business.businessToken}` : "#");
   const thumb = resolveBusinessThumbnail(business, fallback);
   const description = buildBusinessDescription(
     business,
@@ -89,7 +90,7 @@ export default function BusinessCard({
     >
       <div className="pub-biz-image-wrap">
         <Link
-          href={business.canonicalPath}
+          href={detailHref}
           className="pub-biz-image-link"
           aria-label={`Open ${business.name}`}
         >
@@ -115,7 +116,7 @@ export default function BusinessCard({
 
       <div className="pub-biz-body">
         <h3 className="pub-biz-title">
-          <Link href={business.canonicalPath}>{business.name}</Link>
+          <Link href={detailHref}>{business.name}</Link>
         </h3>
 
         {/* Structured Rating Row for easier CSS styling */}
@@ -157,7 +158,7 @@ export default function BusinessCard({
           )}
 
           {variant !== "list" ? (
-            <Link href={business.canonicalPath} className="pub-btn-directions">
+            <Link href={detailHref} className="pub-btn-directions">
               <Navigation size={14} /> Details <ArrowRight size={14} />
             </Link>
           ) : null}

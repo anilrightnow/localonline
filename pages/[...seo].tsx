@@ -609,14 +609,14 @@ export default function SeoPage({
 
   useEffect(() => {
     if (parsed.kind !== "business") return;
-    if (!businessData?.detail?.cid) return;
+    if (!businessData?.detail?.id) return;
     trackAnalyticsEvent({
       eventType: "business_view",
-      cid: businessData.detail.cid,
+      cid: String(businessData.detail.id),
       source: "business-page",
       payload: { path: canonicalPath },
     });
-  }, [parsed.kind, businessData?.detail?.cid, canonicalPath]);
+  }, [parsed.kind, businessData?.detail?.id, canonicalPath]);
   const [contactError, setContactError] = useState<string | null>(null);
 
   const media = businessData

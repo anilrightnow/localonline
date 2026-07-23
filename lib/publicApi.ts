@@ -86,6 +86,7 @@ export type BusinessApiResponse = {
   };
   detail: {
     businessToken: string;
+    id?: number | null;
     name: string;
     name_hindi?: string | null;
     address?: string | null;
@@ -103,6 +104,7 @@ export type BusinessApiResponse = {
     reviewJson?: string | null;
     mediaJson?: string | null;
     menuJson?: string | null;
+    scrapedAt?: string | null;
     isVerified?: boolean | null;
   };
   reviews: Array<{

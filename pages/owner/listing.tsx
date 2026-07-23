@@ -41,7 +41,6 @@ type BusinessDetail = {
   description?: string | null;
   avgRating?: number | null;
   totalReviews?: number | null;
-  placeUrl?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   isVerified?: boolean | null;
@@ -51,12 +50,10 @@ type BusinessDetail = {
   reviewJson?: string;
   mediaJson?: string;
   menuJson?: string;
-  fullJson?: string;
   areaIds?: number[];
   categoryIds?: number[];
   planName?: string | null;
   imageLimit?: number | null;
-  cid?: string | null;
   scrapedAt?: string | null;
 };
 
@@ -110,7 +107,6 @@ export default function OwnerListingPage() {
   const [websiteLink, setWebsiteLink] = useState("");
   const [menuLink, setMenuLink] = useState("");
   const [description, setDescription] = useState("");
-  const [placeUrl, setPlaceUrl] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [avgRating, setAvgRating] = useState("");
@@ -139,7 +135,6 @@ export default function OwnerListingPage() {
   const [businessHoursHadData, setBusinessHoursHadData] = useState(false);
   const [menuHadData, setMenuHadData] = useState(false);
   const [canonicalPath, setCanonicalPath] = useState("");
-  const [fullJson, setFullJson] = useState("{}");
   const [isVerified, setIsVerified] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
   const [galleryMedia, setGalleryMedia] = useState<MediaItem[]>([]);
@@ -231,7 +226,6 @@ export default function OwnerListingPage() {
       setWebsiteLink(b.websiteLink ?? "");
       setMenuLink(b.menuLink ?? "");
       setDescription(b.description ?? "");
-      setPlaceUrl(b.placeUrl ?? "");
       setLatitude(b.latitude == null ? "" : String(b.latitude));
       setLongitude(b.longitude == null ? "" : String(b.longitude));
       setAvgRating(b.avgRating == null ? "" : String(b.avgRating));
@@ -305,7 +299,6 @@ export default function OwnerListingPage() {
       setReviewJson(stringifySafe(b.reviewJson, "{}"));
       setMediaJson(stringifySafe(b.mediaJson, "[]"));
       setMenuJson(stringifySafe(b.menuJson, "[]"));
-      setFullJson(stringifySafe(b.fullJson, "{}"));
 
       setAboutTouched(false);
       setBusinessHoursTouched(false);
@@ -401,7 +394,6 @@ export default function OwnerListingPage() {
           websiteLink,
           menuLink,
           description,
-          placeUrl,
           latitude: toNullableNumber(latitude),
           longitude: toNullableNumber(longitude),
           avgRating: toNullableNumber(avgRating),
@@ -427,7 +419,6 @@ export default function OwnerListingPage() {
             : parseJsonOrNull(mediaJson),
           menuJson:
             menuTouched || menuHadData ? parseJsonOrNull(menuJson) : undefined,
-          fullJson: parseJsonOrNull(fullJson),
         },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
@@ -532,7 +523,6 @@ export default function OwnerListingPage() {
       websiteLink,
       menuLink,
       description,
-      placeUrl,
       latitude: toNullableNumber(latitude),
       longitude: toNullableNumber(longitude),
       avgRating: toNullableNumber(avgRating),
@@ -547,36 +537,6 @@ export default function OwnerListingPage() {
     };
     return fullData;
   };
-
-  // Update fullJson whenever form changes
-  useEffect(() => {
-    if (showEditForm && editingBusiness) {
-      setFullJson(JSON.stringify(generateFullJson(), null, 2));
-    }
-  }, [
-    name,
-    nameHindi,
-    address,
-    phone,
-    website,
-    websiteLink,
-    menuLink,
-    description,
-    placeUrl,
-    latitude,
-    longitude,
-    avgRating,
-    totalReviews,
-    selectedAreas,
-    selectedCategories,
-    isVerified,
-    aboutJson,
-    businessHoursJson,
-    mediaJson,
-    menuJson,
-    showEditForm,
-    editingBusiness,
-  ]);
 
   type TabDefinition = {
     key: "description" | "about" | "businessHours" | "menu";

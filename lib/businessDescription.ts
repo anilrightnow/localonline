@@ -11,7 +11,6 @@ export interface BusinessNarrativeInput {
   website?: string | null;
   websiteLink?: string | null;
   menuLink?: string | null;
-  placeUrl?: string | null;
   description?: string | null;
   avgRating?: number | null;
   totalReviews?: number | null;
@@ -146,7 +145,6 @@ export function generateBusinessDescription(
     website: input.website,
     website_link: input.websiteLink,
     menu_link: input.menuLink,
-    place_url: input.placeUrl,
     avg_rating: input.avgRating,
     total_reviews: input.totalReviews,
     latitude: input.latitude,
@@ -174,13 +172,12 @@ export function generateBusinessDescription(
     sentences.push(`Overview: ${String(b.description).trim()}.`);
   }
 
-  if (b.phone || b.website || b.website_link || b.menu_link || b.place_url) {
+  if (b.phone || b.website || b.website_link || b.menu_link) {
     const parts: string[] = [];
     if (b.phone) parts.push(`phone ${b.phone}`);
     if (b.website) parts.push(`website ${b.website}`);
     if (b.website_link) parts.push(`website link ${b.website_link}`);
     if (b.menu_link) parts.push(`menu ${b.menu_link}`);
-    if (b.place_url) parts.push(`place URL ${b.place_url}`);
     sentences.push(`Contact and links include ${sentenceList(parts)}.`);
   }
 

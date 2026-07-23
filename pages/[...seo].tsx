@@ -966,7 +966,6 @@ export default function SeoPage({
     const urls = [
       toExternalUrl(businessData?.detail.website),
       toExternalUrl(businessData?.detail.websiteLink),
-      toExternalUrl(businessData?.detail.placeUrl),
       toExternalUrl(businessData?.detail.menuLink),
     ].filter(Boolean) as string[];
     const deduped = Array.from(new Set(urls));
@@ -977,14 +976,21 @@ export default function SeoPage({
     parsed.kind === "business" && businessData
       ? {
           "@context": "https://schema.org",
+          "@id": businessData.canonical.canonicalPath,
           "@type": "LocalBusiness",
           name: businessData.detail.name,
           description: businessData.detail.description ?? pageDescription,
           url: businessData.canonical.canonicalPath,
           telephone: businessData.detail.phone ?? undefined,
-          address: businessData.detail.address ?? undefined,
+          address:
+            businessData.detail.address
+              ? {
+                  "@type": "PostalAddress",
+                  streetAddress: businessData.detail.address,
+                  addressLocality: businessData.canonical.cityName,
+                }
+              : undefined,
           sameAs,
-          hasMap: toExternalUrl(businessData.detail.placeUrl) ?? undefined,
           aggregateRating:
             businessData.detail.rating != null
               ? {
@@ -1004,6 +1010,9 @@ export default function SeoPage({
                   longitude: businessData.detail.longitude,
                 }
               : undefined,
+          ...(businessData.detail.scrapedAt
+            ? { dateModified: new Date(businessData.detail.scrapedAt).toISOString() }
+            : {}),
           image: mediaUrls.slice(0, 12),
         }
       : {
@@ -1127,7 +1136,7 @@ export default function SeoPage({
         <meta property="og:description" content={pageDescription} />
         <meta
           property="og:type"
-          content={parsed.kind === "business" ? "business.business" : "website"}
+          content="website"
         />
         <meta property="og:url" content={pageUrl} />
         <meta property="og:image" content={socialImage} />
@@ -1137,7 +1146,7 @@ export default function SeoPage({
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={socialImage} />
-        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="robots" content={currentPage > 1 ? "noindex, follow, max-image-preview:large" : "index, follow, max-image-preview:large"} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -1232,47 +1241,37 @@ export default function SeoPage({
                       <div className="contact-info-main">
                         <Phone size={24} className="text-muted" />
                         <span className="phone-number">
-                          {contactUnlocked
-                            ? businessData.detail.phone
-                            : maskPhone(businessData.detail.phone)}
+                          {businessData.detail.phone}
                         </span>
                       </div>
-                      {contactUnlocked ? (
-                        <div className="pub-contact-actions">
-                          {whatsappLink(
-                            businessData.detail.phone,
-                            businessData.detail.name,
-                          ) ? (
-                            <a
-                              className="pub-chip whatsapp-chip"
-                              href={
-                                whatsappLink(
-                                  businessData.detail.phone,
-                                  businessData.detail.name,
-                                ) ?? "#"
-                              }
-                              target="_blank"
-                              rel="noreferrer noopener"
-                            >
-                              <MessageCircle size={16} /> WhatsApp
-                            </a>
-                          ) : null}
+                      <div className="pub-contact-actions">
+                        {whatsappLink(
+                          businessData.detail.phone,
+                          businessData.detail.name,
+                        ) ? (
+                          <a
+                            className="pub-chip whatsapp-chip"
+                            href={
+                              whatsappLink(
+                                businessData.detail.phone,
+                                businessData.detail.name,
+                              ) ?? "#"
+                            }
+                            target="_blank"
+                            rel="noreferrer noopener"
+                          >
+                            <MessageCircle size={16} /> WhatsApp
+                          </a>
+                        ) : null}
+                        {contactUnlocked ? (
                           <a
                             className="pub-chip email-chip"
                             href={emailShareLink(businessData.detail)}
                           >
                             <Mail size={16} /> Share
                           </a>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className="pub-inline-btn"
-                          onClick={() => setShowContactGate(true)}
-                        >
-                          Contact
-                        </button>
-                      )}
+                        ) : null}
+                      </div>
                     </div>
                   ) : null}
                   {toExternalUrl(businessData.detail.websiteLink) ? (

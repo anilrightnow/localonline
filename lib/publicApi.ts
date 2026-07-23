@@ -86,14 +86,12 @@ export type BusinessApiResponse = {
   };
   detail: {
     businessToken: string;
-    cid?: string | null;
     name: string;
     name_hindi?: string | null;
     address?: string | null;
     phone?: string | null;
     website?: string | null;
     websiteLink?: string | null;
-    placeUrl?: string | null;
     menuLink?: string | null;
     description?: string | null;
     rating?: number | null;
@@ -105,7 +103,6 @@ export type BusinessApiResponse = {
     reviewJson?: string | null;
     mediaJson?: string | null;
     menuJson?: string | null;
-    fullJson?: string | null;
     isVerified?: boolean | null;
   };
   reviews: Array<{

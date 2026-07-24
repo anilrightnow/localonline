@@ -15,7 +15,7 @@ import {
   type HomeApiResponse,
 } from "../lib/publicApi";
 import { getAuthTokenFromCookieHeader } from "../lib/authCookie";
-import { Search, MapPin, ShieldCheck, TrendingUp } from "lucide-react";
+import { Search, MapPin, ShieldCheck, TrendingUp, Volume2, VolumeX } from "lucide-react";
 
 type Props = {
   data: HomeApiResponse;
@@ -89,11 +89,21 @@ export default function HomePage({
             className="pub-home-hero-video"
             poster="/ads_place_holder.jpg"
             controls={false}
+            suppressHydrationWarning
             onClick={() => setHeroMuted(false)}
           >
             <source src="/uploads/localonline-banner.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
+
+          <button
+            type="button"
+            className="pub-sound-toggle"
+            onClick={() => setHeroMuted((m) => !m)}
+            aria-label={heroMuted ? "Unmute video" : "Mute video"}
+          >
+            {heroMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </button>
 
           {/* 
       Note: The dark overlay (::after) is automatically 

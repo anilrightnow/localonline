@@ -35,14 +35,21 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
   };
 };
 
+function getSiteUrl() {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(
+    /\/+$/,
+    "",
+  );
+}
+
 export default function BlogIndexPage({ posts, page, pageSize, totalCount }: Props) {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const siteUrl = getSiteUrl();
   const pageTitle =
     page > 1
       ? `LocalOnline Blog Page ${page} | Noida Extension Guides`
       : "LocalOnline Blog | Noida Extension, Gaur City & Crossing Republik Guides";
 
-  const siteUrl = getSiteUrl();
   return (
     <>
       <Head>

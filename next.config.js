@@ -9,7 +9,25 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/(local-online-logo.svg|favicon.ico|favicon-96x96.png|favicon.svg|site.webmanifest)",
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(favicon.ico|favicon-96x96.png|favicon.svg|site.webmanifest|apple-touch-icon.png)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/local-online-logo.svg",
         headers: [
           {
             key: "Cache-Control",
@@ -22,16 +40,43 @@ const nextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable", // Cache for 1 year
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       {
-        source: "/(ads_place_holder.png|ads_place_holder.webp|ads_place_holder.avif)",
+        source: "/uploads/localonline-banner-large-size.mp4",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable", // Cache for 1 year
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(ads_place_holder.png|ads_place_holder.jpg|ads_place_holder.webp|ads_place_holder.avif)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(:path*).(jpg|jpeg|png|gif|webp|avif|svg|ico|mp4|webm|woff|woff2|ttf|otf|css|js)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=3600",
           },
         ],
       },

@@ -2,7 +2,7 @@ import Head from "next/head";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import Script from "next/script";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import BusinessCard from "../components/public/BusinessCard";
 import AdRequestCard from "../components/public/AdRequestCard";
 import SectionCard from "../components/public/SectionCard";
@@ -24,12 +24,12 @@ type Props = {
 const fallbackData: HomeApiResponse = {
   seo: {
     title:
-      "Local Businesses in Gaur City, Noida Extension & Greater Noida West | LocalOnline",
-    h1: "Discover Local Businesses on LocalOnline",
+      "Local Businesses in Crossing Republik, Gaur City, Greater Noida West, Noida Extension & Shahberi | LocalOnline",
+    h1: "Your Neighborhood, Just a Click Away",
     description:
-      "Discover verified local businesses, services and shops across Gautam Buddha Nagar and Ghaziabad — Gaur City, Noida Extension, Greater Noida West, Crossing Republik and Shahberi.",
+      "Discover verified local businesses, shops, restaurants, and services in Crossing Republik, Gaur City, Greater Noida West, Noida Extension, and Shahberi. Find the best of Gautam Buddha Nagar and Ghaziabad with ratings, reviews, and contact details.",
     keywords:
-      "Gaur City, Noida Extension, Greater Noida West, Crossing Republik, Shahberi, Gautam Buddha Nagar, Ghaziabad, local businesses, near me",
+      "Crossing Republik, Gaur City, Greater Noida West, Noida Extension, Shahberi, Gautam Buddha Nagar, Ghaziabad, local businesses, near me, restaurants, shops, services",
     canonicalPath: "/",
   },
   topCities: [],
@@ -42,6 +42,7 @@ const fallbackData: HomeApiResponse = {
 export default function HomePage({
   data,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [heroMuted, setHeroMuted] = useState(true);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -82,10 +83,13 @@ export default function HomePage({
           <video
             autoPlay
             loop
-            controls
+            muted={heroMuted}
             playsInline
+            preload="none"
             className="pub-home-hero-video"
-            poster="/ads_place_holder.png"
+            poster="/ads_place_holder.jpg"
+            controls={false}
+            onClick={() => setHeroMuted(false)}
           >
             <source src="/uploads/localonline-banner.mp4" type="video/mp4" />
             Your browser does not support the video tag.
@@ -121,7 +125,7 @@ export default function HomePage({
           <AdRequestCard
             variant="banner"
             title="Grow Your Local Reach"
-            subtitle="Promote your business to thousands of residents across Noida Extension, Gaur City, and Crossing Republik."
+            subtitle="Promote your business to thousands of residents across Crossing Republik, Gaur City, Greater Noida West, Noida Extension, and Shahberi."
             ctaLabel="Advertise With Us"
             type="BannerHome"
           />
@@ -201,6 +205,7 @@ export default function HomePage({
                 </p>
               </div>
             </div>
+
             <div
               className="pub-hero-chips"
               style={{ marginTop: "30px", justifyContent: "center" }}

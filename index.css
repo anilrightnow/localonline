@@ -1997,6 +1997,40 @@ position: relative;
   max-width: 300px;
   aspect-ratio:5 / 8 !important;
 }
+.pub-ad-carousel {
+  overflow: hidden;
+}
+.pub-ad-carousel-inner {
+  overflow: hidden;
+}
+.pub-ad-carousel-track {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+.pub-ad-carousel-slide {
+  flex: 0 0 100%;
+}
+.pub-ad-carousel-slide .pub-ad-media {
+  aspect-ratio: 16 / 5;
+}
+.pub-ad-carousel-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.pub-ad-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  padding: 0;
+}
+.pub-ad-carousel-dot.is-active {
+  background: var(--primary);
+}
 .pub-ad-body {
   display: grid;
   gap: 6px;
@@ -3972,6 +4006,7 @@ a:hover {
   height: 100%;
   object-fit: cover;
   z-index: 1;
+  cursor: pointer;
 }
 
 .pub-home-hero::after {
@@ -4577,6 +4612,24 @@ a:hover {
 
 .how-it-works .container {
   max-width: none;
+}
+
+.how-it-works-video-wrap {
+  max-width: 900px;
+  margin: 32px auto 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--lo-radius);
+  overflow: hidden;
+  border: 1px solid rgba(217, 229, 232, 0.9);
+  box-shadow: var(--lo-shadow);
+  background: var(--lo-ink);
+}
+
+.how-it-works-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .section-title {

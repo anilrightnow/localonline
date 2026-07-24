@@ -19,7 +19,7 @@ export default function AboutPage() {
           name="keywords"
           content="localOnline, local directory, Crossing Republik, Noida Extension, Greater Noida West, Gaur City, local businesses, hyper-local search, Crossing Republik local directory, shops in Gaur City, Noida Extension services, Mahagun Mascot shops, Gaur City 14th Avenue services, local search Ghaziabad."
         />
-        <link rel="canonical" href="/about" />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in"}/about`} />
       </Head>
       <SiteShell>
         <section className="pub-hero">

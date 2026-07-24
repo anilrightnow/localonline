@@ -56,6 +56,7 @@ export default function HomePage({
     },
   };
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(/\/+$/, "");
   return (
     <>
       <Head>
@@ -64,11 +65,11 @@ export default function HomePage({
         {data.seo.keywords ? (
           <meta name="keywords" content={data.seo.keywords} />
         ) : null}
-        <link rel="canonical" href={data.seo.canonicalPath} />
+        <link rel="canonical" href={`${siteUrl}${data.seo.canonicalPath}`} />
         <meta property="og:title" content={data.seo.title} />
         <meta property="og:description" content={data.seo.description} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={data.seo.canonicalPath} />
+        <meta property="og:url" content={`${siteUrl}${data.seo.canonicalPath}`} />
         <meta property="og:image" content="/local-online-logo.svg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="/local-online-logo.svg" />

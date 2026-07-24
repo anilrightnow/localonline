@@ -34,12 +34,13 @@ type Props = {
 export default function SearchPage({
   data,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(/\/+$/, "");
   return (
     <>
       <Head>
         <title>{data.seo.title}</title>
         <meta name="description" content={data.seo.description} />
-        <link rel="canonical" href={data.seo.canonicalPath} />
+        <link rel="canonical" href={`${siteUrl}${data.seo.canonicalPath}`} />
       </Head>
       <SiteShell>
         <SectionCard title="Search Results">

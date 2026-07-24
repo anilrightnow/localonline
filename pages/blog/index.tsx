@@ -42,6 +42,7 @@ export default function BlogIndexPage({ posts, page, pageSize, totalCount }: Pro
       ? `LocalOnline Blog Page ${page} | Noida Extension Guides`
       : "LocalOnline Blog | Noida Extension, Gaur City & Crossing Republik Guides";
 
+  const siteUrl = getSiteUrl();
   return (
     <>
       <Head>
@@ -50,9 +51,9 @@ export default function BlogIndexPage({ posts, page, pageSize, totalCount }: Pro
           name="description"
           content="Read practical local guides for Noida Extension, Gaur City, Greater Noida West and Crossing Republik, including schools, retail, real estate and neighbourhood services."
         />
-        <link rel="canonical" href={page > 1 ? `/blog?page=${page}` : "/blog"} />
-        {page > 1 ? <link rel="prev" href={page === 2 ? "/blog" : `/blog?page=${page - 1}`} /> : null}
-        {page < totalPages ? <link rel="next" href={`/blog?page=${page + 1}`} /> : null}
+        <link rel="canonical" href={page > 1 ? `${siteUrl}/blog?page=${page}` : `${siteUrl}/blog`} />
+        {page > 1 ? <link rel="prev" href={page === 2 ? `${siteUrl}/blog` : `${siteUrl}/blog?page=${page - 1}`} /> : null}
+        {page < totalPages ? <link rel="next" href={`${siteUrl}/blog?page=${page + 1}`} /> : null}
       </Head>
       <SiteShell>
         <section className="pub-hero blog-hero">

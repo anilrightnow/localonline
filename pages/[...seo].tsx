@@ -556,13 +556,14 @@ export default function SeoPage({
   businessData,
   currentPage,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://localonline.in").replace(/\/+$/, "");
   const links = apiData?.relatedLinks ?? businessData?.relatedLinks ?? null;
   const totalCount = apiData?.pagination.totalCount ?? 0;
   const pageSize = 20;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const pageBase = canonicalPath;
   const pageUrl =
-    currentPage > 1 ? `${pageBase}?page=${currentPage}` : pageBase;
+    currentPage > 1 ? `${siteUrl}${pageBase}?page=${currentPage}` : `${siteUrl}${pageBase}`;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [showAllScrapedReviews, setShowAllScrapedReviews] = useState(false);

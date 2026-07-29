@@ -2,6 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   compress: true, // Enables compression for better transfer sizes
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
   images: {
     formats: ['image/avif', 'image/webp'], // Support modern high-compression formats
     minimumCacheTTL: 60,

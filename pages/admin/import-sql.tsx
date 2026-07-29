@@ -6,7 +6,12 @@ import axios from "axios";
 import FormMessage from "../../components/shared/FormMessage";
 import { getAuthToken } from "../../lib/auth";
 import { getApiErrorMessage } from "../../lib/apiError";
-//import { hasRole } from "../../lib/session";
+
+type Summary = {
+  businesses: { total: number; inserted: number; skipped: number; errors: string[] };
+  areas: { total: number; inserted: number; skipped: number; errors: string[] };
+  categories: { total: number; inserted: number; skipped: number; errors: string[] };
+};
 
 export default function ImportSqlPage() {
   const { isChecking, isAuthenticated } = useRequireAuth();
@@ -14,29 +19,18 @@ export default function ImportSqlPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  //const isSuperAdmin = useMemo(() => hasRole(session, "SuperAdmin"), [session]);
+  const [summary, setSummary] = useState<Summary | null>(null);
 
   if (isChecking || !isAuthenticated) {
     return <div className="app-loading">Redirecting to login...</div>;
   }
-
-  //   if (!isSuperAdmin) {
-  //     return (
-  //       <AppShell
-  //         title="Access Denied"
-  //         subtitle="You do not have permission to view this page."
-  //       >
-  //         <p>Please contact an administrator if you believe this is an error.</p>
-  //       </AppShell>
-  //     );
-  //   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setSelectedFile(event.target.files[0]);
       setMessage(null);
       setError(null);
+      setSummary(null);
     } else {
       setSelectedFile(null);
     }
@@ -60,6 +54,7 @@ export default function ImportSqlPage() {
     setIsUploading(true);
     setMessage(null);
     setError(null);
+    setSummary(null);
 
     const formData = new FormData();
     formData.append("sqlFile", selectedFile);
@@ -78,8 +73,12 @@ export default function ImportSqlPage() {
           },
         },
       );
+
       setMessage(response.data.message || "SQL file imported successfully.");
-      setSelectedFile(null); // Clear selected file after successful upload
+      if (response.data.summary) {
+        setSummary(response.data.summary);
+      }
+      setSelectedFile(null);
     } catch (err: any) {
       setError(getApiErrorMessage(err, "Failed to import SQL file."));
     } finally {
@@ -116,14 +115,55 @@ export default function ImportSqlPage() {
               className="btn btn-primary"
               disabled={!selectedFile || isUploading}
             >
-              {isUploading ? "Uploading..." : "Import SQL"}
+              {isUploading ? "Importing..." : "Import SQL"}
             </button>
           </div>
         </form>
       </div>
+
+      {summary && (
+        <div className="app-card">
+          <h3>Import Summary</h3>
+          <table className="app-table">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Total</th>
+                <th>Inserted</th>
+                <th>Skipped</th>
+                <th>Errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Businesses</td>
+                <td>{summary.businesses.total}</td>
+                <td>{summary.businesses.inserted}</td>
+                <td>{summary.businesses.skipped}</td>
+                <td>{summary.businesses.errors.length > 0 ? summary.businesses.errors.join(', ') : 'None'}</td>
+              </tr>
+              <tr>
+                <td>Areas</td>
+                <td>{summary.areas.total}</td>
+                <td>{summary.areas.inserted}</td>
+                <td>{summary.areas.skipped}</td>
+                <td>{summary.areas.errors.length > 0 ? summary.areas.errors.join(', ') : 'None'}</td>
+              </tr>
+              <tr>
+                <td>Categories</td>
+                <td>{summary.categories.total}</td>
+                <td>{summary.categories.inserted}</td>
+                <td>{summary.categories.skipped}</td>
+                <td>{summary.categories.errors.length > 0 ? summary.categories.errors.join(', ') : 'None'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <p className="pub-muted">
         Note: Uploaded SQL files are processed and then deleted from the server.
-        The import process will check for existing data and only insert new
+        The import process checks for existing data by CID and only inserts new
         records.
       </p>
     </AppShell>
